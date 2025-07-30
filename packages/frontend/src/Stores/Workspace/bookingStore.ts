@@ -22,7 +22,6 @@ interface BookingState {
    bookingApproval: (id: string) =>  Promise<Booking | null>;
 }
 const BASE_API_URL = `${process.env.REACT_APP_API_URL}/book`;
-
 export const useBookingStore = create<BookingState>((set, get) => ({
   bookings: [],
   currentBooking: null,
@@ -57,7 +56,7 @@ export const useBookingStore = create<BookingState>((set, get) => ({
   createBooking: async (booking: Booking) => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.post("/book", booking);
+      const response = await axiosInstance.post(BASE_API_URL, booking);
       const created = response.data;
       set(state => ({
         bookings: [...state.bookings, created],
@@ -104,7 +103,9 @@ console.log(created,"created in createBookingInCalendar?????????????????????????
 ,
 
   updateBooking: async (id: string, updated: Booking) => {
-    set({ loading: true, error: null });
+    // set({ loading: true, error: null });
+    console.log("startt" + updated);
+    
     try {
       const response = await axiosInstance.patch(`${BASE_API_URL}/updateBooking/${id}`, updated);
       const updatedBooking = response.data;

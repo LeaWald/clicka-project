@@ -75,7 +75,7 @@ res.status(500).json({massage:'err.massage'});
 async  bookingApproval(req: Request, res: Response){
     try{
         const updateBooking=await this.bookingservice.bookingApproval(req.params.id);
-         res.json(updateBooking);
+         res.status(200).json(updateBooking);
     }
     catch(err){
        res.status(500).json({massage:'err.message'});

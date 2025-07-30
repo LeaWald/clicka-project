@@ -70,7 +70,7 @@ export const UpdateAssigenment = () => {
   }
 
   const handleCancel = () => {
-    navigate("/assignmentForm");
+    navigate("/assignmentTable");
   };
 
   return (

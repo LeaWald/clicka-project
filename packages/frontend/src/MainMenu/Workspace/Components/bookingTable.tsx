@@ -65,14 +65,15 @@ const columns: TableColumn<Booking>[] = [
 useEffect(() => {
   const fetchData = async () => {
     if (bookings.length === 0) {
-      console.log("📢 calling getAllBookings");
+      console.log("calling getAllBookings");
       setIsLoading(true);  
       await getAllBookings(); 
       setIsLoading(false);
     }
   };
   fetchData();
-}, [getAllBookings,setIsLoading,bookings.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 // const validBookings = bookings.filter(booking => 
 //   booking && 
 //   booking.id && 

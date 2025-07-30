@@ -9,7 +9,9 @@ import { Button } from "../../../Common/Components/BaseComponents/Button";
 import { useBookingStore } from "../../../Stores/Workspace/bookingStore";
 import { useCustomerStore } from "../../../Stores/LeadAndCustomer/customerStore";
 import { useRoomStore } from "../../../Stores/Workspace/roomStore";
+import { useFormContext } from "react-hook-form";
 type BookingUpdateData = z.infer<typeof bookingUpdateSchema>;
+
 // פונקציה לבדיקת רבעי שעות
 const isQuarter = (time: string) => {
   const minutes = parseInt(time.split(":")[1], 10);
@@ -62,28 +64,14 @@ export const UpdateBooking = () => {
   const [roomOptions, setRoomOptions] = useState<{ label: string; value: string }[]>([]);
   const { updateBooking } = useBookingStore();
   const {rooms,getAllRooms}  = useRoomStore()
-  const customers = useCustomerStore((s) => s.customers);
-  const fetchCustomers = useCustomerStore((s) => s.fetchCustomers);
+  const {customers,fetchCustomers} = useCustomerStore();
   // טעינת נתונים ראשונית
   useEffect(() => {
     fetchCustomers();
     getAllRooms()
-      setRoomOptions(rooms.map((r)=>(
-        {
-          label:r.name,
-          value:r.name
-        }
-  
-      )))
-      },[fetchCustomers,getAllRooms,setRoomOptions,rooms]);
-  
-
-// useEffect(() => {
-//     if (booking  && roomOptions.length > 0) {
-//       setFormKey(prev => prev + 1); // 🎯 זה יאלץ רה-רנדר מלא
-//     }
-//   }, [booking, roomOptions]);
-
+    setRoomOptions(rooms.map((r)=>({label:r.name, value:r.name })))
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      },[]);
 // חילוץ שעה בפורמט HH:MM
 const getTimeFromISO = (isoString: string): string => {
   if (!isoString) return '';
@@ -102,7 +90,6 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
     const totalHours = calculateHours(data.date, data.startTime, data.endTime);
     const roomName = roomOptions.find((room) => room.value === data.roomId)?.label || "";
     console.log("👉 שם החדר:", roomName);
-    
     const base = {
       id: booking.id,
       roomId: data.roomId || booking.roomId,
@@ -114,7 +101,6 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
       notes: data.notes || booking.notes,
       updatedAt: new Date().toISOString(),
     };
-
     if (customerStatus === "customer") {
       return {
         ...base,
@@ -135,7 +121,6 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
       };
     }
   };
-
   const handleSubmit = async (data: BookingUpdateData) => {
     console.log("👉 נתוני הטופס בפועל:", data.customerName);
     try {
@@ -164,6 +149,7 @@ const getDateFromISO = (isoString: string): string => {
   if (!isoString) return '';
   return isoString.split('T')[0];
 };
+
   return (
 <div className="flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
@@ -202,7 +188,7 @@ const getDateFromISO = (isoString: string): string => {
                     label="בחר לקוח מהרשימה"
                     name="customerId"
                     options={customers.map((c) => ({
-                      label: `${c.name}`,
+                      label: `${c.name} - ${c.phone}`,
                       value: c.id || "",
                     }))}
                     className="w-full border rounded px-3 py-2"
@@ -256,6 +242,7 @@ const getDateFromISO = (isoString: string): string => {
                   name="startTime"
                   type="time"
                   defaultValue={getTimeFromISO(booking.startTime)}
+                 // defaultValue={getTimeFromISO(booking.startTime)}
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
@@ -264,27 +251,29 @@ const getDateFromISO = (isoString: string): string => {
                   label="שעת סיום"
                   name="endTime"
                   type="time"
-                  defaultValue={getTimeFromISO(booking.endTime) }
+                  defaultValue={getTimeFromISO(booking.endTime)}
+                  // defaultValue={getTimeFromISO(booking.endTime) }
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
               <div>
-                  <InputField
+                <InputField
                   label="תאריך"
                   name="date"
                   type="date"
-                  defaultValue={ getDateFromISO(booking.endTime)}
+                  defaultValue={getDateFromISO(booking.endTime)}
+                  // defaultValue={ getDateFromISO(booking.endTime)}
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
-              {/* <div>
+              <div>
                 <InputField
                   label="הערות"
                   name="notes"
                   defaultValue={booking.notes || ""}
                   className="w-full border rounded px-3 py-2"
                 />
-              </div> */}
+              </div>
             
             <div>
               <Button
@@ -293,7 +282,6 @@ const getDateFromISO = (isoString: string): string => {
                 onClick={handleCancel}
               > בטל</Button>
               <Button
-                type="submit"
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
                 >שמור</Button>
             </div>
