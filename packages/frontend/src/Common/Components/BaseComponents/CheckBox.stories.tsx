@@ -26,24 +26,24 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // הסיפור הראשון – מציג את הקומפוננטה כפי שהיא אמורה להיראות בשימוש רגיל
-export const Default: Story = {
+// export const Default: Story = {
   // פרופס שמועברים לקומפוננטה – כאן ניתן להדגים כיצד היא מתנהגת במצבים שונים
-  args: {
-    name: 'example',         // שם השדה – חשוב כדי ש־react-hook-form יזהה אותו
-    label: 'Test Checkbox',  // תווית שתופיע ליד תיבת הסימון
-    required: true,          // מציין שזה שדה חובה בטופס
-  },
+  // args: {
+  //   name: 'example',         // שם השדה – חשוב כדי ש־react-hook-form יזהה אותו
+  //   label: 'Test Checkbox',  // תווית שתופיע ליד תיבת הסימון
+  //   required: true,          // מציין שזה שדה חובה בטופס
+  // },
 
   // פונקציית render – מאפשרת לעטוף את הקומפוננטה ב־FormProvider
-  render: (args) => {
+  // render: (args) => {
     // יוצר מופע של useForm – ניהול הטופס
-    const methods = useForm();
+    // const methods = useForm();
 
-    return (
+    // return (
       // עוטף את הקומפוננטה ב־FormProvider כדי לאפשר לה גישה להקשר של הטופס
-      <FormProvider {...methods}>
-        <CheckboxField name={''} label={''} {...args} />
-      </FormProvider>
-    );
-  },
-};
+      // <FormProvider {...methods}>
+        {/* <CheckboxField {...args} /> */}
+      // </FormProvider>
+    // );
+  // },
+// };

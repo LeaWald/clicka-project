@@ -11,6 +11,7 @@ import { useForm, Controller, FormProvider } from 'react-hook-form';
 import clsx from 'clsx';
 import { useTheme } from '../../../../Common/Components/themeConfig';
 import { useAuthStore } from '../../../../Stores/CoreAndIntegration/useAuthStore';
+import axios from 'axios';
 const urll = process.env.REACT_APP_API_URL ;
 
 interface Props {
@@ -31,11 +32,10 @@ const typeLabels: Record<Props['type'], string> = {
 const workspaceOptions = [
   { value: 'OPEN_SPACE', label: 'אופן ספייס' },
   { value: 'KLIKAH_CARD', label: 'כרטיס קליקה' },
-  { value: 'PRIVATE_ROOM1', label: 'חדר פרטי' },
-  { value: 'OPEN_SPACE2', label: 'חדר של 2 ' },
-  { value: 'KLIKAH_CARD3', label: 'חדר של 3 ' },
+  { value: 'PRIVATE_ROOM1', label: 'חדר פרטי 1' },
+  { value: 'PRIVATE_ROOM2', label: 'חדר פרטי 2' },
+  { value: 'PRIVATE_ROOM3', label: 'חדר פרטי 3' },
   { value: 'DESK_IN_ROOM', label: 'שולחן בחדר' },
-
 ];
 
 const PricingSectionPage: React.FC<Props> = ({ type }) => {
@@ -86,23 +86,21 @@ const PricingSectionPage: React.FC<Props> = ({ type }) => {
     setLoading(true);
     setError(null);
     let url = '';
-   switch (type) {
-  case 'workspace':
-    url = `${urll}/pricing/workspace/history/${watchedWorkspaceType}`;
-    break;
-  case 'meeting-room':
-    url = `${urll}/pricing/meeting-room/history`;
-    break;
-  case 'lounge':
-    url = `${urll}/pricing/lounge/history`;
-    break;
 
+    switch (type) {
+      case 'workspace':
+        url = `${urll}/pricing/workspace/history/${watchedWorkspaceType}`;
+        break;
+      case 'meeting-room':
+        url = `${urll}/pricing/meeting-room/history`;
+        break;
+      case 'lounge':
+        url = `${urll}/pricing/lounge/history`;
+        break;
     }
 
     try {
-      const res = await fetch(url, { credentials: 'include' });
-      if (!res.ok) throw new Error('Network response was not ok');
-      const data = await res.json();
+      const { data } = await axios.get(url, { withCredentials: true });
       setHistoryPrices(data);
     } catch (e: any) {
       setError('שגיאה בטעינת היסטוריה: ' + e.message);
@@ -112,6 +110,7 @@ const PricingSectionPage: React.FC<Props> = ({ type }) => {
     }
   }, [type, watchedWorkspaceType]);
 
+
   // ---------------------------
   // פונקציה לטעינת המחיר הנוכחי בהתאם לסוג המחיר
   // דומה לפונקציית ההיסטוריה אך מחזירה רק את המחיר העדכני ביותר
@@ -120,32 +119,29 @@ const PricingSectionPage: React.FC<Props> = ({ type }) => {
     setLoading(true);
     setError(null);
     let url = '';
-  switch (type) {
-  case 'workspace':
-    url = `${urll}/pricing/workspace/current/${watchedWorkspaceType}`;
-    break;
-  case 'meeting-room':
-    url = `${urll}/pricing/meeting-room/current`;
-    break;
-  case 'lounge':
-    url = `${urll}/pricing/lounge/current`;
-    break;
-}
+
+    switch (type) {
+      case 'workspace':
+        url = `${urll}/pricing/workspace/current/${watchedWorkspaceType}`;
+        break;
+      case 'meeting-room':
+        url = `${urll}/pricing/meeting-room/current`;
+        break;
+      case 'lounge':
+        url = `${urll}/pricing/lounge/current`;
+        break;
+    }
 
     try {
-      const res = await fetch(url, { credentials: 'include' });
-      if (!res.ok) {
-        if (res.status === 404) {
-          setCurrentPrice(null);
-          return;
-        }
-        throw new Error('Network response was not ok');
-      }
-      const data = await res.json();
+      const { data } = await axios.get(url, { withCredentials: true });
       setCurrentPrice(data);
     } catch (e: any) {
-      setError('שגיאה בטעינת המחיר הנוכחי');
-      Swal.fire('שגיאה', 'שגיאה בטעינת המחיר הנוכחי', 'error');
+      if (e.response?.status === 404) {
+        setCurrentPrice(null);
+      } else {
+        setError('שגיאה בטעינת המחיר הנוכחי');
+        Swal.fire('שגיאה', 'שגיאה בטעינת המחיר הנוכחי', 'error');
+      }
     } finally {
       setLoading(false);
     }
@@ -228,66 +224,39 @@ const PricingSectionPage: React.FC<Props> = ({ type }) => {
     let url = '';
 
     const recordIdToDelete = selectedPriceData.id;
-switch (type) {
-  case 'workspace':
-    url = `${urll}/pricing/workspace/${recordIdToDelete}`;
-    break;
-  case 'meeting-room':
-    url = `${urll}/pricing/meeting-room/${recordIdToDelete}`;
-    break;
-  case 'lounge':
-    url = `${urll}/pricing/lounge/${recordIdToDelete}`;
-    break;
-  default:
-    Swal.fire('שגיאה', 'שגיאה: סוג מחיר לא נתמך למחיקה.', 'error');
-    setLoading(false);
-    return;
-}
+    switch (type) {
+      case 'workspace':
+        url = `${urll}/pricing/workspace/${recordIdToDelete}`;
+        break;
+      case 'meeting-room':
+        url = `${urll}/pricing/meeting-room/${recordIdToDelete}`;
+        break;
+      case 'lounge':
+        url = `${urll}/pricing/lounge/${recordIdToDelete}`;
+        break;
+      default:
+        Swal.fire('שגיאה', 'שגיאה: סוג מחיר לא נתמך למחיקה.', 'error');
+        setLoading(false);
+        return;
+    }
 
     try {
-      const response = await fetch(url, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        let errorData = null;
-        try {
-          errorData = await response.json();
-        } catch (jsonError) {
-          console.warn('Failed to parse error response as JSON:', jsonError);
-          throw new Error(`שגיאה במחיקת התמחור: ${response.status} ${response.statusText}`);
-        }
-        throw new Error(errorData?.message || 'שגיאה במחיקת התמחור');
-      }
+      await axios.delete(url, { withCredentials: true });
 
       Swal.fire('נמחק!', 'התמחור נמחק בהצלחה!', 'success');
-
-      // עדכון רשימת ההיסטוריה לאחר מחיקה
-      setHistoryPrices((prevPrices) =>
-        prevPrices.filter((p) => p.id !== selectedPriceData.id)
-      );
-
-      // אם המחיר הנוכחי נמחק, מאפס אותו
-      if (currentPrice && currentPrice.id === selectedPriceData.id) {
-        setCurrentPrice(null);
-      }
-
-      // איפוס שדות הטופס והמצבים
+      setHistoryPrices((prev) => prev.filter((p) => p.id !== selectedPriceData.id));
+      if (currentPrice?.id === selectedPriceData.id) setCurrentPrice(null);
       methods.setValue('effectiveDate', '');
       setSelectedEffectiveDate('');
       setSelectedPriceData(null);
 
-      // רענון הנתונים
       await fetchHistoryPrices();
       await fetchCurrentPrice();
-
-      // חזרה לתצוגת היסטוריה
       setSection('history');
     } catch (e: any) {
-      setError(e.message);
-      Swal.fire('שגיאה', e.message, 'error');
-      console.error('שגיאה במחיקה:', e);
+      const msg = e.response?.data?.message || e.message || 'שגיאה במחיקת התמחור';
+      setError(msg);
+      Swal.fire('שגיאה', msg, 'error');
     } finally {
       setLoading(false);
     }
@@ -313,6 +282,8 @@ switch (type) {
             <p><strong>מחיר שנה 2:</strong> {currentPrice.year2Price} ₪</p>
             <p><strong>מחיר שנה 3:</strong> {currentPrice.year3Price} ₪</p>
             <p><strong>מחיר שנה 4:</strong> {currentPrice.year4Price} ₪</p>
+            <p><strong>מחיר יומיים מהמשרד:</strong> {currentPrice.twoDaysFromOfficePrice} ₪</p>
+            <p><strong>מחיר שלושה ימים מהמשרד:</strong> {currentPrice.threeDaysFromOfficePrice} ₪</p>
           </>
         )}
         {type === 'meeting-room' && (
@@ -350,7 +321,7 @@ switch (type) {
     // כותרות עמודות בטבלה בהתאם לסוג המחיר
     let headers: string[] = ['תאריך תחילה'];
     if (type === 'workspace') {
-      headers.push('שנה 1', 'שנה 2', 'שנה 3', 'שנה 4');
+      headers.push('שנה 1', 'שנה 2', 'שנה 3', 'שנה 4', 'יומיים מהמשרד', 'שלושה ימים מהמשרד');
     } else if (type === 'meeting-room') {
       headers.push('מחיר לשעה', 'מחיר לשעה (הנחה)', 'שעות חינם בכרטיס קליקה');
     } else if (type === 'lounge') {
@@ -404,6 +375,8 @@ switch (type) {
                       <td className="border px-4 py-2">{row.year2Price}</td>
                       <td className="border px-4 py-2">{row.year3Price}</td>
                       <td className="border px-4 py-2">{row.year4Price}</td>
+                      <td className="border px-4 py-2">{row.twoDaysFromOfficePrice}</td>
+                      <td className="border px-4 py-2">{row.threeDaysFromOfficePrice}</td>
                     </>
                   )}
                   {type === 'meeting-room' && (

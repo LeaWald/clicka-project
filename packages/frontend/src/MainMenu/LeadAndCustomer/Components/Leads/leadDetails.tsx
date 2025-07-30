@@ -17,17 +17,6 @@ export const LeadDetails = ({ lead, onDelete }: { lead: Lead, onDelete: () => vo
       </div>
       <div className="flex gap-2">
         <Button
-          variant="primary"
-          size="sm"
-          onClick={() =>
-            navigate("interestedCustomerRegistration", {
-              state: { data: lead },
-            })
-          }
-        >
-          לטופס רישום ללקוח
-        </Button>
-        <Button
           variant="accent"
           size="sm"
           onClick={() => alert("עדכון בעתיד")}

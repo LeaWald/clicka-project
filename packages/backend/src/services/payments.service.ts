@@ -4,7 +4,7 @@ import { PaymentModel } from "../models/payments.model";
 import { supabase } from "../db/supabaseClient";
 import { EmailTemplateService } from "./emailTemplate.service";
 import { sendEmail } from "./gmail-service";
-// 
+
 export class PaymentService extends baseService<PaymentModel> {
 
   constructor() {
@@ -108,16 +108,7 @@ async getPaymentByDateAndCIds(params: {
       };
 
 
-
-
-
-
-  /**
-   * שליפת תשלומים לפי טווח תאריכים
-   * @param params - אובייקט עם תאריך התחלה ותאריך סיום
-   * @returns רשימת תשלומים
-   */
-  async getPaymentByDate(params: { dateFrom: string; dateTo: string; customerId?: ID }): Promise<Payment[]> {
+    async getPaymentByDate(params: { dateFrom: string; dateTo: string; customerId?: ID }): Promise<Payment[]> {
     try {
       let query = supabase.from('payment').select('*');
 
@@ -147,41 +138,13 @@ async getPaymentByDateAndCIds(params: {
       return [];
     }
   }
-  static async getPaymentByDateAndCIds(params: {
-    dateFrom: string;
-    dateTo: string;
-    customerIds?: ID[];
-  }): Promise<Payment[]> {
-    try {
-      let query = supabase.from('payment').select('*');
+   /**
+   * שליפת תשלומים לפי טווח תאריכים
+   * @param params - אובייקט עם תאריך התחלה ותאריך סיום
+   * @returns רשימת תשלומים
+   */
 
-      if (params.customerIds?.length) {
-        query = query.in('customer_id', params.customerIds);
-      }
-      if (params.dateFrom) {
-        query = query.gte('date', params.dateFrom);
-      }
-      if (params.dateTo) {
-        query = query.lte('date', params.dateTo);
-      }
-
-      query = query.order('date', { ascending: false });
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Error fetching payments:', error);
-        return [];
-      }
-
-      return data as Payment[];
-    } catch (err) {
-      console.error('Unexpected error fetching payments:', err);
-      return [];
-    }
-  }
   //שליחת מייל תזכורת
-  emailService = new EmailTemplateService();
 
   sendPaymentReminderEmail = async (
     customerName: string,
@@ -191,20 +154,16 @@ async getPaymentByDateAndCIds(params: {
     token: any,
   ): Promise<void> => {
 
-    function encodeSubject(subject: string): string {
-      return `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
-    }
-
     try {
       // טוענים את תבנית המייל בשם "תזכורת תשלום"
-      const template = await this.emailService.getTemplateByName("תזכורת לתשלום על חשבונית");
+      const template = await emailService.getTemplateByName("תזכורת לתשלום על חשבונית");
       if (!template) {
         console.warn("Email template 'תזכורת תשלום' not found");
         return;
       }
 
       // ממלאים את התבנית עם הנתונים הדינמיים
-      const renderedHtml = await this.emailService.renderTemplate(template.bodyHtml, {
+      const renderedHtml = await emailService.renderTemplate(template.bodyHtml, {
         customerName,
         amount: amount.toString(),
         invoiceNumber,
@@ -269,4 +228,81 @@ export const sendPaymentProblemEmailInternal = async (
 function encodeSubject(subject: string): string {
   return `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
 }
+    
+    
+//   getCustomerBalance(customerId: ID)/*: CustomerBalance*/ {
+//     // שליפת כל החשבוניות של הלקוח שלא שולמו במלואן
+//     // חישוב סך כל החשבוניות שעדיין פתוחות
+//     // חישוב סך הסכומים שעדיין לא שולמו
+//     // שליפת היסטוריית תשלומים של הלקוח
+//     // חישוב היתרה הנוכחית של הלקוח (לדוגמה: סך החיובים פחות סך התשלומים)
+//     // שליפת תאריך התשלום האחרון במידה ויש
+//   }
 
+//   getOverdueInvoices()/*: OverdueInvoiceSummary[] */{
+//     // שליפת כל החשבוניות מהמערכת (DB / API)
+//     // שליפת כל הלקוחות מהמערכת
+//     // שליפת כל התשלומים מהמערכת
+//     // סינון חשבוניות שלא שולמו או שולמו חלקית בלבד
+//     // סינון חשבוניות שמועד הפירעון שלהן עבר (כלומר היום כבר אחרי due_date)
+//     // בניית מערך סיכום לכל חשבונית באיחור
+//     // איתור הלקוח לפי מזהה הלקוח בחשבונית
+//     // שליפת כל התשלומים של הלקוח ומיון מהתאריך האחרון לישן יותר
+//   }
+
+//   matchPaymentsToInvoices(customerId: ID, currentPayment: Payment): void {
+//     // שליפת כל החשבוניות של הלקוח
+//     // סינון חשבוניות שלא שולמו במלואן
+//     // לולאה על כל תשלום פתוח עד שנגמר סכום התשלום
+//     // עדכון של החשבוניות בהתאם לסכום שנכנס
+//     // אם התשלום הושלם, להכניס את היתרה ליתרה בחשבון של המשתמש
+//   }
+
+//   matchPaymentsToInvoice(customerId: ID, currentPayment: Payment, invoice: Invoice): void {
+//     // שליפת כל החשבוניות של הלקוח
+//     // סינון חשבוניות שלא שולמו במלואן
+//     // לולאה על כל תשלום פתוח עד שנגמר סכום התשלום
+//     // עדכון של החשבוניות בהתאם לסכום שנכנס
+//     // אם התשלום הושלם, להכניס את היתרה ליתרה בחשבון של המשתמש
+//   }
+
+//   getPaymentHistory(customerId: ID)/*: Payment[]*/ {
+//     // שליפת כל התשלומים מהמסד (פונקציה כללית שמחזירה את כולם)
+//     // סינון לפי מזהה הלקוח
+//     // מיון תשלומים מהחדש לישן לפי תאריך תשלום
+//   }
+
+//   //לרחל
+//   /**
+//    * תיעוד תשלום חדש ללקוח ועדכון מצב החשבוניות והיתרה
+//    * @param customerId מזהה הלקוח
+//    * @param paymentData פרטי התשלום (סכום, תאריך, אמצעי תשלום וכו')
+//    * @param recordedBy מי תיעד את התשלום (משתמש/מערכת)
+//    * @returns אובייקט תשלום חדש לאחר עדכון החשבוניות והיתרה
+//    */
+//   recordAndApplyPayment(
+//     customerId: ID,
+//     // paymentData: PaymentRecordRequest,
+//     recordedBy: ID
+//   )/*: Payment*/ {
+//     // כאן יבוא המימוש בפועל
+//   }
+
+//   /**
+//    * מחזירה דוח גבייה כללי לכל הלקוחות (סיכום מצב גבייה).
+//    * @returns Promise<CollectionSummary>
+//    */
+//   async getCollectionSummaryReport()/*: Promise<CollectionSummary>*/ {
+
+//   }
+
+//   /**
+//    * מחזירה דוח גבייה מפורט ללקוח מסוים.
+//    * @param customerId מזהה הלקוח
+//    * @returns Promise<CustomerCollectionReport>
+//    */
+//   async getCustomerCollectionReport(customerId: ID)/*: Promise<CustomerCollectionReport>*/ {
+  
+//   }
+  
+// }

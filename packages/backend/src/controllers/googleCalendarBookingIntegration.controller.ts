@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as CalendarService from '../services/googleCalendarBookingIntegration.service ';
 import * as calendarUpdate from '../services/calendar-service'
 import { CalendarSync } from 'shared-types/calendarSync';
@@ -24,7 +24,6 @@ export const getGoogleCalendarEvents = async (req: Request, res: Response, next:
   }
 };
 
-// זו הפונקציה העדכנית-----------------------------
 export const createCalendarEvent = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = await userTokenService.getSystemAccessToken();
@@ -102,15 +101,16 @@ export const deleteEvent = async (req: Request, res: Response) => {
     }
 }
 export const deleteCalendarSyncByEventId = async (req: Request, res: Response) => {
-    try {
-        const id: string = req.params.id
-        await CalendarService.deleteCalendarSync(id);
-        res.status(200).json({ message: 'Calendar sync deleted successfully' });
-    } catch (error) {
-        console.error('Error deleting calendar sync by event ID:', error);
-        res.status(500).json({ message: 'Failed to delete calendar sync', error: error });
-    }
-}
+  try {
+    const id: string = req.params.id;
+    await CalendarService.deleteCalendarSync(id);
+    res.status(200).json({ message: 'Calendar sync deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting calendar sync by event ID:', error);
+    res.status(500).json({ message: 'Failed to delete calendar sync', error });
+  }
+};
+
 export const updateEventOnChangeBooking = async (req: Request, res: Response) => {
     try {
         let token = await userTokenService.getSystemAccessToken();
@@ -140,14 +140,15 @@ export const updateEventOnChangeBooking = async (req: Request, res: Response) =>
 }
 
 
-export async function deleteCalendarSync(req: Request, res: Response) {
-    try {
-        await CalendarService.deleteCalendarSync(req.params.id)
-        res.status(204).end()
-    } catch (error) {
-        res.status(500).json({ error: (error as Error).message })
-    }
-}
+export const deleteCalendarSync = async (req: Request, res: Response) => {
+  try {
+    await CalendarService.deleteCalendarSync(req.params.id);
+    res.status(204).end();
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 export const getCalendarByRoom = async (req: Request, res: Response) => {
     try {
         const roomId: ID = req.params.roomId;
@@ -164,15 +165,15 @@ export const getCalendarByRoom = async (req: Request, res: Response) => {
 }
 
 export const manageCalendarPermissions = async (req: Request, res: Response) => {
-    try {
-        const { calendarId, email, role } = req.body;
-        await CalendarService.manageCalendarPermissions(calendarId, email, role);
-        res.status(200).json({ message: 'Calendar permissions managed successfully' });
-    } catch (error) {
-        console.error('Error managing calendar permissions:', error);
-        res.status(500).json({ message: 'Failed to manage calendar permissions', error: error });
-    }
-}
+  try {
+    const { calendarId, email, role } = req.body;
+    await CalendarService.manageCalendarPermissions(calendarId, email, role);
+    res.status(200).json({ message: 'Calendar permissions managed successfully' });
+  } catch (error) {
+    console.error('Error managing calendar permissions:', error);
+    res.status(500).json({ message: 'Failed to manage calendar permissions', error });
+  }
+};
 
 export const shareCalendar = async (req: Request, res: Response) => {
     try {

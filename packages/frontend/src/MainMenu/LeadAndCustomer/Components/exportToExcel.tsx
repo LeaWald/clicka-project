@@ -1,6 +1,7 @@
 import React from 'react';
 import * as XLSX from 'xlsx';
 import { Button } from '../../../Common/Components/BaseComponents/Button';
+import DownloadIcon from '@mui/icons-material/Download';
 
 interface ExportToExcelProps {
     data: Array<Record<string, any>>;
@@ -19,7 +20,10 @@ export const ExportToExcel: React.FC<ExportToExcelProps> = ({ data, fileName }) 
     };
 
     return (
-        <Button variant="primary" size="sm" onClick={handleExport}>יצוא נתונים לאקסל </Button>
+        <Button variant="primary" size="sm" onClick={handleExport}>
+            <DownloadIcon />
+            יצוא נתונים לאקסל
+        </Button>
     );
 };
 

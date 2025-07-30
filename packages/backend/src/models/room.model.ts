@@ -1,7 +1,7 @@
-import {RoomFeature,RoomType,RoomStatus,Room, BookingRules} from 'shared-types/booking';
-import { ID, DateISO } from 'shared-types/core';
+import { RoomFeature, RoomType, RoomStatus, Room } from "shared-types/booking";
+import { ID, DateISO } from "shared-types/core";
 
-export class RoomModel implements Room{
+export class RoomModel implements Room {
   id?: ID;
   name: string;
   description?: string;
@@ -23,7 +23,6 @@ export class RoomModel implements Room{
   MaximumBookingMinutes: number;
   RequiredApproval: boolean;
   FreeHoursForKlikcaCard: number;
-
   nextMaintenanceDate?: DateISO;
   workspaceMapId: string; 
   createdAt: DateISO;
@@ -97,13 +96,10 @@ toDatabaseFormat() {
       google_calendar_id: this.googleCalendarId,
       location: this.location,
       equipment: this.equipment,
-
-      // BookingRules fields:
       minimum_booking_minutes: this.MinimumBookingMinutes,
       maximum_booking_minutes: this.MaximumBookingMinutes,
       required_approval: this.RequiredApproval,
       free_hours_for_klikca_card: this.FreeHoursForKlikcaCard,
-
       next_maintenance_date: this.nextMaintenanceDate,
       workspace_map_id:this.workspaceMapId, 
        createdat: this.createdAt,

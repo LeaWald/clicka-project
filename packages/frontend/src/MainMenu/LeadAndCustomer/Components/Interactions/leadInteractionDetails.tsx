@@ -2,7 +2,7 @@ import { FaPhone, FaEnvelope, FaUsers, FaQuestion } from "react-icons/fa";
 import { FaTrash, FaPen } from "react-icons/fa"; // ייבוא האייקונים
 import { Button } from "../../../../Common/Components/BaseComponents/Button";
 import { useNavigate } from "react-router-dom";
-import { InteractionType } from "shared-types";
+import { InteractionType} from "shared-types";
 import { useLeadsStore } from "../../../../Stores/LeadAndCustomer/leadsStore";
 import { ChartData, ChartDisplay } from "../../../../Common/Components/BaseComponents/Graph";
 import { set } from "lodash";
@@ -24,7 +24,6 @@ export const LeadInteractionDetails = () => {
   const navigate = useNavigate();
   const selectedLead = useLeadsStore(state => state.selectedLead);
   const { handleDeleteInteraction, handleSelectLead, resetSelectedLead } = useLeadsStore();
-  // const location = useLocation();
   const isEditModalOpen = useLeadsStore(state => state.isEditModalOpen);
   const setIsEditModalOpen = useLeadsStore(state => state.setIsEditModalOpen);
   const editingInteraction = useLeadsStore(state => state.editingInteraction);
@@ -44,7 +43,7 @@ export const LeadInteractionDetails = () => {
   const handleSaveInteraction = async () => {
     if (editingInteraction && selectedLead?.id) {
       try {
-        const response = await fetch(`http://localhost:3001/api/interaction/${editingInteraction.id}`, {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/api/interaction/${editingInteraction.id}`, {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
@@ -232,17 +231,7 @@ export const LeadInteractionDetails = () => {
         )}
 
         <div className="flex gap-2 mt-6">
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() =>
-              navigate("/leadAndCustomer/leads/interestedCustomerRegistration", {
-                state: { data: selectedLead },
-              })
-            }
-          >
-            לטופס רישום ללקוח
-          </Button>
+   
           <Button
             variant="accent"
             size="sm"

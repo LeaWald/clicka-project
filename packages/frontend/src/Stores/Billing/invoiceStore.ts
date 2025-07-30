@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import axios from 'axios';
 import {
   CreateInvoiceRequest,
   Invoice,
@@ -8,7 +7,7 @@ import {
 } from 'shared-types';
 import { InvoiceStatus } from 'shared-types';
 import { UUID } from 'crypto';
-
+import axiosInstance from '../../Service/Axios';
 type CustomerCollection = {
   name: string;
   email: string;
@@ -25,13 +24,12 @@ type CustomerCollection = {
   }[];
 };
 interface InvoiceState {
-  //  STATE 
+  //  STATE
   invoices: Invoice[];
   collection: CustomerCollection[];
   loading: boolean;
   error: string | null;
-
-  //  פעולות בסיסיות 
+  //  פעולות בסיסיות
   fetchInvoices: () => Promise<void>;
   getAllInvoices: () => Promise<void>;
   getAllInvoiceItems: (invoiceId: UUID) => Promise<void>;
@@ -39,26 +37,22 @@ interface InvoiceState {
   createInvoice: (invoice: CreateInvoiceRequest) => Promise<Invoice>;
   updateInvoice: (invoiceNumber: string, updates: Partial<Invoice>) => Promise<Invoice>; // שינוי מ-id ל-invoiceNumber
   deleteInvoice: (invoiceNumber: string) => Promise<void>; // שינוי מ-id ל-invoiceNumber
-
   // פעולות מתקדמות
   generateMonthlyInvoices: () => Promise<Invoice[]>;
   updateInvoiceStatus: (invoiceNumber: string, status: InvoiceStatus) => Promise<Invoice>; // שינוי מ-id ל-invoiceNumber
   sendInvoiceByEmail: (invoiceNumber: string, email: string) => Promise<void>; // שינוי מ-invoiceId ל-invoiceNumber
-
-  //  חישובים ושאילתות 
+  //  חישובים ושאילתות
   getOverdueInvoices: () => Invoice[];
   getInvoicesByStatus: (status: InvoiceStatus) => Invoice[];
   calculateOpenInvoicesTotal: () => number;
-
-  //  עזר 
+  //  עזר
   clearError: () => void;
 }
-
 export const useInvoiceStore = create<InvoiceState>()(
   devtools(
     persist(
       (set, get) => ({
-        //מצב התחלתי 
+        //מצב התחלתי
         invoices: [],
         loading: false,
         error: null,
@@ -85,17 +79,14 @@ export const useInvoiceStore = create<InvoiceState>()(
             loading: false
           });
         },
-
         getAllInvoices: async () => {
           set({ loading: true, error: null });
           try {
-            const response = await axios.get('/api/invoices');
-            // השרת מחזיר אובייקט עם message ו-invoices
+            const response = await axiosInstance.get('/invoices');
             const invoicesData = Array.isArray(response.data.invoices) ? response.data.invoices : [];
             const processedInvoices = invoicesData.map((invoice: any) => {
               return {
                 ...invoice,
-                // וודא שהפריטים נמצאים בשדה הנכון
                 items: invoice.items || invoice.invoice_item || []
               };
             });
@@ -112,7 +103,7 @@ export const useInvoiceStore = create<InvoiceState>()(
         },
         getAllInvoiceItems: async (invoiceId) => {
           try {
-            const response = await axios.get(`/api/invoices/${invoiceId}/items`);
+            const response = await axiosInstance.get(`/invoices/${invoiceId}/items`);
             return response.data;
           } catch (error) {
             console.error('Error fetching invoice items:', error);
@@ -120,14 +111,12 @@ export const useInvoiceStore = create<InvoiceState>()(
           }
         },
         collection: [],
-
         getCustomersCollection: async () => {
           set({ loading: true, error: null });
           try {
-            const response = await axios.get('/api/invoices/getCustomersCollection');
+            const response = await axiosInstance.get('/invoices/getCustomersCollection');
             const collectionData = Array.isArray(response.data.collectionDetails) ? response.data.collectionDetails : [];
             set({ collection: collectionData, loading: false });
-
             const processedCollection = collectionData.map((item: any) => {
               return {
                 ...item,
@@ -144,12 +133,11 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
         // יצירת חשבונית חדשה
         createInvoice: async (newInvoice) => {
           set({ loading: true, error: null });
           try {
-            const response = await axios.post('api/invoices', newInvoice);
+            const response = await axiosInstance.post('/invoices', newInvoice);
             set((state) => ({
               invoices: Array.isArray(state.invoices) ? [...state.invoices, response.data] : [response.data],
               loading: false
@@ -161,11 +149,10 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
-      // עדכון חשבונית קיימת
+        // עדכון חשבונית קיימת
         updateInvoice: async (invoiceId, updates) => {
           try {
-            const response = await axios.put(`/api/invoices/${invoiceId}`, updates);
+            const response = await axiosInstance.put(`/invoices/${invoiceId}`, updates);
             set((state) => ({
               invoices: state.invoices.map(invoice =>
                 invoice.id === invoiceId ? { ...invoice, ...response.data.invoice } : invoice
@@ -179,18 +166,14 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
-
         // מחיקת חשבונית
         deleteInvoice: async (id) => {
           try {
-            const response = await axios.delete(`/api/invoices/${id}`);
-
+            await axiosInstance.delete(`/invoices/${id}`);
             set((state) => {
               const filteredInvoices = state.invoices.filter(invoice => {
                 return invoice.id !== id;
               });
-
               return {
                 invoices: filteredInvoices
               };
@@ -199,12 +182,11 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
         // יצירת חשבוניות חודשיות אוטומטית לכל הלקוחות
         generateMonthlyInvoices: async () => {
           set({ loading: true, error: null });
           try {
-            const response = await axios.post('api/invoices/generateMonthly');
+            const response = await axiosInstance.post('/invoices/generateMonthly');
             set({ invoices: response.data, loading: false });
             return response.data;
           } catch (error) {
@@ -213,16 +195,14 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
         // שינוי סטטוס חשבונית (שולח, שולם, בוטל וכו')
         updateInvoiceStatus: async (id, status) => {
           return get().updateInvoice(id, {});
         },
-
         // שליחת חשבונית למייל הלקוח
         sendInvoiceByEmail: async (invoiceId, email) => {
           try {
-            await axios.post(`api/invoices/${invoiceId}/send`, { email });
+            await axiosInstance.post(`/invoices/${invoiceId}/send`, { email });
             await get().updateInvoiceStatus(invoiceId, InvoiceStatus.DRAFT);
           } catch (error) {
             set({ error: 'Error sending invoice by email' });
@@ -230,7 +210,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             throw error;
           }
         },
-
         // קבלת חשבוניות באיחור (עברו את תאריך התשלום)
         getOverdueInvoices: () => {
           const { invoices } = get();
@@ -241,13 +220,11 @@ export const useInvoiceStore = create<InvoiceState>()(
             invoice.due_date < today
           );
         },
-
         // קבלת חשבוניות לפי סטטוס (טיוטה, נשלח, שולם וכו')
         getInvoicesByStatus: (status) => {
           const { invoices } = get();
           return invoices.filter(invoice => invoice.status === status);
         },
-
         // חישוב סה"כ חשבוניות פתוחות (שטרם שולמו)
         calculateOpenInvoicesTotal: () => {
           const { invoices } = get();
@@ -258,7 +235,6 @@ export const useInvoiceStore = create<InvoiceState>()(
             )
             .reduce((total, invoice) => total + invoice.subtotal, 0);
         },
-
         // ניקוי הודעת שגיאה
         clearError: () => {
           set({ error: null });

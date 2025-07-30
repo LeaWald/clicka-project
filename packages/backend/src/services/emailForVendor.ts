@@ -2,7 +2,7 @@ import { sendEmail } from './gmail-service';
 import { EmailTemplateService } from './emailTemplate.service';
 import { Expense } from 'shared-types'; // או איפה שמוגדר Expense אצלך
 import { VendorModel } from '../models/vendor.model'; // הנתיב למודל שלך
-import { getVendorById } from './vendor.servic'; // אתה צריך שתהיה לך פונקציה כזו
+import { getVendorById } from './vendor.service'; // אתה צריך שתהיה לך פונקציה כזו
 
 const emailService = new EmailTemplateService();
 

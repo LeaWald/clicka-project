@@ -74,6 +74,7 @@ useEffect(() => {
    return <div>
     <h1  className="text-3xl font-bold text-center text-blue-600 my-4">הקצאות</h1>
     {isLoading && <h1>טוען...</h1>}
+   
    {!isLoading && Array.isArray(assignments) && (
   <>
     <Button onClick={() => navigate('/assignmentForm')}>להוספת הקצאה חדשה</Button>
@@ -86,6 +87,7 @@ useEffect(() => {
     />
   </>
 )}
+
 {!isLoading && !Array.isArray(assignments) && (
   <div style={{ color: 'red' }}>שגיאה: assignments אינו מערך תקין</div>
 )}

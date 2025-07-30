@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from "react";
 import { useInvoiceStore } from "../../../../Stores/Billing/invoiceStore";
 import TableNoActions, { TableColumn } from "../../../../Common/Components/BaseComponents/TableNoActions";
 import { ExportButtons } from "../../../../Common/Components/BaseComponents/ExportButtons";
-
 interface CollectionItem {
     name: string;
     email: string;
@@ -18,18 +17,16 @@ interface CollectionItem {
         issue_date: string;
     }[];
 }
-
 export const Collection = () => {
     const { collection, getCustomersCollection, loading, error } = useInvoiceStore();
     const [monthInput, setMonthInput] = useState<string>("");
     const [yearInput, setYearInput] = useState<string>("");
+    const [phoneInput, setPhoneInput] = useState<string>("");
     const reportRef = useRef<HTMLDivElement | null>(null);
-
     useEffect(() => {
         getCustomersCollection();
     }, [getCustomersCollection]);
-
-    // סינון לפי חודש ושנה (אם הוזן ערך)
+    // סינון לפי חודש, שנה ומספר טלפון (אם הוזן ערך)
     const filteredCollection = collection.filter((item) => {
         const issueDate = item.invoice?.[0]?.issue_date;
         if (!issueDate) return true;
@@ -38,9 +35,9 @@ export const Collection = () => {
         const year = date.getFullYear().toString();
         const monthMatch = monthInput ? month === monthInput.padStart(2, "0") : true;
         const yearMatch = yearInput ? year === yearInput : true;
-        return monthMatch && yearMatch;
+        const phoneMatch = phoneInput ? item.customer_payment_method?.[0]?.credit_card_holder_phone.includes(phoneInput) : true;
+        return monthMatch && yearMatch && phoneMatch;
     });
-
     // נתונים לייצוא (רק מה שמוצג בטבלה)
     const dataToExport = filteredCollection.map(item => ({
         "שם": item.name,
@@ -53,7 +50,6 @@ export const Collection = () => {
         "סכום חיוב": item.invoice?.[0]?.subtotal ?? "",
         "תאריך הנפקה": item.invoice?.[0]?.issue_date || ""
     }));
-
     const columns: TableColumn<CollectionItem>[] = [
         { header: "שם", accessor: "name" },
         { header: "אימייל", accessor: "email" },
@@ -89,33 +85,37 @@ export const Collection = () => {
             render: (value) => value?.[0]?.issue_date || "-"
         }
     ];
-
     if (loading) return <div>טוען נתונים...</div>;
     if (error) return <div>שגיאה: {error}</div>;
-
     return (
         <div className="p-4" ref={reportRef}>
             <h2 className="text-xl font-bold mb-4">נתוני גבייה</h2>
-            <ExportButtons
-                title="collection"
-                exportData={dataToExport}
-                refContent={reportRef}
-                showPDF={false}
-            />
             <div className="flex gap-4 mb-4">
+                {/* שנה */}
+                <input
+                    type="month"
+                    value={yearInput ? `${yearInput}-${monthInput.padStart(2, "0")}` : ""}
+                    onChange={e => {
+                        const [year, month] = e.target.value.split("-");
+                        setYearInput(year);
+                        setMonthInput(month);
+                    }}
+                    style={{ width: 180 }}
+                />
+                {/* טלפון */}
                 <input
                     type="text"
-                    placeholder="חודש (למשל 07)"
-                    value={monthInput}
-                    onChange={e => setMonthInput(e.target.value)}
+                    placeholder="טלפון (למשל 054)"
+                    value={phoneInput}
+                    onChange={e => setPhoneInput(e.target.value)}
                     style={{ width: 120 }}
                 />
-                <input
-                    type="text"
-                    placeholder="שנה (למשל 2025)"
-                    value={yearInput}
-                    onChange={e => setYearInput(e.target.value)}
-                    style={{ width: 120 }}
+                {/* כפתור ייצוא */}
+                <ExportButtons
+                    title="collection"
+                    exportData={dataToExport}
+                    refContent={reportRef}
+                    showPDF={false}
                 />
             </div>
             <TableNoActions columns={columns} data={filteredCollection} />

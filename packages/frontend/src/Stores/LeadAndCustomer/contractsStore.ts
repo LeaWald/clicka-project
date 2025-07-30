@@ -1,4 +1,4 @@
-import { Contract } from "shared-types";
+import { Contract} from "shared-types";
 import { create } from "zustand";
 
 interface ContractStore {
@@ -22,6 +22,9 @@ interface ContractStore {
     handleSelectContract: (contractId: string | null) => void;
     resetSelectedContract: () => void;
     setShowGraphForId: (id: string | null) => void;
+    // uploadFileAndReturnReference: (file: Express.Multer.File, folderPath: string) => Promise<FileReference>;
+    // postContractDocument: (documentToAdd: FileReference, contractId: ID) => Promise<void>;
+    // handleUploadFileToContract: (file: File, contractId: string, folderPath: string) => Promise<void>;
 }
 
 const BASE_API_URL = `${process.env.REACT_APP_API_URL}/contract`;
@@ -172,4 +175,68 @@ export const useContractStore = create<ContractStore>((set, get) => ({
     setShowGraphForId: (id: string | null) => {
         set({ showGraphForId: id });
     },
+
+//   פונקציות שקשורות לשמירת קבצים במסד
+//     uploadFileAndReturnReference: async (file, folderPath) => {
+//       const formData = new FormData();
+//       formData.append("file", file);
+//       formData.append("folderPath", folderPath);
+    
+//       const res = await fetch("/api/upload", {
+//         method: "POST",
+//         body: formData,
+//       });
+  
+//       const data = await res.json();
+//       return data.fileReference;
+//     },
+    
+//     postContractDocument: async (fileReference, contractId) => {
+//       await fetch(`/api/contracts/${contractId}/documents`, {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ fileReference }),
+//       });
+//     },
+    
+    
+//         handleUploadFileToContract: async (
+//       file: File,
+//       contractId: string,
+//       folderPath: string
+//     ) => {
+//       set({ loading: true, error: undefined });
+//       try {
+//         // הכנת קובץ בסגנון Express.Multer.File
+//         const expressStyleFile = {
+//           fieldname: "file",
+//           originalname: file.name,
+//           encoding: "7bit", // או מה שרלוונטי
+//           mimetype: file.type,
+//           size: file.size,
+//           buffer: await file.arrayBuffer().then(b => Buffer.from(b)),
+//       destination: "",
+//       filename: file.name,
+//       path: "",
+//       stream: undefined as any,
+//     };
+
+//     // שלב 1: העלאה וקבלת רפרנס
+//     const fileRef = await get().uploadFileAndReturnReference(
+//       expressStyleFile as unknown as Express.multer.File,
+//       folderPath
+//     );
+
+//     // שלב 2: שיוך הרפרנס לחוזה
+//     await get().postContractDocument(fileRef, contractId);
+    
+//         // ריענון חוזה אם צריך
+//     // await get().fetchContractDetails(contractId);
+//   } catch (error: any) {
+//     console.error("שגיאה בהעלאת קובץ לחוזה:", error);
+//     set({ error: error.message || "שגיאה בהעלאת קובץ לחוזה" });
+//   } finally {
+//     set({ loading: false });
+//   }
+// },
 }));

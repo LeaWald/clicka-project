@@ -1,5 +1,6 @@
+import React, { } from "react";
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Customer } from "shared-types";
+import { Customer} from "shared-types";
 import { showAlert } from "../../../../Common/Components/BaseComponents/ShowAlert";
 import { useCustomerStore } from "../../../../Stores/LeadAndCustomer/customerStore";
 import { CustomerRegistrationForm } from "./customerForm";
@@ -8,7 +9,7 @@ import { CustomerRegistrationForm } from "./customerForm";
 export const UpdateCustomer: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const { updateCustomer } = useCustomerStore();
+    const { updateCustomer, loading } = useCustomerStore();
 
     // קבלת ערכי הלקוח מהעמוד הקודם
     const customer: Customer = location.state?.data;
@@ -16,7 +17,7 @@ export const UpdateCustomer: React.FC = () => {
     const firstPayment = customer.paymentMethods![0] || {};
 
     const defaultValues = {
-        ...customer,
+        ...customer,        
         creditCardNumber: firstPayment.creditCardNumber || "",
         creditCardExpiry: firstPayment.creditCardExpiry || "",
         creditCardHolderIdNumber: firstPayment.creditCardHolderIdNumber || customer.idNumber || "",
@@ -24,6 +25,7 @@ export const UpdateCustomer: React.FC = () => {
     };
     // פונקציית שליחה
     const onSubmit = async (data: any) => {
+
         const newCustomer: Partial<Customer> = { ...data };
         console.log("עדכון לקוח עם הנתונים in updatecustomer:", newCustomer);
         
@@ -37,14 +39,21 @@ export const UpdateCustomer: React.FC = () => {
         }
     };
 
-    return (
-        <CustomerRegistrationForm
-            defaultValues={defaultValues}
-            onSubmit={onSubmit}
-            title="עדכון פרטי לקוח"
-            subtitle="ערוך את הפרטים הרצויים"
-            isEditMode={true}
-        />
+     return (
+        <div className="relative">
+            <CustomerRegistrationForm
+                defaultValues={defaultValues}
+                onSubmit={onSubmit}
+                title="עדכון פרטי לקוח"
+                subtitle="ערוך את הפרטים הרצויים"
+                isEditMode={true}
+            />
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+                </div>
+            )}
+        </div>
     );
 };
 

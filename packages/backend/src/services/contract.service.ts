@@ -9,6 +9,9 @@ import type {
 import { ContractModel } from "../models/contract.model";
 import { baseService } from "./baseService";
 import { supabase } from "../db/supabaseClient";
+import { uploadFileAndReturnReference } from "./drive-service";
+import { DocumentModel } from "../models/document.model";
+import { randomUUID } from "crypto";
 
 export class contractService extends baseService<ContractModel> {
   constructor() {
@@ -172,11 +175,11 @@ export class contractService extends baseService<ContractModel> {
 
   // הוספת מסמך לחוזה
   postContractDocument = async (
-    documentToAdd: FileReference,
+    documentId: ID,
     contractId: ID
   ): Promise<void> => {
     const contract = await this.getById(contractId);
-    const updatedDocs = [...(contract.documents ?? []), documentToAdd];
+    const updatedDocs = [...(contract.documents ?? []), documentId];
     await this.patch({ documents: updatedDocs }, contractId);
   };
 
@@ -187,8 +190,75 @@ export class contractService extends baseService<ContractModel> {
   ): Promise<void> => {
     const contract = await this.getById(contractId);
     const updatedDocs = contract.documents.filter(
-      (doc) => doc.id !== documentId
+      (docId) => docId !== documentId
     );
     await this.patch({ documents: updatedDocs }, contractId);
   };
+
+  // עדכון חוזה עם מזהה מסמך
+  updateContractWithDocument = async (
+    contractId: ID,
+    documentId: ID
+  ): Promise<void> => {
+    console.log('updateContractWithDocument called with:', { contractId, documentId });
+    
+    const contract = await this.getById(contractId);
+    console.log('Current contract:', contract);
+    console.log('Current documents:', contract.documents);
+    
+    const updatedDocs = [...(contract.documents ?? []), documentId];
+    console.log('Updated documents array:', updatedDocs);
+    
+    const result = await this.patch({ documents: updatedDocs }, contractId);
+    console.log('Patch result:', result);
+  };
+
+  // יצירה או עדכון חוזה עם מסמך
+  createOrUpdateContractWithDocument = async (
+    customerId: ID,
+    documentId: ID
+  ): Promise<void> => {
+    console.log('createOrUpdateContractWithDocument called with:', { customerId, documentId });
+    
+    // בדוק שהמסמך קיים
+    const { data: document, error: docError } = await supabase
+      .from('document')
+      .select('id')
+      .eq('id', documentId)
+      .single();
+      
+    if (docError || !document) {
+      throw new Error('Document not found');
+    }
+    
+    // חפש חוזה קיים ללקוח
+    const existingContracts = await this.getAllContractsByCustomerId(customerId);
+    console.log('Existing contracts for customer:', existingContracts);
+    
+    if (existingContracts && existingContracts.length > 0) {
+      // יש חוזה קיים - עדכן אותו
+      const contract = existingContracts[0]; // קח את החוזה הראשון
+      const updatedDocs = [...(contract.documents ?? []), documentId];
+      
+      console.log('Updating existing contract with document');
+      await this.patch({ documents: updatedDocs }, contract.id!);
+    } else {
+      // אין חוזה - צור חדש
+      console.log('Creating new contract for customer');
+      const newContract = new ContractModel(
+        randomUUID(),
+        customerId,
+        1,
+        ContractStatus.DRAFT,
+        new Date().toISOString(),
+        [documentId], // מערך עם מזהה המסמך
+        new Date().toISOString(),
+        new Date().toISOString()
+      );
+      
+      await this.post(newContract);
+    }
+  };
+
+
 }

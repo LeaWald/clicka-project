@@ -27,7 +27,7 @@ router.delete('/v3/files/:fileId', deleteFile);
 router.post('/v3/files/:fileId/permissions', shareFile);
 
 // נתיב העלאה נוסף
-// router.post('/upload', upload.single('file'), postFile);
 router.post('/upload', upload.single('file'), uploadFile);
 router.post('/plainUpload', upload.single('file'), postFile);
+
 export default router;

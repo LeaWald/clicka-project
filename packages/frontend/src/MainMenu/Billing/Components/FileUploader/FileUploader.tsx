@@ -4,14 +4,6 @@ import {  Upload,  X,  CheckCircle,  AlertCircle,  File,  Image,  FileText} from
 import { designSystem, spacing } from '../../Css/theme';
 
 
-// interface FileUploadRequest {
-//   file: File;
-//   folderId?: string;
-//   category: 'חוזה' | 'חשבונית' | 'קבלה' | 'שונות';
-//   customerId?: string;
-//   description?: string;
-// }
-
 interface FileItem {
   id: string;
   file: File;
@@ -70,6 +62,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesUploaded }) => {
 
   // שליחת קובץ לשרת (כולל מידע נוסף)
   const uploadFile = (fileItem: FileItem, retryCount = 0) => {
+    console.log('Starting upload for file:', fileItem.file.name);
+    
     setFiles(prev =>
       prev.map(f =>
         f.id === fileItem.id ? { ...f, status: 'uploading', progress: 0 } : f
@@ -79,12 +73,18 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesUploaded }) => {
     const formData = new FormData();
     formData.append('file', fileItem.file);
     formData.append('category', category);
+    formData.append('folderPath', 'test/folder'); // הוספת folderPath
     if (customerId) formData.append('customerId', customerId);
     if (folderId) formData.append('folderId', folderId);
     if (description) formData.append('description', description);
+    
+    console.log('FormData contents:');
+    console.log('File:', fileItem.file.name);
+    console.log('Category:', category);
+    console.log('FolderPath: test/folder');
 
     const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'http://localhost:3001/api/upload');
+    xhr.open('POST', `${process.env.REACT_APP_API_URL}/document/save`);
 
     // עדכון התקדמות העלאה
     xhr.upload.onprogress = (event) => {
@@ -100,15 +100,21 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesUploaded }) => {
 
     // טיפול בסיום העלאה
     xhr.onload = () => {
-      if (xhr.status === 200) {
+      console.log('Upload response status:', xhr.status);
+      console.log('Upload response text:', xhr.responseText);
+      
+      if (xhr.status === 200 || xhr.status === 201) {
+        console.log('Upload successful for file:', fileItem.file.name);
         setFiles(prev =>
           prev.map(f =>
             f.id === fileItem.id ? { ...f, status: 'success', progress: 100 } : f
           )
         );
       } else if (retryCount < 2) {
+        console.log('Upload failed, retrying...', xhr.status, xhr.responseText);
         uploadFile(fileItem, retryCount + 1);
       } else {
+        console.error('Upload failed after retries:', xhr.status, xhr.responseText);
         setFiles(prev =>
           prev.map(f =>
             f.id === fileItem.id ? { ...f, status: 'error' } : f

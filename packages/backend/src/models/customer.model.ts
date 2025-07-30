@@ -1,3 +1,4 @@
+
 import { UUID } from "node:crypto";
 import type { Contract, Customer, CustomerPaymentMethod, CustomerPeriod, CustomerStatus, DateISO, FileReference, ID, PaymentMethod, PaymentMethodType, WorkspaceType } from "shared-types";
 
@@ -17,9 +18,9 @@ export class CustomerModel implements Customer {
   billingStartDate?: string;
   notes?: string;
   invoiceName?: string;
-  // contractDocuments?: FileReference[];
   paymentMethods?: CustomerPaymentMethod[];  // ללקוח יכולים להיות כמה אמצעי תשלום שונים – למשל שני כרטיסים. כל אמצעי תשלום שייך ללקוח אחד.
   paymentMethodType: PaymentMethodType;
+  ip: string;
   periods?: CustomerPeriod[];
   // contracts: Contract[];  // One customer can have several contracts. 1:N
   createdAt: DateISO;
@@ -39,13 +40,13 @@ export class CustomerModel implements Customer {
     updatedAt: DateISO,
     paymentMethods: CustomerPaymentMethod[],
     paymentMethodType: PaymentMethodType,
+    ip: string,
     currentWorkspaceType?: WorkspaceType,
     contractSignDate?: string,
     contractStartDate?: string,
     billingStartDate?: string,
     notes?: string,
     invoiceName?: string,
-    // contractDocuments?: FileReference[],
     periods?: CustomerPeriod[] | undefined,
     // contracts: Contract[] = []
   ) {
@@ -64,7 +65,7 @@ export class CustomerModel implements Customer {
     this.billingStartDate = billingStartDate;
     this.notes = notes;
     this.invoiceName = invoiceName;
-    // this.contractDocuments = contractDocuments;
+    this.ip = ip;
     this.paymentMethods = paymentMethods;
     this.paymentMethodType = paymentMethodType;
     this.periods = periods;
@@ -89,11 +90,8 @@ export class CustomerModel implements Customer {
       billing_start_date: this.billingStartDate,
       notes: this.notes,
       invoice_name: this.invoiceName,
-      // contract_documents: this.contractDocuments,
-      // paymentMethods: this.paymentMethods,
       payment_methods_type: this.paymentMethodType,
-      // periods: this.periods,
-      // contracts: this.contracts,
+      ip: this.ip,
       created_at: this.createdAt,
       updated_at: this.updatedAt
     };
@@ -113,16 +111,13 @@ export class CustomerModel implements Customer {
       dbData.updated_at,
       dbData.paymentMethods || [],
       dbData.payment_methods_type,
+      dbData.ip,
       dbData.current_workspace_type,
       dbData.contract_sign_date,
       dbData.contract_start_date,
       dbData.billing_start_date,
       dbData.notes,
       dbData.invoice_name,
-      //dbData.contract_documents,
-      // dbData.periods,
-      // dbData.contracts,
-
     );
   }
   static fromDatabaseFormatArray(dbDataArray: any[]): CustomerModel[] {
@@ -148,6 +143,7 @@ export class CustomerModel implements Customer {
     if (data.paymentMethodType !== undefined) dbObj.payment_methods_type = data.paymentMethodType;
     if (data.createdAt !== undefined) dbObj.created_at = data.createdAt;
     if (data.updatedAt !== undefined) dbObj.updated_at = data.updatedAt;
+    if (data.ip !== undefined) dbObj.ip = data.ip;
     // הוסיפי כאן שדות נוספים במידת הצורך
     return dbObj;
   }

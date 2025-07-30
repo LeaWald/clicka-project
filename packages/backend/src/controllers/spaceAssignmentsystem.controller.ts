@@ -10,12 +10,12 @@ export class SpaceAssignmentController {
     const spaceData = req.body;
     
     // הוספת created_at ו-updated_at
-    const currentTime = new Date().toISOString();
-    const spaceDataWithTimestamps = {
-        ...spaceData,
-        created_at: currentTime,
-        updated_at: currentTime
-    };
+const currentTime = new Date();
+const spaceDataWithTimestamps = {
+  ...spaceData,
+  createdAt: currentTime,
+  updatedAt: currentTime
+};
     
     console.log('Prepared space data:', JSON.stringify(spaceDataWithTimestamps, null, 2));
     const space = new SpaceAssignmentModel(spaceDataWithTimestamps);
@@ -90,15 +90,16 @@ export class SpaceAssignmentController {
 
     async checkConflicts(req: Request, res: Response) {
         try {
-            const { workspaceId, assignedDate, unassignedDate, excludeId } = req.body;
+            const { workspaceId, assignedDate, unassignedDate, excludeId, daysOfWeek } = req.body;
             
-            console.log('Checking conflicts for:', { workspaceId, assignedDate, unassignedDate, excludeId });
+            console.log('Checking conflicts for:', { workspaceId, assignedDate, unassignedDate, excludeId , daysOfWeek});
             
             const conflicts = await this.spaceAssignmentService.checkConflicts(
                 workspaceId, 
                 assignedDate, 
                 unassignedDate, 
-                excludeId
+                excludeId,
+                daysOfWeek
             );
             
             res.status(200).json({
@@ -134,17 +135,4 @@ export class SpaceAssignmentController {
         res.status(500).json({ error: 'Internal server error' });
       }
     }
-   
-async getOccupancyReport(req: Request, res: Response) {
-        try {
-            const { type, startDate, endDate } = req.params;
-            console.log('Received request for occupancy report:', { type, startDate, endDate });
-            const report = await this.spaceAssignmentService.getOccupancyReport(type, startDate, endDate);
-            res.json(report);
-        } catch (err) {
-            console.error('Error fetching occupancy report:', err);
-            res.status(500).json({ message: 'Error fetching occupancy report' });
-        }
-    }
-
 }

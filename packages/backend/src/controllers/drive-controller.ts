@@ -7,19 +7,7 @@ import {
   shareDriveFile,
   getFileMetadataFromDrive ,
   uploadFileToFolderPath,
-  uploadFileAndReturnReference
-  // //getFileMetadataFromDrive
-  // getFileFromDrive
-  // getOrCreateFolderIdByPath
-  //  uploadFileToDrive
-  //  createFolderInDrive
-  //  findFolderByName
-  //  shareDriveFile
-  //  deleteFileFromDrive
-  //  getOrCreateFolderByPath
-  //  uploadFileToFolderPath
-
-  
+  uploadFileAndReturnReference 
 } from '../services/drive-service';
 import {
   validateUploadFile,
@@ -32,22 +20,6 @@ interface MulterRequest extends Request {
   file: Express.Multer.File;
 }
 
-// export async function postFile(req: Request, res: Response, next: NextFunction) {
-//   console.log('uploadFile hit');
-//   console.log('req.file:', req.file);
-//   const token = req.headers.authorization?.split(' ')[1];
-//   if (!token) return next({ status: 401, message: 'Missing token' });
-//   const file = req.file;
-//   if (!file) return next({ status: 400, message: 'Missing file' });
-//   try {
-//     validateUploadFile(req);
-//     const result = await uploadFileToDrive(file, token);
-//     res.status(201).json(result);
-//   } catch (err: any) {
-//     if (!err.status) err.status = 500;
-//     next(err);
-//   }
-// }
 //חדש
 export async function postFile(req: Request, res: Response, next: NextFunction) {
   console.log('uploadFile hit');
@@ -161,13 +133,35 @@ export async function shareFile(req: Request, res: Response, next: NextFunction)
     next(err);
   }
 }
+
+// export async function uploadFile(req: Request, res: Response, next: NextFunction) {
+//   const token =  req.cookies.session;
+//   const file = req.file; // multer middleware אמור להעלות את הקובץ לפה
+//   const folderPath = req.body.folderPath;
+
+//   if (!token) return next({ status: 401, message: 'Missing token' });
+//   if (!file) return next({ status: 400, message: 'Missing file' });
+//   if (!folderPath) return next({ status: 400, message: 'Missing folder path' });
+
+//   try {
+//     const fileRef = await uploadFileAndReturnReference(file, folderPath);
+//     res.status(201).json(fileRef);
+//   } catch (err: any) {
+//     if (!err.status) err.status = 500;
+//     next(err);
+//   }
+// }
+
 export async function uploadFile(req: Request, res: Response, next: NextFunction) {
-  const token =  req.cookies.session;
+  const token = req.cookies.session;
   const file = req.file; // multer middleware אמור להעלות את הקובץ לפה
   const folderPath = req.body.folderPath;
+  const contractId = req.body.contractId; // אופציונלי
+
   if (!token) return next({ status: 401, message: 'Missing token' });
   if (!file) return next({ status: 400, message: 'Missing file' });
   if (!folderPath) return next({ status: 400, message: 'Missing folder path' });
+
   try {
     const fileRef = await uploadFileAndReturnReference(file, folderPath);
     res.status(201).json(fileRef);

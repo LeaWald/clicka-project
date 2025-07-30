@@ -14,7 +14,7 @@ export function useTranslation(requestedKeys: string[]) {
 
     if (missing.length === 0) return;
 
-    const url = `http://localhost:3001/api/translate?lang=${lang}&keys=${missing.join(",")}`;
+    const url = `${process.env.REACT_APP_API_URL}/translate?lang=${lang}&keys=${missing.join(",")}`;
 
     fetch(url)
       .then(res => res.json())

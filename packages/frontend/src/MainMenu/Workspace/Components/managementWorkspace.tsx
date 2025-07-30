@@ -1,42 +1,19 @@
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
 import { useEffect, useState } from "react";
+import { useForm, FormProvider } from "react-hook-form";
 import { useWorkSpaceStore } from "../../../Stores/Workspace/workspaceStore";
 import { Space, SpaceStatus, WorkspaceType } from "shared-types";
 import { Table as StyledTable, TableColumn } from "../../../Common/Components/BaseComponents/Table";
-// import { Pencil, Trash } from "lucide-react";
-import { Button } from "../../../Common/Components/BaseComponents/Button"; // עיצוב הכפתורים
-
-
+import { Button } from "../../../Common/Components/BaseComponents/Button";
+import { Modal } from "../../../Common/Components/BaseComponents/Modal";
+import { InputField } from "../../../Common/Components/BaseComponents/Input";
+import { SelectField } from "../../../Common/Components/BaseComponents/Select";
+import { showAlert } from "../../../Common/Components/BaseComponents/ShowAlert";
 export const ManagementWorkspace = () => {
-  const { workSpaces, getAllWorkspace, createWorkspace, updateWorkspace, deleteWorkspace } = useWorkSpaceStore();
+  const { workSpaces, maps, getAllWorkspace, createWorkspace, updateWorkspace, deleteWorkspace, getAllWorkspaceMap } = useWorkSpaceStore();
   const [open, setOpen] = useState(false);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [workspaceToDelete, setWorkspaceToDelete] = useState<Space | null>(null);
-  const [newSpace, setNewSpace] = useState<Space>({
-    id: '',
-    name: '',
-    description: '',
-    type: WorkspaceType.PRIVATE_ROOM1,
-    status: SpaceStatus.AVAILABLE,
-    currentCustomerId: 'עוד לא עודכן לקוח',
-    currentCustomerName: 'עוד לא עודכן לקוח',
-    positionX: 0,
-    positionY: 0,
-    width: 0,
-    height: 0,
-    workspaceMapId: '',
-    location: '',
-    createdAt: '',
-    updatedAt: '',
-  });
-
-  useEffect(() => {
-    getAllWorkspace();
-  }, [getAllWorkspace]);
-
-  const handleAddSpace = () => {
-    setNewSpace({
-      id: '',
+  const [editingSpace, setEditingSpace] = useState<Space | null>(null);
+  const methods = useForm<Space>({
+    defaultValues: {
       name: '',
       description: '',
       type: WorkspaceType.PRIVATE_ROOM1,
@@ -46,20 +23,43 @@ export const ManagementWorkspace = () => {
       width: 0,
       height: 0,
       workspaceMapId: '',
-      createdAt: '',
-      updatedAt: '',
       location: '',
-      // currentCustomerId: 'עוד לא עודכן לקוח',
-      // currentCustomerName: 'עוד לא עודכן לקוח',
+    }
+  });
+  useEffect(() => {
+    getAllWorkspace();
+    getAllWorkspaceMap();
+  }, [getAllWorkspace, getAllWorkspaceMap]);
+  const handleAddSpace = () => {
+    setEditingSpace(null);
+    methods.reset({
+      name: '',
+      description: '',
+      type: WorkspaceType.PRIVATE_ROOM1,
+      status: SpaceStatus.AVAILABLE,
+      positionX: 0,
+      positionY: 0,
+      width: 0,
+      height: 0,
+      workspaceMapId: '',
+      location: '',
     });
     setOpen(true);
   };
-
   const handleClose = () => {
     setOpen(false);
+    setEditingSpace(null);
+    methods.reset();
   };
-
-  const handleSave = async () => {
+  const handleSave = async (data: Space) => {
+    if (!data.workspaceMapId) {
+      await showAlert({
+        title: 'שגיאה!',
+        text: 'יש לבחור מפה לחלל!',
+        icon: 'error',
+      });
+      return;
+    }
     try {
       const formatDate = (date: Date) => {
         return date.toLocaleString("he-IL", {
@@ -71,69 +71,70 @@ export const ManagementWorkspace = () => {
           hour12: false,
         }).replace(",", "");
       };
-
       const spaceWithDates = {
-        ...newSpace,
+        ...data,
         updatedAt: formatDate(new Date()),
       };
-
-      if (newSpace.id) {
-        await updateWorkspace(spaceWithDates, spaceWithDates.id || "");
-      }
-      else {
+      if (editingSpace?.id) {
+        await updateWorkspace(spaceWithDates, editingSpace.id);
+      } else {
         const newSpaceData = {
           ...spaceWithDates,
           createdAt: formatDate(new Date()),
         };
         await createWorkspace(newSpaceData);
       }
-
       setOpen(false);
-      // getAllWorkspace();
+      await showAlert({
+        title: 'הצלחה!',
+        text: editingSpace ? 'החלל עודכן בהצלחה' : 'החלל נוצר בהצלחה',
+        icon: 'success',
+      });
     } catch (error) {
-      console.error("Error saving new space:", error);
+      console.error("Error saving space:", error);
+      await showAlert({
+        title: 'שגיאה!',
+        text: 'אירעה שגיאה בשמירת החלל',
+        icon: 'error',
+      });
     }
   };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | { name?: string; value: unknown }>) => {
-    const { name, value } = e.target;
-    setNewSpace({ ...newSpace, [name as string]: value });
-  };
-
-  // תיקון: פונקציה ל-Select בלבד
-  const handleSelectChange = (e: any) => {
-    const { name, value } = e.target;
-    setNewSpace({ ...newSpace, [name]: value });
-  };
-
   const handleEdit = (workspace: Space) => {
-    setNewSpace(workspace);
+    setEditingSpace(workspace);
+    methods.reset({
+      ...workspace,
+      workspaceMapId: workspace.workspaceMapId || '',
+    });
     setOpen(true);
   };
-
-  const handleDelete = (workspace: Space) => {
-    setWorkspaceToDelete(workspace);
-    setConfirmDeleteOpen(true);
-  };
-  const confirmDelete = async () => {
-    if (!workspaceToDelete) return;
-    try {
-      await deleteWorkspace(workspaceToDelete.id || "");
-      // getAllWorkspace();
-      setConfirmDeleteOpen(false);
-      setWorkspaceToDelete(null);
-    } catch (error) {
-      console.error("Error deleting workspace:", error);
+  const handleDelete = async (workspace: Space) => {
+    const result = await showAlert({
+      title: '',
+      text: `האם אתה בטוח שברצונך למחוק את החלל "${workspace.name}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'מחק',
+      cancelButtonText: 'ביטול',
+      reverseButtons: false,
+    });
+    if (result.isConfirmed) {
+      try {
+        await deleteWorkspace(workspace.id || "");
+        await showAlert({
+          title: 'נמחק בהצלחה!',
+          text: 'החלל נמחק מהמערכת',
+          icon: 'success',
+        });
+      } catch (error) {
+        await showAlert({
+          title: 'שגיאה!',
+          text: 'אירעה שגיאה במחיקת החלל',
+          icon: 'error',
+        });
+      }
     }
   };
-
-  const cancelDelete = () => {
-    setConfirmDeleteOpen(false);
-    setWorkspaceToDelete(null);
-  };
-
-
-  const columns: TableColumn<Space>[] = [
+  const columns: TableColumn<Space & { mapName?: string; locationName?: string }>[] = [
     { header: 'שם חלל', accessor: 'name' },
     { header: 'סוג', accessor: 'type' },
     { header: 'סטטוס', accessor: 'status' },
@@ -144,157 +145,149 @@ export const ManagementWorkspace = () => {
     { header: 'תיאור', accessor: 'description' },
     { header: 'קוד לקוח', accessor: 'currentCustomerId' },
     { header: 'שם לקוח', accessor: 'currentCustomerName' },
+    { header: 'שם המפה', accessor: 'mapName' },
+    { header: 'מיקום העמדה', accessor: 'locationName' },
     { header: 'נוצר ב', accessor: 'createdAt' },
     { header: 'עודכן ב', accessor: 'updatedAt' },
   ];
-
-
-
+  const enrichedWorkspaces = workSpaces.map((space) => {
+    const map = maps.find((m) => String(m.id) === String(space.workspaceMapId));
+    const locationSpace = workSpaces.find((s) => String(s.id) === String(space.location));
+    return {
+      ...space,
+      mapName: map ? map.name : '*************',
+      locationName: locationSpace ? locationSpace.name : 'לא הוגדר',
+    };
+  });
+  // אפשרויות לרכיבי הבחירה
+  const mapOptions = maps.map(map => ({
+    value: map.id,
+    label: map.name
+  }));
+  const typeOptions = Object.values(WorkspaceType).map(type => ({
+    value: type,
+    label: type
+  }));
+  const statusOptions = Object.values(SpaceStatus).map(status => ({
+    value: status,
+    label: status
+  }));
+  const locationOptions = workSpaces
+    .filter(space =>
+      space.type === WorkspaceType.OPEN_SPACE ||
+      space.type === WorkspaceType.PRIVATE_ROOM1
+    )
+    .map(space => ({
+      value: space.id || '',
+      label: space.name
+    }));
+  // ווטש על שינויים בסוג החלל כדי להציג/להסתיר שדה מיקום
+  const watchedType = methods.watch('type');
   return (
     <div style={{ padding: "20px" }}>
       <h1>ניהול חללים</h1>
-
       <div style={{ marginBottom: "20px" }}>
-        {/* <Button variant="contained" color="primary" onClick={handleAddSpace}> */}
         <Button variant="primary" onClick={handleAddSpace}>
-
           הוספת חלל חדש
         </Button>
       </div>
-
       <h2>רשימת החללים:</h2>
       {workSpaces.length === 0 ? (
         <p>אין חללים להצגה.</p>
       ) : (
-        <StyledTable<Space>
+        <StyledTable<Space & { mapName?: string; locationName?: string }>
           columns={columns}
-          data={workSpaces}
+          data={enrichedWorkspaces}
           onUpdate={handleEdit}
           onDelete={handleDelete}
           className="shadow-lg"
         />
       )}
-
-      {/* Modal for Adding/Editing Space */}
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>{newSpace.id ? "עריכת חלל" : "הוספת חלל חדש"}</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="שם חלל"
-            fullWidth
-            name="name"
-            value={newSpace.name}
-            onChange={handleChange}
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="תיאור"
-            fullWidth
-            name="description"
-            value={newSpace.description}
-            onChange={handleChange}
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="מיקום X"
-            fullWidth
-            name="positionX"
-            value={newSpace.positionX}
-            onChange={handleChange}
-            type="number"
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="מיקום Y"
-            fullWidth
-            name="positionY"
-            value={newSpace.positionY}
-            onChange={handleChange}
-            type="number"
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="רוחב"
-            fullWidth
-            name="width"
-            value={newSpace.width}
-            onChange={handleChange}
-            type="number"
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="אורך"
-            fullWidth
-            name="height"
-            value={newSpace.height}
-            onChange={handleChange}
-            type="number"
-            style={{ marginBottom: "10px" }}
-          />
-          <TextField
-            label="workspaceMapId"
-            fullWidth
-            name="workspaceMapId"
-            value={newSpace.workspaceMapId}
-            onChange={handleChange}
-            required
-            style={{ marginBottom: "10px" }}
-          />
-          <FormControl fullWidth style={{ marginBottom: "10px" }}>
-            <InputLabel>סוג חלל</InputLabel>
-            <Select
-              name="type"
-              value={newSpace.type}
-              onChange={handleSelectChange}
-              label="סוג חלל"
-            >
-              {Object.values(WorkspaceType).map((type) => (
-                <MenuItem key={type} value={type}>
-                  {type}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl fullWidth style={{ marginBottom: "10px" }}>
-            <InputLabel>סטטוס חלל</InputLabel>
-            <Select
-              name="status"
-              value={newSpace.status}
-              onChange={handleSelectChange}
-              label="סטטוס חלל"
-            >
-              {Object.values(SpaceStatus).map((status) => (
-                <MenuItem key={status} value={status}>
-                  {status}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="secondary">
-            ביטול
-          </Button>
-          <Button onClick={handleSave} color="primary">
-            שמור
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={confirmDeleteOpen} onClose={cancelDelete}>
-        <DialogTitle>אישור מחיקה</DialogTitle>
-        <DialogContent>
-          <p>האם אתה בטוח שברצונך למחוק את החלל "{workspaceToDelete?.name}"?</p>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={cancelDelete} color="secondary">
-            ביטול
-          </Button>
-          <Button onClick={confirmDelete} color="destructive">
-            מחק
-          </Button>
-        </DialogActions>
-      </Dialog>
-
+      <Modal
+        open={open}
+        onClose={handleClose}
+        title={editingSpace ? "עריכת חלל" : "הוספת חלל חדש"}
+      >
+        <FormProvider {...methods}>
+          <form onSubmit={methods.handleSubmit(handleSave)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField
+                name="name"
+                label="שם חלל"
+                required
+                placeholder="הכנס שם החלל"
+              />
+              <SelectField
+                name="type"
+                label="סוג חלל"
+                options={typeOptions}
+                required
+              />
+              <SelectField
+                name="status"
+                label="סטטוס"
+                options={statusOptions}
+                required
+              />
+              <SelectField
+                name="workspaceMapId"
+                label="בחר מפה"
+                options={mapOptions}
+                required
+              />
+            </div>
+            <InputField
+              name="description"
+              label="תיאור"
+              placeholder="תיאור החלל (אופציונלי)"
+            />
+            {/* מיקום העמדה - רק לסוגים מתאימים */}
+            {(watchedType === WorkspaceType.DESK_IN_ROOM || watchedType === WorkspaceType.COMPUTER_STAND) && (
+              <SelectField
+                name="location"
+                label="מיקום העמדה"
+                options={locationOptions}
+              />
+            )}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <InputField
+                name="positionX"
+                label="מיקום X"
+                type="number"
+                defaultValue={0}
+              />
+              <InputField
+                name="positionY"
+                label="מיקום Y"
+                type="number"
+                defaultValue={0}
+              />
+              <InputField
+                name="width"
+                label="רוחב"
+                type="number"
+                required
+                defaultValue={0}
+              />
+              <InputField
+                name="height"
+                label="אורך"
+                type="number"
+                required
+                defaultValue={0}
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="secondary" onClick={handleClose}>
+                ביטול
+              </Button>
+              <Button type="submit" variant="primary">
+                שמור
+              </Button>
+            </div>
+          </form>
+        </FormProvider>
+      </Modal>
     </div>
   );
 };

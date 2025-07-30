@@ -17,6 +17,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.50.3",
     "axios": "^1.10.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "node-cron": "^4.2.1",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cookie-parser": "^1.4.7",

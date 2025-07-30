@@ -49,6 +49,7 @@ async  createRoomRequest(room: RoomModel): Promise<RoomModel | null> {
         return null;
       }
  const createdroom = RoomModel.fromDatabaseFormatArray(data)
+ console.log('Rooms fetched from database:', createdroom);
       return createdroom;
     } catch (err) {
       console.error('Unexpected error:', err);

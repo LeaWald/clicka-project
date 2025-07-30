@@ -99,7 +99,7 @@ export const Table = <T extends Record<string, any>>({
                 <td key={colIdx} className="border px-4 py-2">
                   {col.render
                     ? col.render(row[col.accessor], row)
-                    : String(row[col.accessor] ?? '')
+                    : String(row[col.accessor] ?? '—')
                   }
                 </td>
                 // {/* //ניגש לכל מה שכתוב בעמודות לדוג אם ACCESOR=NAME אז מדפיס לי ROW[NAME] */}

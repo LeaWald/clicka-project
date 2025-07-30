@@ -10,7 +10,7 @@ export async function getRevenues(parameters: ReportParameters): Promise<Payment
   const paymentService = new PaymentService();
   const payments: Payment[] = [];
 
-
+  
 
   // סינון לפי טווח תאריכים
   const from = new Date(parameters.dateRange.startDate as DateISO);
@@ -20,11 +20,11 @@ export async function getRevenues(parameters: ReportParameters): Promise<Payment
     const paymentDate = new Date(payment.date);
     return paymentDate >= from && paymentDate <= to;
   });
-  // עבור כל לקוח ברשימת ה-customerIds (אם קיימת)
+// עבור כל לקוח ברשימת ה-customerIds (אם קיימת)
   if (parameters.customerIds && parameters.customerIds.length > 0) {
     for (const customerId of parameters.customerIds) {
-
-      const customerPayments = await paymentService.getPaymentByDateAndCIds({ dateFrom: parameters.dateRange.startDate, dateTo: parameters.dateRange.endDate, customerIds: [customerId] }); payments.push(...customerPayments);
+      const customerPayments = await paymentService.getPaymentByDateAndCIds({dateFrom: parameters.dateRange.startDate, dateTo: parameters.dateRange.endDate, customerIds: [customerId]});
+      payments.push(...customerPayments);
     }
   } else {
     console.warn('getRevenues: No customerIds provided. Returning empty result.');

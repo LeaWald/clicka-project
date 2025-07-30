@@ -12,6 +12,7 @@ export const LeadAndCustomer = () => {
         <h1 className="text-3xl font-bold mb-8 text-gray-800">Lead & Customer</h1>
         <Button variant="primary" size="md" onClick={() => navigate('leads')}>מתעניינים</Button>
         <Button variant="primary" size="md" onClick={() => navigate('customers')}>לקוחות</Button>
+        <Button variant="secondary" size="md" onClick={() => navigate('/customerHistory/customers')}>היסטוריית לקוחות</Button>
         <Button variant="primary" size="md" onClick={() => navigate('contractManagement')}>חוזים</Button>
         {/* <Button variant="accent" size="sm" onClick={() => navigate('/')}>Back</Button> */}
     </div>

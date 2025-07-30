@@ -1,3 +1,6 @@
+
+
+////מעודכן כולל פרופיל
 import React, { useState } from "react";
 import {
   ChevronDown,
@@ -14,9 +17,8 @@ import {
   ScrollText,
   Coins,
   BadgePercent,
-  // User,
   Camera,
-  // FileDown,
+  Globe
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { CustomerStatus, PaymentMethodType, WorkspaceType } from "shared-types";
@@ -40,6 +42,7 @@ export interface CustomerCardProps {
   notes?: string;
   invoiceName?: string;
   paymentMethodType?: PaymentMethodType;
+  ip: string;
   createdAt?: string;
   updatedAt?: string;
   onEdit: (id: string) => void;
@@ -51,7 +54,7 @@ const statusColors: Record<CustomerStatus, string> = {
   NOTICE_GIVEN: "bg-yellow-100 text-yellow-800",
   EXITED: "bg-red-100 text-red-800",
   PENDING: "bg-gray-100 text-gray-800",
-  CREATED: "bg-blue-100 text-gray-800"
+  CREATED: "bg-blue-100 text-blue-800",
 };
 
 const statusLabels: Record<CustomerStatus, string> = {
@@ -63,7 +66,9 @@ const statusLabels: Record<CustomerStatus, string> = {
 };
 
 const workspaceTypeLabels: Record<WorkspaceType, string> = {
-  PRIVATE_ROOM: "חדר פרטי",
+  PRIVATE_ROOM1: "חדר פרטי",
+  PRIVATE_ROOM2: "חדר של 2",
+  PRIVATE_ROOM3: "חדר של 3",
   DESK_IN_ROOM: "שולחן בחדר",
   OPEN_SPACE: "אופן ספייס",
   KLIKAH_CARD: "כרטיס קליקה",
@@ -71,7 +76,7 @@ const workspaceTypeLabels: Record<WorkspaceType, string> = {
   WALL: "קיר",
   COMPUTER_STAND: "עמדת מחשב",
   RECEPTION_DESK: "דלפק קבלה",
-  BASE:"בסיס"
+  BASE: "בסיס"
 
 };
 
@@ -124,6 +129,7 @@ export const ExpandableCustomerCard = ({
   notes,
   invoiceName,
   paymentMethodType,
+  ip,
   createdAt,
   updatedAt,
   onEdit,
@@ -142,7 +148,7 @@ export const ExpandableCustomerCard = ({
   const hasImage = !!image;
 
   return (
-    <div className="rounded-xl border shadow p-5 mb-4 bg-white transition-all duration-300 text-right">
+    <div className="rounded-xl border shadow p-2 mb-0.5 bg-white transition-all duration-300 text-right">
       <div className="cursor-pointer" onClick={() => setOpen(!open)}>
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
@@ -235,6 +241,9 @@ export const ExpandableCustomerCard = ({
             <Coins size={14} /> תשלום: {paymentMethodLabels[paymentMethodType!] || "לא זמין"}
           </div>
           <div className="flex items-center gap-2">
+            <Globe size={14} /> כתובת IP: {ip || "לא זמין"} {/* הוספת שדה ה-IP */}
+          </div>
+          <div className="flex items-center gap-2">
             <Calendar size={14} /> נוצר: {formatDate(createdAt)}
           </div>
           <div className="flex items-center gap-2">
@@ -243,8 +252,7 @@ export const ExpandableCustomerCard = ({
 
           <div className="flex flex-wrap justify-between items-center mt-4 gap-2">
             <div className="flex gap-3 text-blue-600 font-medium text-sm">
-              <button onClick={() => navigate(`/${id}/dashboard`)}>לוח בקרה</button>
-              <button onClick={() => navigate(`${id}/contract`)}>חוזה לקוח</button>
+              <button onClick={() => navigate(`${id}/contract`, { state: { customerName: name } })}>חוזה לקוח</button>
             </div>
             <div className="flex gap-2">
               <Button

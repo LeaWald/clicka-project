@@ -1,6 +1,8 @@
 import { DocumentModel } from '../models/document.model';
 import { supabase } from '../db/supabaseClient';
+import { v4 as uuidv4 } from 'uuid';
 import { uploadFileAndReturnReference } from './drive-service';
+import { UserTokenService } from './userTokenService';
 
 // יצירת מסמך ושמירתו בטבלת vendor (שדה document_ids)
 // 1. הוספה לטבלת documents
@@ -121,41 +123,46 @@ export const getDocumentById = async (documentId: string) => {
 
   return data[0];  // מחזיר את המסמך היחיד
 };
-// export async function uploadVendorDocument(
-//   file: Express.Multer.File,
-//   vendorId: string,
-//   folderPath: string
-// ) {
-//   // 1. העלאה ל־Google Drive
-//   const fileRef = await uploadFileAndReturnReference(file, folderPath);
 
-//   // 2. יצירת אובייקט מסמך מה־FileReference
-//   const document = new DocumentModel({
-//     id: crypto.randomUUID(),
-//     name: fileRef.name,
-//     path: fileRef.path,
-//     mimeType: fileRef.mimeType,
-//     size: fileRef.size,
-//     url: fileRef.url,
-//     googleDriveId: fileRef.googleDriveId!,
-//     created_at: fileRef.createdAt,
-//     updated_at: fileRef.updatedAt,
-//   });
-
-//   // 3. שמירה בטבלת documents
-//   const { data, error } = await supabase
-//     .from('documents')
-//     .insert([document.toDatabaseFormat()])
-//     .select()
-//     .single();
-
-//   if (error) {
-//     console.error('Error saving document:', error);
-//     throw new Error('Failed to save document');
-//   }
-
-//   // 4. עדכון vendor - הוספת המסמך ל-document_ids
-//   await addDocumentToVendor(vendorId, data.id);
-
-//   return data; // או document אם את רוצה להחזיר את המידע
-// }
+export async function saveDocument(folderPath: string, file: Express.Multer.File, userId?: string) {
+  console.log('Starting saveDocument with:', { folderPath, fileName: file.originalname });
+  
+  try {
+    console.log('Calling uploadFileAndReturnReference...');
+    let userToken = null;
+    if (userId) {
+      console.log('Getting user token for userId:', userId);
+      const tokenService = new UserTokenService();
+      userToken = await tokenService.getAccessTokenByUserId(userId);
+      console.log('User token retrieved:', userToken ? 'Success' : 'Failed');
+    }
+    const uploaded = await uploadFileAndReturnReference(file, folderPath, userToken);
+    console.log('File uploaded to Drive successfully:', uploaded);
+    
+    console.log('Inserting document to database...');
+    const { data: insertedDoc, error: insertError } = await supabase
+      .from('document')
+      .insert(uploaded.toDatabaseFormat())
+      .select()
+      .single();
+      
+    console.log('Supabase insert result:', { insertedDoc, insertError });
+    
+    if (insertError) {
+      console.error('Database insert error:', insertError);
+      throw new Error(`Database error: ${insertError.message}`);
+    }
+    
+    if (!insertedDoc) {
+      console.error('No document returned from insert');
+      throw new Error('No document returned from database');
+    }
+    
+    console.log('Document saved successfully');
+    return DocumentModel.fromDatabaseFormat(insertedDoc);
+  } catch (error: any) {
+    console.error('Error in saveDocument:', error.message);
+    console.error('Error stack:', error.stack);
+    throw error;
+  }
+}

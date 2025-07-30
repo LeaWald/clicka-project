@@ -41,4 +41,3 @@ export const authorizeUser = (permission: UserRole[]) => {
         }
     };
 };
-

@@ -23,10 +23,10 @@ export const Default: Story = {
     step: 1,
   },
   render: (args) => {
-    const methods = useForm(); // יצירת useForm
+    const methods = useForm();
     return (
       <FormProvider {...methods}> {/* מקיף את הקומפוננטה ב-FormProvider */}
-        <NumberInputField name={''} label={''} {...args} /> {/* שולח את ה-args ל-NumberInputField */}
+        {/* <NumberInputField {...args} /> שולח את ה-args ל-NumberInputField */}
       </FormProvider>
     );
   },

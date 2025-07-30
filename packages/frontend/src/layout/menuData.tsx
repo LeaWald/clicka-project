@@ -22,8 +22,8 @@ export const menus: Menu[] = [
       { label: 'סקירה כללית', path: '/dashboard' },
       { label: 'חוזים קרובים', path: '/dashboard/contracts' },
       { label: 'תשלומים אחרונים', path: '/dashboard/payments' },
-      { label: 'מפת חללים', path: '/workspaceMap' }
-
+      { label: 'מפת חללים', path: '/workspaceMap' },
+      { label: 'לגרף מקורות', path: '/leadAndCustomer/leads/LeadSourcesPieChart' },
     ]
   },
   {
@@ -43,10 +43,11 @@ export const menus: Menu[] = [
     title: 'חללים',
     icon: <Map size={18} style={{ marginLeft: 8 }} />,
     items: [
+      {label: 'חדרים', path: '/rooms' },
       { label: 'מפה', path: '/workspaceMap' },
       { label: 'הקצאות', path: '/assignmentTable' },
       { label: 'ישיבות', path: '/bookingCalendar' },
-      { label: 'ניהול', path: '/managementWorkspace' },
+      { label: 'חללים', path: '/managementWorkspace' },
       { label: 'הזמנות', path: '/bookings' }
     ]
   },
@@ -81,7 +82,8 @@ export const menus: Menu[] = [
       { label: 'פעולות משתמשים', path: '/UserActions' },
       { label: 'הרשאות', path: '/permissions' },
       { label: 'הגדרות', path: '/settings' },
-      { label: 'אינטגרציות', path: '/integrations' }
+      { label: 'אינטגרציות', path: '/integrations' },
+      { label: 'העלאת מסמכים', path: '/documentUpload' }
     ]
   },
   {

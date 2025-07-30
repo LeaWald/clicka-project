@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState ,useMemo} from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { PaymentMethodType, WorkspaceType } from "shared-types";
 import { z } from "zod";
@@ -8,9 +8,8 @@ import { FileInputField } from "../../../../Common/Components/BaseComponents/Fil
 import { Form } from '../../../../Common/Components/BaseComponents/Form';
 import { InputField } from "../../../../Common/Components/BaseComponents/Input";
 import { NumberInputField } from "../../../../Common/Components/BaseComponents/InputNumber";
-import { SelectField } from '../../../../Common/Components/BaseComponents/Select'; 
-
-//האם להכניס עוד שדות שקשורים לחוזה????
+import { SelectField } from '../../../../Common/Components/BaseComponents/Select'; // מייבאים את הקומפוננטה
+import FileUploader from '../../../../Common/Components/BaseComponents/FileUploader';
 
 //בשביל שבתצוגה זה יהיה בעברית
 const workspaceTypeOptions = [
@@ -51,6 +50,10 @@ const schema = z.object({
     creditCardHolderPhone: z.string().optional(),
     contractDocuments: z.array(z.any()).optional(),
     ProfilePicture: z.any().optional(),
+    requireEmailVerification: z.boolean().optional(),
+    ip: z.string().optional().refine(val => {
+        return !val || /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(val);
+    }, { message: "כתובת IP לא תקינה" }),
 }).superRefine((data, ctx) => {
     if (data.paymentMethodType === PaymentMethodType.CREDIT_CARD) {
         if (!data.creditCardNumber || !/^\d{16}$/.test(data.creditCardNumber)) {
@@ -98,17 +101,22 @@ export const CustomerRegistrationForm: React.FC<CustomerRegistrationFormProps> =
     onSubmit,
     title = "רישום לקוח חדש",
     subtitle = "מלא את הפרטים החסרים",
-    isEditMode = false
-
 }) => {
 
     const [currentStep, setCurrentStep] = useState<number>(0);
 
     const methods = useForm<z.infer<typeof schema>>({
         resolver: zodResolver(schema),
-        defaultValues: { ...defaultValues, workspaceCount: 1, notes: defaultValues?.notes || "" }
+        defaultValues: {
+            ...defaultValues,
+            idNumber: defaultValues?.idNumber || "",
+            workspaceCount: 1,
+            notes: defaultValues?.notes || "",
+            contractSignDate: defaultValues?.contractSignDate || new Date().toISOString().split("T")[0],
+            contractStartDate: defaultValues?.contractStartDate || new Date().toISOString().split("T")[0],
+            billingStartDate: defaultValues?.billingStartDate || new Date().toISOString().split("T")[0],
+        }
     });
-
 
     //אם רואים שלא מתעדכן הערכים עבור מתעניין חדש יש לשים את זה
     // useEffect(() => {
@@ -136,17 +144,16 @@ export const CustomerRegistrationForm: React.FC<CustomerRegistrationFormProps> =
     //     });
     // }, [lead, methods]);
 
-
-const stepFieldNames = useMemo(() => [
-    ["name", "phone", "email", "idNumber", "businessName", "businessType", "notes", "ProfilePicture"] as const,
-    ["currentWorkspaceType", "workspaceCount", "contractSignDate", "contractStartDate", "billingStartDate", "contractDocuments"] as const,
-    ["paymentMethodType", "invoiceName", "creditCardNumber", "creditCardExpiry", "creditCardHolderIdNumber", "creditCardHolderPhone"] as const,
-], []); // רשימת תלויות ריקה כי זה מערך סטטי
+    const stepFieldNames = [
+        ["name", "phone", "email", "idNumber", "businessName", "businessType", "notes", "ProfilePicture","ip"] as const,
+        ["currentWorkspaceType", "workspaceCount", "contractSignDate", "contractStartDate", "billingStartDate", "contractDocuments"] as const,
+        ["paymentMethodType", "invoiceName", "creditCardNumber", "creditCardExpiry", "creditCardHolderIdNumber", "creditCardHolderPhone"] as const,
+    ];
 
     const paymentMethodType = methods.watch("paymentMethodType");
     const idNumber = methods.watch("idNumber");
     const phone = methods.watch("phone");
-
+    const email = methods.watch("email");
 
     const steps = [
         {
@@ -157,15 +164,25 @@ const stepFieldNames = useMemo(() => [
                     <FileInputField name="ProfilePicture" label="תמונת פרופיל" />
                     <InputField name="phone" label="טלפון" required />
                     <InputField name="email" label="אימייל" required />
+                    <div className="flex items-center col-span-2">
+                        <input
+                            type="checkbox"
+                            {...methods.register("requireEmailVerification")}
+                            className="ml-2"
+                            id="requireEmailVerification"
+                        />
+                        <label htmlFor="requireEmailVerification" className="text-sm text-gray-700">דרוש אימות מייל</label>
+                    </div>
                     <InputField name="idNumber" label="תעודת זהות" required />
                     <InputField name="notes" label="הערות" />
                     <InputField name="businessName" label="שם העסק" required />
                     <InputField name="businessType" label="סוג העסק" required />
+                    <InputField name='ip' label='כתובת IP'/>
                 </>
             )
         },
 
-        ...(isEditMode ? [] : [{
+        {
             title: "פרטי חוזה",
             content: (
                 <>
@@ -185,10 +202,17 @@ const stepFieldNames = useMemo(() => [
                     <InputField name="contractSignDate" label="תאריך חתימת חוזה" required type="date" />
                     <InputField name="contractStartDate" label="תאריך תחילת חוזה" required type="date" />
                     <InputField name="billingStartDate" label="תאריך תחילת חיוב" required type="date" />
-                    <FileInputField name="contractDocuments" label="מסמכי חוזה" multiple />
+                    {/* <FileInputField name="contractDocuments" label="מסמכי חוזה" multiple /> */}
+                    <FileUploader
+                        folderPath={`לקוחות/${email}/חוזים`}
+                        onFilesUploaded={(files) => {
+                            console.log("קבצים הועלו:", files);
+                            // אפשר להוסיף לוגיקת הצלחה
+                        }}
+                    />
                 </>
             )
-        }]),
+        },
         {
             title: "פרטי תשלום",
             content: (
@@ -199,7 +223,7 @@ const stepFieldNames = useMemo(() => [
                         options={PaymentMethodTypeOptions}
                         required
                     />
-                    <InputField name="invoiceName" label="שם לחשבונית" />
+                    <InputField name="invoiceName" label='חשבונית ע"ש' />
                     <div className="col-span-2 mt-4 mb-2">
                         <h3 className="text-lg font-semibold text-gray-700 pb-1">פרטי אשראי</h3>
                     </div>
@@ -243,7 +267,8 @@ const stepFieldNames = useMemo(() => [
         stepFieldNames[currentStep].forEach((field) => {
             methods.clearErrors(field as any);
         });
-    }, [currentStep,stepFieldNames,methods]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentStep]);
 
 
     return <div className='interestedCustomerRegistration mx-auto max-w-4xl'>

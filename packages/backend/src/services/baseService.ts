@@ -1,10 +1,11 @@
 import type { ID } from "shared-types";
 import { supabase } from "../db/supabaseClient";
 import { sendEmailToConfrim } from "./gmail-service";
+import { ca } from "date-fns/locale";
 
 export class baseService<T> {
   // בשביל שם המחלקה
-  constructor(private tableName: string) {}
+  constructor(private tableName: string) { }
 
   getById = async (id: ID): Promise<T> => {
     const { data, error } = await supabase
@@ -26,14 +27,18 @@ export class baseService<T> {
   };
 
   getAll = async (): Promise<T[]> => {
-    // console.log("🧾 טבלה:", this.tableName);
+    console.log("🧾 טבלה:", this.tableName);
 
-    const { data, error } = await supabase
-    .from(this.tableName)
-    // .select("*, lead_interaction(*)")
-    .select("*");
+    let query = supabase.from(this.tableName).select("*");
 
-    console.log(data);
+    // אם זה טבלת customer, נוסיף מיון לפי created_at
+    if (this.tableName === 'customer') {
+      query = query.order('created_at', { ascending: false });
+    }
+
+    const { data, error } = await query;
+
+    // console.log(data);
 
     if (!data || data.length === 0) {
       console.log(` אין נתונים בטבלה ${this.tableName}`);
@@ -107,11 +112,6 @@ export class baseService<T> {
     console.log("added");
     console.log(data);
 
-    const createdRecord = data?.[0];
-
-    if (this.tableName === "customer") {
-      sendEmailToConfrim(emailToSave, createdRecord.id);
-    }
 
     if (error) {
       console.log("enter to log", error);
@@ -119,6 +119,21 @@ export class baseService<T> {
       console.error("שגיאה בהוספת הנתונים:", error);
       throw error;
     }
+
+    const createdRecord = data?.[0];
+
+    if (this.tableName === "customer") {
+      try {
+        await sendEmailToConfrim(emailToSave, createdRecord.id);
+        console.log("📧 after send email Confirmation email sent to:", emailToSave);
+
+      }
+      catch (error) {
+        console.error("שגיאה בשליחת מייל אימות:", error);
+      }
+    }
+
+
     if (!data) throw new Error("לא התקבלה תשובה מהשרת אחרי ההוספה");
     console.log(data);
 

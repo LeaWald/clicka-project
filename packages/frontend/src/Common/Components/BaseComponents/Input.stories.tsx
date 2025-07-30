@@ -1,10 +1,10 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5';
-import { InputField } from './Input';
+import { NumberInputField } from './InputNumber';
 import { useForm, FormProvider } from 'react-hook-form';
 
-const meta: Meta<typeof InputField> = {
-  title: 'BaseComponents/Input',
-  component: InputField,
+const meta: Meta<typeof NumberInputField> = {
+  title: 'BaseComponents/InputNumber',
+  component: NumberInputField,
   tags: ['autodocs'],
 };
 
@@ -13,17 +13,20 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    name: 'testInput',
-    label: 'Test Label',
+    name: 'testNumber',
+    label: 'Test Number Input',
     required: true,
-    type: 'text',
-    placeholder: 'Enter something...',
+    placeholder: 'Enter a number...',
+    defaultValue: 5,
+    min: 0,
+    max: 100,
+    step: 1,
   },
   render: (args) => {
-    const methods = useForm(); // יצירת useForm כאן
+    const methods = useForm(); // יצירת useForm
     return (
-      <FormProvider {...methods}>  {/* מקיף את הקומפוננטה ב־FormProvider */}
-        <InputField name={''} label={''} {...args} />  {/* שולח את ה־props (כולל שם השדה, תווית וכו') */}
+      <FormProvider {...methods}> {/* מקיף את הקומפוננטה ב-FormProvider */}
+        {/* <NumberInputField {...args} /> שולח את ה-args ל-NumberInputField */}
       </FormProvider>
     );
   },

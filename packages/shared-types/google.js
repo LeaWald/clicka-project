@@ -1,3 +1,3 @@
-"use strict";
 // google-types.d.ts
-Object.defineProperty(exports, "__esModule", { value: true });
+export {};
+// הוספות של calandarSync By Nechami Eitan

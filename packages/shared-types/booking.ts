@@ -1,5 +1,3 @@
-// booking-types.d.ts
-
 import { ID, DateISO, ApiResponse, PaginatedResponse } from './core';
 
 // Room type enum
@@ -7,11 +5,14 @@ export enum RoomType {
   MEETING_ROOM = 'MEETING_ROOM',
   LOUNGE = 'LOUNGE'
 }
+
 export interface RoomFeature {
+  id?: ID;
   description?: string;
   IsIncluded: boolean;
   additionalCost: number;
 }
+
 // Room status enum
 export enum RoomStatus {
   AVAILABLE = 'AVAILABLE',
@@ -28,12 +29,6 @@ export enum BookingStatus {
   CANCELED = 'CANCELED',
   COMPLETED = 'COMPLETED'
 }
-export interface RoomFeature {
-  id?: ID;
-  description?: string;
-  IsIncluded: boolean;
-  additionalCost: number;
-}
 
 // Room model
 export interface Room {
@@ -43,19 +38,27 @@ export interface Room {
   type: RoomType;
   status: RoomStatus;
   capacity: number;
-  features?:ID[],
+  features?: ID[];
+  equipment?: string[];
   hourlyRate: number;
   discountedHourlyRate: number; // For 4+ hours
   googleCalendarId?: string;
-  createdAt: DateISO;
-  updatedAt: DateISO;
-    positionX: number;
+  location?: string;
+  positionX: number;
   positionY: number;
-  workspaceMapId: ID; // Assuming this is a reference to a WorkspaceMap
-  // ממדי סביבת העבודה
   width: number;
   height: number;
+  workspaceMapId: ID; // Assuming this is a reference to a WorkspaceMap
+  createdAt: DateISO;
+  updatedAt: DateISO;
+
+  MinimumBookingMinutes: number;
+  MaximumBookingMinutes: number;
+  RequiredApproval: boolean;
+  FreeHoursForKlikcaCard: number;
+  nextMaintenanceDate?: DateISO;
 }
+
 export interface BookingRules {
   MinimumBookingMinutes: number;
   MaximumBookingMinutes: number;
@@ -64,17 +67,16 @@ export interface BookingRules {
   FreeHoursForKlikcaCard: number;
 }
 
-
 // Booking model
 export interface Booking {
   id?: ID;
   roomId: ID;
   roomName: string;
-  customerId?: ID|null;
-  customerName?: string |null;
-  externalUserName?: string|null;
-  externalUserEmail?: string|null;
-  externalUserPhone?: string|null;
+  customerId?: ID | null;
+  customerName?: string | null;
+  externalUserName?: string | null;
+  externalUserEmail?: string | null;
+  externalUserPhone?: string | null;
   startTime: DateISO;
   endTime: DateISO;
   status: BookingStatus;
@@ -95,48 +97,49 @@ export interface CreateRoomRequest {
   name: string;
   description?: string;
   type: RoomType;
+  status?: RoomStatus;
   capacity: number;
   hourlyRate: number;
   discountedHourlyRate: number;
   googleCalendarId?: string;
+  location?: string;
+  features?: ID[];
+  equipment?: string[];
+  positionX: number;
+  positionY: number;
+  width: number;
+  height: number;
+  MinimumBookingMinutes: number;
+  MaximumBookingMinutes: number;
+  RequiredApproval: boolean;
+  FreeHoursForKlikcaCard: number;
+  workspaceMapId: ID;
+  nextMaintenanceDate?: DateISO;
 }
 
 // Update room request
 export interface UpdateRoomRequest {
   name?: string;
   description?: string;
+  type?: RoomType;
   status?: RoomStatus;
   capacity?: number;
   hourlyRate?: number;
   discountedHourlyRate?: number;
   googleCalendarId?: string;
-}
-
-// Get rooms request
-export interface GetRoomsRequest {
-  type?: RoomType[];
-  status?: RoomStatus[];
-  page?: number;
-  limit?: number;
-}
-
-// Create booking request
-export interface CreateBookingRequest {
-  roomId: ID;
-  customerId?: ID;
-  externalUserName?: string;
-  externalUserEmail?: string;
-  externalUserPhone?: string;
-  startTime: DateISO;
-  endTime: DateISO;
-  notes?: string;
-}
-
-// Update booking request
-export interface UpdateBookingRequest {
-  startTime?: DateISO;
-  endTime?: DateISO;
-  notes?: string;
+  location?: string;
+  features?: ID[];
+  equipment?: string[];
+  positionX?: number;
+  positionY?: number;
+  width?: number;
+  height?: number;
+  MinimumBookingMinutes?: number;
+  MaximumBookingMinutes?: number;
+  RequiredApproval?: boolean;
+  FreeHoursForKlikcaCard?: number;
+  workspaceMapId?: ID;
+  nextMaintenanceDate?: DateISO;
 }
 
 // Get bookings request
@@ -164,7 +167,21 @@ export interface RejectBookingRequest {
 export interface CancelBookingRequest {
   reason: string;
 }
-
+export interface UpdateBookingRequest {
+  startTime?: DateISO;
+  endTime?: DateISO;
+  notes?: string;
+}
+// Get bookings request
+export interface GetBookingsRequest {
+  roomId?: ID;
+  customerId?: ID;
+  status?: BookingStatus[];
+  startDateFrom?: DateISO;
+  startDateTo?: DateISO;
+  page?: number;
+  limit?: number;
+}
 // Check room availability request
 export interface CheckRoomAvailabilityRequest {
   roomId: ID;

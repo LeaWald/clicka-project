@@ -1,4 +1,6 @@
-{
+
+
+    {
   "name": "clicka-project",
   "version": "1.0.0",
   "main": "index.js",
@@ -7,7 +9,9 @@
   "scripts": {
     "start:backend": "yarn workspace clicka-backend dev",
     "start:frontend": "yarn workspace clicka-frontend start",
-    "build": "yarn workspace shared-types build && yarn workspace clicka-frontend build"
+    "build": "yarn workspace shared-types build && yarn workspace clicka-frontend build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "workspaces": [
     "packages/*"

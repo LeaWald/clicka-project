@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { showAlert } from "./Common/Components/BaseComponents/ShowAlert";
 
 declare global {
   interface Window {
@@ -23,9 +24,7 @@ export const VoiceCommand = () => {
 
     recognition.onresult = (event: any) => {
       const transcript = event.results[0][0].transcript;
-      // const wakeWord = "מירי";
 
-      
       console.log("הפקודה שהתקבלה:", transcript);
       handleCommand(transcript);
     };
@@ -96,15 +95,74 @@ const handleCommand = (text: string) => {
     "עיון בלקוחות",
   ];
 
+  const newLead = [
+    "מתעניין חדש",
+    "הוספת מתעניין",
+    "צור מתעניין",
+    "פתחי מתעניין",
+    "הוסף מתעניין",
+    "אני רוצה להוסיף מתעניין",
+    "קליטה של מתעניין",
+    "לפתוח מתעניין",
+    "הכנסת מתעניין",
+  ];
+
+  const leadsList = [
+    "מתעניינים",
+    "רשימת מתעניינים",
+    "כל המתעניינים",
+    "תראי לי מתעניינים",
+    "אני רוצה לראות את המתעניינים",
+    "דף מתעניינים",
+    "עיון במתעניינים",
+  ];
+
+  const sourcesGraph = [
+    "גרף מקורות",
+    "מקורות",
+    "תראי לי גרף מקורות",
+    "גרף של המקורות",
+    "ניתוח מקורות",
+    "דוח מקורות",
+    "גרף מקורות לקוחות",
+  ];
+
+  const contractList = [
+    "חוזים",
+    "רשימת חוזים",
+    "כל החוזים",
+    "תראי לי חוזים",
+    "אני רוצה לראות את החוזים",
+    "דף חוזים",
+    "עיון בחוזים",
+    "הסכמים",
+  ];
+
+  const history = [
+    "היסטוריית לקוח",
+    "היסטוריה של לקוח",
+    "פעילות לקוח",
+    "היסטוריה",
+  ];
+
   const matches = (input: string, keywords: string[]) =>
     keywords.some((kw) => input.includes(kw));
 
   if (matches(lower, newCustomerKeywords)) {
-    window.location.href = "http://localhost:3000/leadAndCustomer/customers/new";
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/customers/new`;
   } else if (matches(lower, customersListKeywords)) {
-    window.location.href = "http://localhost:3000/leadAndCustomer/customers";
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/customers`;
+  } else if (matches(lower, newLead)) {
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads/interestedCustomerRegistration`;
+  } else if (matches(lower, leadsList)) {
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads`;
+  } else if (matches(lower, contractList)) {
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/contracts`;
+  } else if (matches(lower, sourcesGraph)) {
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads/LeadSourcesPieChart`;
+  } else if (matches(lower, history)) {
+    window.location.href = `${process.env.REACT_APP_BASE_URL}/customerHistory`;
   } else {
-    alert("לא הבנתי את הפקודה... 😕 נסי שוב בבקשה");
+    showAlert("","לא הבנתי את הפקודה... 😕 נסי שוב בבקשה","warning");
   }
 };
-

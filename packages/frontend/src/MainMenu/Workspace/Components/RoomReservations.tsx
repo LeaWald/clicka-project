@@ -16,6 +16,7 @@ import "../Css/roomReservations.css";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+
 export enum BookingStatus {
   PENDING = "PENDING",
   APPROVED = "APPROVED",
@@ -65,6 +66,7 @@ const isTodayAndStartTimeInPast = (startDate: string, startTime: string) => {
   selectedTime.setHours(hours, minutes, 0, 0);
   return selectedTime < now;
 };
+
 //ולידציה שיהיה אפשר לקחת את החדר רק לכמות שעות עגולות לא רבעים ולא חצאים
 const isFullHourDifference = (startTime: string, endTime: string) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);
@@ -138,6 +140,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       mode: "onSubmit",
       resolver: zodResolver(bookingSchema),
     });
+
     const { createBookingInCalendar, createBooking, getCustomerByPhoneOrEmail} = useBookingStore();
     const {getAllRooms,rooms} = useRoomStore();
     const customers = useCustomerStore((s) => s.customers);
@@ -146,8 +149,9 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     const status = useWatch({ control: methods.control, name: "customerStatus" });
     const phoneOrEmail = useWatch({ control: methods.control, name: "phoneOrEmail" });
     const [selectedRoomFeatures, setSelectedRoomFeatures] = useState<string[]>([]);
-    const { features, getAllFeatures } = useFeatureStore();
+    const {  getAllFeatures } = useFeatureStore();
       const navigate = useNavigate();
+
 //חישוב כמות השעות שהמשתמש בחר את החדר
     const calculateDurationInMinutes = (startISO: string, endISO: string): number => {
       const start = new Date(startISO);
@@ -155,6 +159,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       const diffInMs = end.getTime() - start.getTime();
       return (Math.floor(diffInMs / (1000 * 60))) / 60;
     };
+
     useImperativeHandle(ref, () => ({
       fillFormWithExternalData: (data: Partial<FormFields>) => {
         Object.entries(data).forEach(([key, value]) => {
@@ -184,6 +189,8 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       }
        //eslint-disable-next-line react-hooks/exhaustive-deps
     }, [status, customerId, customers]);
+
+
     useEffect(() => {
       const fetch = async () => {
         if (status === "customer" && phoneOrEmail) {
@@ -206,6 +213,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       }
        //eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomOptions]);
+
     const selectedRoomId = useWatch({ control: methods.control, name: "selectedRoomId" });
     //תכונות החדר
     useEffect(() => {
@@ -229,17 +237,19 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     const mapRoomFeatures = (fet:string[]) => {
       const featureofroom:string[] = [];
        //eslint-disable-next-line react-hooks/exhaustive-deps
-       fet.map(f => {
-         //eslint-disable-next-line react-hooks/exhaustive-deps
-           features.map((feature) => {
-            if (feature.id === f) {
-               if(feature.description)
-                featureofroom.push(feature.description);
-            }
-           });
-      });
+      //  fet.map(f => {
+      //    //eslint-disable-next-line react-hooks/exhaustive-deps
+      //      features.map((feature) => {
+      //       if (feature.id === f) {
+      //          if(feature.description)
+      //           featureofroom.push(feature.description);
+      //       }
+      //      });
+
+      // });
       return featureofroom;
     };
+
     useEffect(() => {
       if (selectedRoomId && rooms.length > 0) {
         const room = rooms.find((r) => r.id === selectedRoomId);
@@ -250,12 +260,15 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       }
       //eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedRoomId, rooms]);
+
+
     const convertFormToBooking = (data: FormFields) => {
       const name = data.name?.trim() || "";
       const startTime = `${data.startDate}T${data.startTime}`;
       const endTime = `${data.startDate}T${data.endTime}`;
       const selectedRoom = roomOptions.find((room) => room.value === data.selectedRoomId);
       const roomName = selectedRoom?.label ?? "Unknown";
+
       const totalMinutes = calculateDurationInMinutes(startTime, endTime);
       //האוביקט המלא של הבוקינג
       const base = {
@@ -300,6 +313,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     useEffect(() => {
        //eslint-disable-next-line react-hooks/exhaustive-deps
     }, [methods.formState.errors]);
+
     const handleSubmit = async (data: FormFields) => {
 //שלא ישאר שדות ריקים
       try {
@@ -313,12 +327,11 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
             alert("נא למלא את כל פרטי הלקוח החיצוני");
             return;
           }
-        } 
+        }
         //להכניס את נתוני הטופס ולהמירם לסוג של הדטה
         const bookingPayload = convertFormToBooking(data);
-        console.log("לפני השליחה לפונקציה😍" + (bookingPayload))
-        const resultCalendar = await createBookingInCalendar(bookingPayload, "primary");
         const result = await createBooking(bookingPayload);
+        const resultCalendar = await createBookingInCalendar(bookingPayload, "primary");
 //הוספת ההזמנה גם לגוגל קלנדר
           if(result){
             methods.reset();

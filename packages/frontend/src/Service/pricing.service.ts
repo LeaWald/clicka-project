@@ -141,6 +141,15 @@ export async function updatePricingTierPricing(id: string, data: UpdatePricingTi
   }
 }
 
+// מחיקת תמחור workspace לפי מזהה
+export async function deletePricingTier(id: string): Promise<void> {
+  try {
+    await axios.delete(`${API_BASE_URL}/tier/${id}`);
+  } catch (error: any) {
+    throw new Error(extractErrorMessage(error));
+  }
+}
+
 // ==============================
 // =    Meeting Room Pricing    =
 // ==============================

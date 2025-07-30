@@ -9,7 +9,7 @@ export const OccupancyTrend = () => {
     // שליפת הנתונים מהשרת
     const fetchTrends = async () => {
       try {
-        const response = await axios.get("http://localhost:3000/api/occupancy/getAllTrends");
+        const response = await axios.get(`${process.env.REACT_APP_API_URL}/occupancy/getAllTrends`);
         setTrends(response.data || []);
       } catch (error) {
         console.error("Failed to fetch trends:", error);

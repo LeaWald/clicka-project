@@ -12,7 +12,7 @@ export class ContractModel implements Contract {
   startDate?: string;
   endDate?: string;
   terms?: ContractTerms;
-  documents: FileReference[];
+  documents: ID[];
   signedBy?: string;
   witnessedBy?: string;
   createdAt: DateISO;
@@ -24,7 +24,7 @@ export class ContractModel implements Contract {
     version: number,
     status: ContractStatus,
     startDate: string,
-    documents: FileReference[],
+    documents: ID[],
     createdAt: string,
     updatedAt: string,
     signDate?: string,

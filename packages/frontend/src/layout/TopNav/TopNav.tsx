@@ -5,7 +5,10 @@ import MobileMenu from '../MobileMenu/MobileMenu';
 import { useMediaQuery } from 'react-responsive';
 import { menus } from '../menuData';
 import { T } from '../../Common/Service/T';
-import logo from '../Assets/Klika Logo.jpg'; 
+import logo from '../Assets/Klika Logo.jpg';
+import { useAuthStore } from '../../Stores/CoreAndIntegration/useAuthStore';
+import { LogoutButton } from '../../MainMenu/CoreAndIntegration/Components/Login/LogoutButton';
+
 
 const TopNav = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -13,6 +16,8 @@ const TopNav = () => {
   const navRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const [clickedMenuKey, setClickedMenuKey] = useState<string>('');
+  const { user } = useAuthStore();
+  console.log('user: ', user)
 
   const isMenuOpen = (menu: string) =>
     openMenu === menu || (hoveredMenu === menu && !openMenu);
@@ -60,9 +65,8 @@ const TopNav = () => {
           {menus.map(menu => (
             <li
               key={menu.key}
-              className={`${styles.navItem} ${
-                clickedMenuKey === menu.key ? styles.activeLink : ''
-              }`}
+              className={`${styles.navItem} ${clickedMenuKey === menu.key ? styles.activeLink : ''
+                }`}
               onMouseEnter={() => setHoveredMenu(menu.key)}
               onMouseLeave={() => setHoveredMenu(null)}
             >
@@ -94,8 +98,33 @@ const TopNav = () => {
           ))}
         </ul>
       )}
+      {user && (
+        <div
+          style={{
+            marginLeft: 'auto',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+            paddingRight: '16px',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <img
+              src="/user.png"
+              alt="avatar"
+              style={{ width: 25, height: 25, borderRadius: '10%', objectFit: 'cover' }}
+            />
+            <span style={{ fontSize: 14, color: '#000', marginTop: 4 }}>
+              {user.firstName} {user.lastName}
+            </span>
+          </div>
+          <LogoutButton></LogoutButton>
+        </div>
+      )}
     </nav>
+
   );
+
 };
 
 export default TopNav;

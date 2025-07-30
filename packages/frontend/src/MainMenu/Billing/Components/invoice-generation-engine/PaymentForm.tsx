@@ -19,7 +19,7 @@ interface FormFields {
 
 async function sendPaymentToApi(payment: any) {
   try {
-    const response = await axios.post("http://localhost:3001/payments", payment);
+    const response = await axios.post(`${process.env.REACT_APP_API_URL}/payments`, payment);
     return response.data;
   } catch (error) {
     console.error("שגיאה בשליחת תשלום לשרת:", error);

@@ -7,47 +7,38 @@ import { Routing } from './routing';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { ThemeProvider } from './Common/Components/themeConfig';
 import { LangContext } from './Common/Service/langContext';
-import clsx from 'clsx';
-import BackButton from './Common/Components/BaseComponents/BackButton';
+import { AuthProvider } from './MainMenu/CoreAndIntegration/Components/Login/AuthProvider';
 
 function Root() {
-  const [lang, setLang] = useState<"he" | "en">("he");
+  const [lang, setLang] = useState<"HE" | "EN">("HE");
 
   return (
     <React.StrictMode>
       <ThemeProvider>
-        <LangContext.Provider value={lang}>
+        <LangContext.Provider value={lang=== "HE" ? "he" : "en"}>
           <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID!}>
             <BrowserRouter>
-              <div className="p-4 gap-4 items-start">
-                {/* קונטיינר אופקי (שורה) עבור כפתורי שפה + חזרה */}
-                <div className="flex items-center gap-4">
-                  {/* כפתור חזרה */}
-                  <BackButton />
-                  <div className="gap-2 bg-gray-100 rounded-full p-1 shadow-inner w-fit">
-                    {["he", "en"].map((l) => (
-                      <button
-                        key={l}
-                        onClick={() => {
-                          setLang(l as "he" | "en");
-                          console.log("Current language:", l);
-                        }}
-                        className={clsx(
-                          "px-4 py-1 text-sm font-medium rounded-full transition",
-                          lang === l
-                            ? "bg-blue-600 text-white shadow"
-                            : "text-gray-700 hover:bg-gray-200"
-                        )}
-                      >
-                        {l === "he" ? "עברית" : "English"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+              <AuthProvider>
 
-                {/* הראוטינג עצמו */}
-                <Routing />
-              </div>
+                <div className="p-4 gap-4 items-start">
+                  {/* כפתורי שפה מעוצבים */}
+                  <div className="fixed bottom-20 right-4 z-5">
+                      <button
+                       className="px-4 py-1 rounded-full border border-gray-300 text-sm font-semibold text-gray-700 bg-gradient-to-b from-white to-gray-100 shadow-sm hover:shadow-md transition"
+                        onClick={() => {
+                          const nextLang = lang === "HE" ? "EN" : "HE";
+                          setLang(nextLang);
+                          console.log("Language switched to:", nextLang);
+                        }}
+                      >
+                        {lang === "HE" ? "HE" : "EN"}
+                      </button>
+                  </div>
+                  {/* הראוטינג עצמו */}
+                  <Routing />
+                </div>
+              </AuthProvider>
+
             </BrowserRouter>
           </GoogleOAuthProvider>
         </LangContext.Provider>

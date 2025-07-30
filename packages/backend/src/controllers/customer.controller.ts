@@ -2,21 +2,52 @@ import { Request, Response } from "express";
 import { customerService } from "../services/customer.service";
 import {
   CreateCustomerRequest,
+  CustomerStatus,
   ID,
   StatusChangeRequest,
-
 } from "shared-types";
 import { contractService } from "../services/contract.service";
 import { serviceCustomerPaymentMethod } from "../services/customerPaymentMethod.service";
 import { UserTokenService } from "../services/userTokenService";
 import { sendEmail } from "../services/gmail-service";
 import { EmailTemplateService } from "../services/emailTemplate.service";
+import { th } from "date-fns/locale";
+import { CustomerModel } from "../models/customer.model";
 
 const serviceCustomer = new customerService();
 const serviceContract = new contractService();
 const userTokenService = new UserTokenService();
 const emailService = new EmailTemplateService();
 
+export const postCustomersFromExcel = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    console.log('Received file:', req.file);
+    await serviceCustomer.importCustomersFromExcelBuffer(req.file.buffer);
+    res.status(200).json({ message: 'הלידים נוספו בהצלחה!!' });
+  } catch (error: any) {
+    console.error('Error uploading leads:', error);
+    res.status(500).json({ message: 'שגיאה, אנא העלה קובץ אקסל של לידים בלבד!!!', error: error.message });
+  }
+};
+
+export const sendContractEmail = async (req: Request, res: Response) => {
+  try {
+    const customer: CustomerModel = req.body;
+    const link = req.params.link; // assuming the link is passed as a route param
+
+    if (!customer) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    await serviceCustomer.sendEmailWithContract(customer, link);
+
+    res.status(200).json({ message: "Contract email sent successfully" });
+  } catch (error) {
+    console.error("Error sending contract email:", error);
+    res.status(500).json({ message: "Failed to send contract email" });
+  }
+};
 
 export const getAllCustomers = async (req: Request, res: Response) => {
   try {
@@ -31,58 +62,18 @@ export const getAllCustomers = async (req: Request, res: Response) => {
 
 export const postCustomer = async (req: Request, res: Response) => {
   try {
-    const newCustomer: CreateCustomerRequest = req.body;
-
-    // console.log("in controller");
-    // console.log(newCustomer);
-    const email = newCustomer.email;
-
+    
+    const newCustomer = req.body; 
     const customer = await serviceCustomer.createCustomer(newCustomer);
-
-    const token = await userTokenService.getSystemAccessToken();
-
-    const template = await emailService.getTemplateByName(
-          "אימות לקוח",
-    );
-    if (!template) {
-          console.warn("Team email template not found");
-          return;
-        }
-        // const renderedHtml = await emailService.renderTemplate(
-        //   template.bodyHtml,
-        //   {
-        //     "שם": customer.name,
-        //     "סטטוס": status,
-        //     "תאריך": formattedDate,
-        //     "סיבה": detailsForChangeStatus.reason || "ללא סיבה מצוינת",
-        //   },
-        // );
-    
-
-    if (!email || !token)
-      res.status(401).json("its have a problam on email or token");
-    
-    
-
-    // sendEmail( "me",
-    //       {
-    //         to: [email ?? ""],
-    //         subject: template.subject,
-    //         body: renderedHtml,
-    //         isHtml: true,
-    //       },
-    //       token,)
-    console.log("in controller");
-    console.log(customer);
-
     res.status(200).json(customer);
-  } catch (error) {
-    res.status(500).json({ message: 'Error fetching customers', error });
+  }
+  catch (error: any) {
+    console.error("Error posting customer:", error);
+    res.status(500).json({ message: error.details || "Error creating customer" });
   }
 }
 
 export const getCustomerById = async (req: Request, res: Response) => {
-
   const { id } = req.params;
   console.log("in getCustomerById", id);
 
@@ -130,10 +121,12 @@ export const getAllCustomerStatus = async (req: Request, res: Response) => {
 export const deleteCustomer = async (req: Request, res: Response) => {
   const { id } = req.params;
   try {
-    const statuses = await serviceCustomer.delete(id);
-    res.status(200).json(statuses);
+    await serviceCustomer.deleteCustomerCompletely(id);
+    res.status(200).json({
+      message: "Customer and all related data deleted successfully",
+    });
   } catch (error) {
-    res.status(500).json({ message: "Error fetching all statuses", error });
+    res.status(500).json({ message: "Error deleting customer", error });
   }
 };
 
@@ -183,8 +176,9 @@ export const getCustomersByPage = async (req: Request, res: Response) => {
 
     console.log("Filters passed to service:", filtersForService);
 
-    const customer =
-      await serviceCustomer.getCustomersByPage(filtersForService);
+    const customer = await serviceCustomer.getCustomersByPage(
+      filtersForService,
+    );
 
     if (customer.length > 0) {
       res.status(200).json(customer);
@@ -223,15 +217,23 @@ export const patchCustomer = async (req: Request, res: Response) => {
   }
 };
 
-export const getCustomerPaymentMethods = async (req: Request, res: Response) => {
+export const getCustomerPaymentMethods = async (
+  req: Request,
+  res: Response,
+) => {
   const { id } = req.params;
   try {
-    const paymentMethods = await serviceCustomerPaymentMethod.getByCustomerId(id);
+    const paymentMethods = await serviceCustomerPaymentMethod.getByCustomerId(
+      id,
+    );
     res.status(200).json(paymentMethods);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching customer payment methods", error });
+    res.status(500).json({
+      message: "Error fetching customer payment methods",
+      error,
+    });
   }
-}
+};
 
 // לשאול את שולמית לגבי זה
 
@@ -265,25 +267,28 @@ export const confirmEmail = async (req: Request, res: Response) => {
   const id = req.params.id;
 
   if (!email || !id) {
-    return res.status(400).send(createHtmlMessage("שגיאה: אימייל או מזהה חסרים"));
+    return res.status(400).send(
+      createHtmlMessage("שגיאה: אימייל או מזהה חסרים"),
+    );
   }
 
   try {
     await serviceCustomer.confirmEmail(email, id);
     res.send(createHtmlMessage("האימות הצליח! תודה שהצטרפת אלינו."));
-
   } catch (error: any) {
     console.error("שגיאה באימות:", error);
 
-   
+    // אם מדובר בשגיאת דופליקציה (email כבר קיים)
+    if (error?.code === "23505") {
+      return res.status(400).send(createHtmlMessage("האימייל הזה כבר קיים במערכת."));
+    }
 
     // כל שגיאה אחרת
     res
       .status(500)
-      .send(createHtmlMessage("\nאירעה שגיאה במהלך האימות." + error.details));
+      .send(createHtmlMessage("אירעה שגיאה במהלך האימות. אנא נסה שוב מאוחר יותר."));
   }
 };
-
 
 function createHtmlMessage(message: string) {
   return `
@@ -316,14 +321,12 @@ function createHtmlMessage(message: string) {
   `;
 }
 
-
-
 export const changeCustomerStatus = async (req: Request, res: Response) => {
   try {
     console.log("changeCustomerStatus called with params:", req.params);
     const userTokenService = new UserTokenService();
     const id = req.params.id; // מזהה הלקוח מהנתיב (או body לפי איך מוגדר)
-    const statusChangeData : StatusChangeRequest = req.body; // פרטים לשינוי הסטטוס
+    const statusChangeData: StatusChangeRequest = req.body; // פרטים לשינוי הסטטוס
 
     const token = await userTokenService.getSystemAccessToken();
     console.log("changeCustomerStatus called with token:", token);
@@ -343,7 +346,7 @@ export const changeCustomerStatus = async (req: Request, res: Response) => {
     await serviceCustomer.sendStatusChangeEmails(
       statusChangeData,
       id,
-      token
+      token,
     );
 
     res

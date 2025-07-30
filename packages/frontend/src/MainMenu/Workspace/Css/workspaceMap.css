@@ -40,19 +40,52 @@ h1 ::after{
     box-shadow: 3px 3px 3px 3px rgb(224, 224, 224);
     padding: 10px;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    gap: 10px;
+    align-items: stretch;
+     box-sizing: border-box;
 }
 .search{
    width: 20%;
-   height: 100%;
-   /* background-color:#fafafa ; */
-   /* gap: 10px; */
+   /* height: 100%; */
+   min-width: 250px;
+   flex-shrink: 0;
+   display: flex;
+    flex-direction: column;
+box-sizing: border-box;
+ border: 1px solid transparent;
 }
-.workspaceMap{
-    width: 75%;
+.search > :last-child {
+    margin-top: auto; 
+}
+.workspaceMap {
+    position: relative;
+    flex: 1;
+    width: calc(100% - 270px);
+    min-width: 0;
     height: 100%;
-    /* background-color: #fafafa; */
-    /* gap:10px; */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+ .toggleSidebarBtn {
+   position: absolute;
+    right: 30px;
+    top: 90px;
+    z-index: 1001; 
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .toggleSidebarBtn:hover {
+    background: #f8f9fa;
 }
 .workspaceMap.fullWidth {
     width: 100%;
@@ -61,13 +94,18 @@ h1 ::after{
 
 .content.sidebarHidden {
     flex-direction: column;
+    overflow: hidden;
 }
 
 .content.sidebarHidden .workspaceMap {
+    flex: 1;
     width: 100%;
-    height: calc(100vh - 100px); /* התאם לפי הצורך */
+    height: 100%;
 }
 
+.content.sidebarHidden .zoom {
+    margin-left: 0;
+}
 .search.hidden {
     display: none;
 }
@@ -76,15 +114,13 @@ h1 ::after{
     margin-bottom: 10px;
 }
 .zoom {
-
-
     position: absolute;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
     pointer-events: none;
-    margin-left: calc(50vw - 50%); /* התאמה למרכז המפה האמיתי */
+    margin-left: calc(50vw - 50%); 
 }
 
 .zoom-controls {
@@ -182,41 +218,53 @@ h1 ::after{
     min-width: 35px;
     text-align: center;
 }
+.svg-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+   padding: 5px;
+   box-sizing: border-box;
+}
+.mapContent {
+  width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-width: 90% !important;
+    min-height: 90% !important;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: white;
+    transform-origin: center center !important;/* שמור על יחס גובה-רוחב */
+}
 
 .spaces {
-    width: 100%;
+  width: 100%;
     height: 100%;
-    overflow: hidden;
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 10px;
-   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  padding: 20px;
-  border-radius: 1px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  margin-right: 40px;
+     box-sizing: border-box;
+}
+
+.room-space {
+    fill: #b0c4de !important; /* צבע כחול-אפור לדוגמה */
+    stroke: #333;
+    stroke-width: 2;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 
-.mapContent {
-/* width: 100%;
-    height: 100%;
-    overflow: hidden;
-    position: relative;
-    display: flex;
+/* תצוגת מסך מלא – כשהתפריט מוסתר */
+.content.sidebarHidden .spaces {
     justify-content: center;
     align-items: center;
-    padding: 10px; */
-   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-   /* padding: 20px;
-  border-radius: 1px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  margin-right: 40px; */
-    display: block;
+     margin-right: 0;
 }
 
 .space-rect {
@@ -299,6 +347,13 @@ h1 ::after{
 .space-rect.OCCUPIED + .customer-name {
     filter: drop-shadow(0 0 3px #ffeb3b);
 }
+.sidebarHidden .spaces {
+    margin-right: 0; /* ביטול מרווח ימני */
+    border-radius: 10px; /* תואם לעיצוב הכללי */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* שמירה על גבול */
+    padding: 0; /* תואם לעיצוב הכללי */
+}
+
 /* עיצוב לשם הלקוח */
 .customer-name {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
@@ -353,6 +408,7 @@ h1 ::after{
 }
 .clearSearchBtn,.backBtn {
  margin-top: 20px;
+ margin-top: 20px;
   background-color: #007BFF !important;
   color: white !important;
   border-color: #6c757d !important;
@@ -364,20 +420,9 @@ h1 ::after{
     border-color: #0056b3 !important; */
     box-shadow: 0 2px 4px rgba(255, 136, 0, 0.2) !important;
 }
-.workspaceMap {
-    position: relative;
-}
-.zoom {
-    position: absolute;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    pointer-events: none;
-}
-.zoom-controls {
-    pointer-events: auto;
-}
+
+
+
 .room-space {
     fill: var(--space-fill, #f8f9fa);
     stroke: #333;
@@ -402,22 +447,23 @@ h1 ::after{
 }
 
 /* סטטוסים לחדרים - זהה לחללים */
-.room-space.AVAILABLE,
+/* .room-space.AVAILABLE,
 .room-workstation.AVAILABLE {
     --space-fill: #d4edda;
     fill: #d4edda;
-}
+} */
 
-.room-space.OCCUPIED,
+/* .room-space.OCCUPIED,
 .room-workstation.OCCUPIED {
     --space-fill: #f8d7da;
     fill: #f8d7da;
-}
+} */
 
 .room-space.MAINTENANCE,
 .room-workstation.MAINTENANCE {
     --space-fill: #fff3cd;
     fill: #fff3cd;
+}
 
 .room-space.NONE,
 .room-workstation.NONE {
@@ -441,4 +487,173 @@ h1 ::after{
 position: absolute;
 right: 30px;
 top: 90px;
-}}
+}
+
+/* תצוגה רספונסיבית*/
+@media (max-width: 1200px) {
+  .content {
+    width: 95%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .search {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    min-width: auto;
+
+  }
+  
+  .workspaceMap {
+    width: 100%;
+    height: 60vh;
+    flex: 1;
+  }
+
+}
+
+@media (max-width: 768px) {
+  .all {
+    height: 100vh;
+    padding: 10px;
+  }
+  
+  .content {
+    width: 100%;
+    height: 90vh;
+    padding: 5px;
+    gap: 5px;
+  }
+  
+  .search {
+    padding: 10px;
+  }
+  
+  .statusAndType, .displayDate {
+    margin-top: 2vh;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    min-width: 250px;
+    flex-shrink: 0; 
+    box-sizing: border-box;
+  }
+  
+  .workspaceMap {
+    height: 70vh;
+  }
+  
+  .zoom {
+    bottom: 5px;
+    margin-left: 0;
+    transform: translateX(-50%) scale(0.8);
+  }
+  
+  .zoom-controls {
+    padding: 4px 8px;
+    gap: 4px;
+  }
+  
+  .zoom-btn, .reset-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+  }
+  
+  .slider {
+    width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5rem;
+    padding: 5px 0;
+  }
+  
+  h2 {
+    font-size: 0.9rem;
+    padding: 5px 0;
+  }
+  
+ 
+  .minimap {
+    width: 150px;
+    height: 75px;
+    top: 60px;
+    left: 10px;
+  }
+  
+  .workspaceMap {
+    height: 65vh;
+  }
+  
+  .zoom {
+    transform: translateX(-50%) scale(0.7);
+  }
+}
+
+/* שיפור התצוגה במסכים קטנים */
+.content.sidebarHidden {
+  padding: 5px;
+}
+
+.content.sidebarHidden .workspaceMap {
+  height: calc(100vh - 120px);
+}
+
+/* הוספת גמישות לטקסט במפה */
+.space-text {
+  font-size: clamp(8px, 1vw, 12px);
+}
+
+/* שיפור התצוגה של הכפתורים במסכים קטנים */
+.clearSearchBtn, .backBtn {
+  margin-top: auto;
+  width: 100%;
+    margin-bottom: 10px;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+.clearSearchBtn:hover, .backBtn:hover {
+    box-shadow: 0 2px 4px rgba(255, 136, 0, 0.2) !important;
+}
+
+@media (max-width: 480px) {
+  .clearSearchBtn, .backBtn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255,255,255,0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

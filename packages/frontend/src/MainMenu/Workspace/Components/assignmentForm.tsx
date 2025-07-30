@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useAssignmentStore } from "../../../Stores/Workspace/assigmentStore";
 import { useCustomerStore } from "../../../Stores/LeadAndCustomer/customerStore";
 import { useWorkSpaceStore } from "../../../Stores/Workspace/workspaceStore";
@@ -25,53 +25,79 @@ interface AssignmentFormProps {
   assignedBy?: string;
   status?: 'ACTIVE' | 'SUSPENDED' | 'ENDED';
 }
+
+
+
+
+
+
 export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
-  const location = useLocation(); // :white_check_mark: שימוש תקין בתוך הקומפוננטה
-  // :white_check_mark: שליפת נתונים שהועברו דרך ניווט
+  const location = useLocation();
   const {
-    customerId: customerIdFromState,
-    // customerName: customerNameFromState,
-    // workspaceType: workspaceTypeFromState,
+    space,
+    displayDate,
+    customerId,
+    customerName,
+    workspaceType: workspaceTypeFromRoot
   } = location.state || {};
-  // :white_check_mark: שילוב בין props ובין location.state
-  const customerId = props.customerId || customerIdFromState;
-  // const customerName = props.customerName || customerNameFromState;
-  //const workspaceType = props.workspaceType || workspaceTypeFromState;
-  const workspaceId = props.workspaceId;
-  // const workspaceName = props.workspaceName;
-  const assignedDate = props.assignedDate;
-  const unassignedDate = props.unassignedDate;
-  const notes = props.notes;
-  const assignedBy = props.assignedBy;
-  const status = props.status || 'ACTIVE';
-  const onSubmit = props.onSubmit;
-  const title = props.title || "הקצאת חלל עבודה";
   const {
-    spaces,
-    loading,
-    error,
-    conflictCheck,
-    createAssignment,
-    checkConflicts,
-    clearError,
-  } = useAssignmentStore();
-  const { getAllWorkspace } = useWorkSpaceStore();
+    id: workspaceId,
+    name: workspaceName,
+    type: workspaceTypeFromSpace,
+  } = space || {};
+
+  const workspaceType = workspaceTypeFromRoot ?? workspaceTypeFromSpace;
+  const assignedDate = (displayDate instanceof Date
+    ? displayDate.toISOString()
+    : new Date().toISOString()
+  ).split("T")[0]; console.log("Location state:", JSON.stringify(location.state, null, 2));
+
+  const onSubmit = props.onSubmit;
+  const title = props.title ?? "הקצאת חלל עבודה";
+
+
+
+  const { workSpaces, getAllWorkspace } = useWorkSpaceStore();
+  const customers = useCustomerStore((s) => s.customers);
+
   const [isCheckingConflicts, setIsCheckingConflicts] = useState(false);
 
   const methods = useForm({
     defaultValues: {
       isForCustomer: true,
+      workspaceName: workspaceName || "",
       workspaceId: workspaceId || "",
+      customerName: customerName || "",
       customerId: customerId || "",
-      assignedDate: assignedDate || "",
-      unassignedDate: unassignedDate || "",
+      assignedDate: assignedDate,
+      unassignedDate: "",
       daysOfWeek: [],
-      notes: notes || "",
-      assignedBy: assignedBy || "",
-      status: status,
+      notes: "",
+      assignedBy: "",
+      status: "ACTIVE",
     },
   });
-  const customers = useCustomerStore((s) => s.customers);
+  const didReset = useRef(false);
+
+  useEffect(() => {
+    if (!didReset.current) {
+      methods.reset({
+        isForCustomer: true,
+        workspaceName: workspaceName || "",
+        workspaceId: workspaceId || "",
+        customerName: customerName || "",
+        customerId: customerId || "",
+        assignedDate: assignedDate,
+        unassignedDate: "",
+        daysOfWeek: [],
+        notes: "",
+        assignedBy: "",
+        status: "ACTIVE",
+      });
+      didReset.current = true;
+    }
+  }, [assignedDate, customerId, customerName, methods, workspaceId, workspaceName]);
+
   const fetchCustomers = useCustomerStore((s) => s.fetchCustomers);
 
   const watch = methods.watch;
@@ -82,6 +108,14 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
   const watchedDaysOfWeek = watch("daysOfWeek");
   const isForCustomer = String(watch("isForCustomer")) === "true";
 
+  const {
+    loading,
+    error,
+    conflictCheck,
+    createAssignment,
+    checkConflicts,
+    clearError,
+  } = useAssignmentStore();
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -99,7 +133,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
     return () => {
       clearError();
     };
-  }, [getAllWorkspace,clearError]); // ← רק פעם אחת בטעינה
+  }, [getAllWorkspace, clearError]);
   useEffect(() => {
     fetchCustomers()
   }, [fetchCustomers]);
@@ -136,33 +170,17 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
     const timeoutId = setTimeout(checkForConflicts, 500);
     return () => clearTimeout(timeoutId);
   }, [watchedWorkspaceId, watchedAssignedDate, watchedUnassignedDate, watchedDaysOfWeek, checkConflicts]);
-  // const filteredSpaces = React.useMemo(() => {
-  //   if (!workspaceType) {
-  //     return spaces;
-  //   }
-
-  //   console.log('Filtering spaces by type:', workspaceType);
-  //   console.log('Available spaces:', spaces.map(s => ({ id: s.id, name: s.name, type: s.type })));
-
-  //   const filtered = spaces.filter(space => {
-  //     const spaceType = typeof space.type === 'string'
-  //       ? space.type.replace(/^"(.*)"$/, '$1')
-  //       : space.type;
-
-  //     return spaceType === workspaceType;
-  //   });
-
-  //   console.log('Filtered spaces:', filtered);
-  //   return filtered;
-  // }, [spaces, workspaceType]);
+  // סינון חללים לפי סוג
+  const filteredSpaces = React.useMemo(() => {
+    if (!workspaceType) {
+      return workSpaces.filter(space => space.status !== 'NONE');
+    }
+    console.log('workspaceType:', workspaceType);
+    console.log('spaces:', workSpaces);
+    return workSpaces.filter(space => space.type === workspaceType);
+  }, [workSpaces, workspaceType]);
 
   // הוספת useEffect נפרד לdebug
-  useEffect(() => {
-    console.log('Customers updated:', customers);
-    console.log('Spaces updated:', spaces);
-    console.log('Loading:', loading);
-    console.log('Error:', error);
-  }, [customers, spaces, loading, error]);
 
 
   const handleFormSubmit = async (data: any) => {
@@ -177,17 +195,8 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
       console.error("Error submitting form:", error);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="p-4 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-        <p className="mt-2">טוען נתונים...</p>
-      </div>
-    );
-  }
   console.log('Render - customers:', customers.length);
-  console.log('Render - spaces:', spaces.length);
+  console.log('Render - spaces:', workSpaces.length);
   console.log('Render - loading:', loading);
   console.log('Render - error:', error);
 
@@ -196,7 +205,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
       <div className="p-4 text-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
         <p className="mt-2">טוען נתונים...</p>
-        <p className="text-xs text-gray-500">Customers: {customers.length}, Spaces: {spaces.length}</p>
+        <p className="text-xs text-gray-500">Customers: {customers.length}, Spaces: {workSpaces.length}</p>
       </div>
     );
   }
@@ -271,9 +280,10 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
         <SelectField
           label="חלל עבודה"
           name="workspaceId"
-          options={spaces.map(space => ({ label: space.name, value: space.id || '' }))}
+          options={filteredSpaces.map(workSpaces => ({ label: workSpaces.name, value: workSpaces.id || '' }))}
           required
         />
+
 
         {isForCustomer && (
           <SelectField
@@ -292,21 +302,43 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
           type="date"
           required
         />
+
         <InputField
           label="תאריך סיום"
           name="unassignedDate"
           type="date"
         />
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            ימים בשבוע
+          </label>
+          <div className="grid grid-cols-6 gap-1 text-sm">
+            {[0, 1, 2, 3, 4, 5].map((day) => (
+              <label key={day} className="flex items-center justify-center gap-1">
+                <input
+                  type="checkbox"
+                  value={day}
+                  {...methods.register("daysOfWeek")}
+                  className="h-4 w-4"
+                />
+                {["א", "ב", "ג", "ד", "ה", "ו"][day]}
+              </label>
+            ))}
+          </div>
+        </div>
+
         <InputField
           label="הערות"
           name="notes"
           type="textarea"
         />
+
         <InputField
           label="מוקצה ע"
           name="assignedBy"
           required
         />
+
         <SelectField
           label="סטטוס"
           name="status"
@@ -321,7 +353,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
           required
         />
         <div className="mt-6 flex justify-center">
-          <Button type="submit" variant="primary" size="md">
+          <Button type="submit" variant="primary" size="md" >
             בצע הקצאה
           </Button>
         </div>
@@ -330,13 +362,3 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-

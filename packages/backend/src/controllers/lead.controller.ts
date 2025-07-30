@@ -45,7 +45,7 @@ export const createLead = async (req: Request, res: Response) => {
     const leadData: LeadModel = req.body;
     console.log(leadData);
 
-    const newLead = await serviceLead.post(leadData);
+    const newLead = await serviceLead.createLead(leadData);
 
     res.status(201).json(newLead);
   } catch (error: any) {
@@ -54,6 +54,18 @@ export const createLead = async (req: Request, res: Response) => {
       message: "Error creating lead",
       error: error.message || error,
     });
+  }
+};
+
+export const postLeadFromExcel = async (req: Request, res: Response) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+    console.log('Received file:', req.file);
+    await serviceLead.importLeadsFromExcelBuffer(req.file.buffer);
+    res.status(200).json({ message: 'הלידים נוספו בהצלחה!!' });
+  } catch (error: any) {
+    console.error('Error uploading leads:', error);
+    res.status(500).json({ message: 'שגיאה, אנא העלה קובץ אקסל של לידים בלבד!!!', error: error.message });
   }
 };
 

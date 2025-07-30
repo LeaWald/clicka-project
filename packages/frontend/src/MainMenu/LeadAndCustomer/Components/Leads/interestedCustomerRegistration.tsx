@@ -4,37 +4,25 @@ import { useLeadsStore } from "../../../../Stores/LeadAndCustomer/leadsStore";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   CreateCustomerRequest,
+  Customer,
   Lead,
   LeadStatus,
   PaymentMethodType,
 } from "shared-types";
 import { showAlert } from "../../../../Common/Components/BaseComponents/ShowAlert";
+import { ShowAlertWarn } from "../../../../Common/Components/BaseComponents/showAlertWarn";
 
 export const InterestedCustomerRegistration: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const lead: Lead | undefined = location.state?.data;
 
-  const { createCustomer } = useCustomerStore();
+  const { createCustomer, loading } = useCustomerStore();
   const { handleUpdateLead } = useLeadsStore();
 
   const onSubmit = async (data: any) => {
-    //איך לשמור את התמונת פרופיל ואיפה ואם לא הכניסו אז לשים ברירת מחדל
+    console.log('📧 Form data requireEmailVerification:', data.requireEmailVerification);
 
-    //צריך להמיר את הטפסים שהתקבלו ל
-    // export interface FileReference {
-    //     id: ID;
-    //     name: string;
-    //     path: string;
-    //     mimeType: string;
-    //     size: number;
-    //     url: string;
-    //     googleDriveId?: string;
-    //     createdAt: DateISO;
-    //     updatedAt: DateISO;
-    // }
-
-    JSON.stringify(data, null, 2);
     const customerRequest: CreateCustomerRequest = {
       name: data.name,
       phone: data.phone,
@@ -50,36 +38,52 @@ export const InterestedCustomerRegistration: React.FC = () => {
       notes: data.notes,
       invoiceName: data.invoiceName,
       paymentMethodType: data.paymentMethodType,
+      ip: data.ip,
       paymentMethod:
         data.paymentMethodType === PaymentMethodType.CREDIT_CARD
           ? {
-              creditCardNumber: data.creditCardNumber,
-              creditCardExpiry: data.creditCardExpiry,
-              creditCardHolderIdNumber: data.creditCardHolderIdNumber,
-              creditCardHolderPhone: data.creditCardHolderPhone,
-            }
+            creditCardNumber: data.creditCardNumber,
+            creditCardExpiry: data.creditCardExpiry,
+            creditCardHolderIdNumber: data.creditCardHolderIdNumber,
+            creditCardHolderPhone: data.creditCardHolderPhone,
+          }
           : undefined,
-      contractDocuments: data.contractDocuments, // אם יש שדה כזה
+      contractDocuments: data.contractDocuments,
     };
 
-    console.log(customerRequest);
+
 
     try {
-      await createCustomer(customerRequest);
-      
-
-      showAlert("", "להשלמת התהליך יש לאמת את הלקוח במייל", "success");
-
+      const customer: Customer | undefined = await createCustomer(customerRequest);
+      console.log("new customer created in interestedCustomerRegistration:", customer);
+      let latestError = useCustomerStore.getState().error;
+      if (latestError) {
+        showAlert("שגיאה ביצירת לקוח", latestError, "error");
+        return;
+      }
+      showAlert("הלקוח נוסף בהצלחה", "להשלמת התהליך יש לאמת את הלקוח במייל", "success");
       await handleUpdateLead(lead!.id!, { status: LeadStatus.CONVERTED });
-
-      const latestError = useLeadsStore.getState().error;
+      latestError = useLeadsStore.getState().error;
       if (latestError) {
         showAlert(
           "שגיאה בעדכון סטטוס למתעניין",
           latestError || "שגיאה בלתי צפויה",
           "error"
         );
-      } else {
+
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      const confirmed = await ShowAlertWarn(`האם ברוצנך לבחור חלל עכשיו?`, "תוכל לבחור חלל מאוחר יותר דרך הקצאות במפת החללים", "question");
+      if (confirmed) {
+        navigate('/assignmentForm', {
+          state: {
+            customerId: customer!.id,
+            customerName: customer!.name,
+            workspaceType: customer!.currentWorkspaceType,
+          }
+        });
+      }
+      else {
         navigate(-1);
       }
     } catch (error: any) {
@@ -87,14 +91,27 @@ export const InterestedCustomerRegistration: React.FC = () => {
         error?.response?.data?.message || error.message || "שגיאה בלתי צפויה";
       showAlert("שגיאה ביצירת לקוח", errorMessage, "error");
     }
+
   };
 
+
   return (
-    <CustomerRegistrationForm
-      defaultValues={lead}
-      onSubmit={onSubmit}
-      title="רישום מתעניין ללקוח"
-      subtitle="מלא את הפרטים החסרים"
-    />
+    <div className="relative">
+      <CustomerRegistrationForm
+        defaultValues={{ 
+          ...lead, 
+          currentWorkspaceType: Array.isArray(lead?.interestedIn) ? lead?.interestedIn[0] : lead?.interestedIn 
+        }}
+        onSubmit={onSubmit}
+        title="רישום מתעניין ללקוח"
+        subtitle="מלא את הפרטים החסרים"
+      />
+      {(loading) && (
+        // {(loading || loadingLead) && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white bg-opacity-75 z-10">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      )}
+    </div>
   );
 };

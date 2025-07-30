@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { Contract, ContractStatus, FileReference, WorkspaceType } from "shared-types";
+import { Contract, ContractStatus, WorkspaceType } from "shared-types";
 import { Button } from "../../../../Common/Components/BaseComponents/Button";
 import { useContractStore } from "../../../../Stores/LeadAndCustomer/contractsStore";
 import { Pencil, Trash } from "lucide-react";
 import { showAlert } from "../../../../Common/Components/BaseComponents/ShowAlert";
-import { ShowAlertWarn } from "../../../../Common/Components/showAlertWarn";
+import { ShowAlertWarn } from "../../../../Common/Components/BaseComponents/showAlertWarn";
 
 const statusLabels: Record<ContractStatus, string> = {
   DRAFT: "טיוטה",
@@ -14,10 +14,13 @@ const statusLabels: Record<ContractStatus, string> = {
   ACTIVE: "פעיל",
   EXPIRED: "פג תוקף",
   TERMINATED: "הסתיים",
+  RENEWED: "חודש"
 };
 
 const workspaceTypeLabels: Record<WorkspaceType, string> = {
-    PRIVATE_ROOM: "חדר פרטי",
+  PRIVATE_ROOM1: "חדר פרטי",
+  PRIVATE_ROOM2: "חדר של 2",
+  PRIVATE_ROOM3: "חדר של 3",
     DESK_IN_ROOM: "שולחן בחדר",
     OPEN_SPACE: "עמדה במרחב פתוח",
     KLIKAH_CARD: "כרטיס קליקה",
@@ -25,7 +28,7 @@ const workspaceTypeLabels: Record<WorkspaceType, string> = {
     WALL: "קיר",
     RECEPTION_DESK: "דלפק קבלה",
     COMPUTER_STAND: "עמדת מחשב",
-    BASE: "בסיס",
+    BASE: "בסיס"
 };
 
 const formatDate = (iso?: string) =>
@@ -152,11 +155,9 @@ export const ContractDetails = () => {
                   <h4 className="font-semibold text-gray-700 mb-2">מסמכים</h4>
                   {(contract.documents ?? []).length > 0 ? (
                     <ul className="list-disc pr-5 space-y-1 text-blue-700">
-                      {contract.documents.map((doc: FileReference) => (
-                        <li key={doc.id}>
-                          <a href={doc.url} target="_blank" rel="noopener noreferrer" className="underline hover:text-blue-500">
-                            {doc.name}
-                          </a> – {Math.round(doc.size / 1024)} KB
+                      {contract.documents.map((docId: string) => (
+                        <li key={docId}>
+                          <span className="text-blue-700">מסמך: {docId}</span>
                         </li>
                       ))}
                     </ul>

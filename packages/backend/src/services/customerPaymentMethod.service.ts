@@ -21,6 +21,18 @@ export class customerPaymentMethodService extends baseService<customerPaymentMet
 
         return customerPaymentMethodModel.fromDatabaseFormatArray(data) || [];
     }
+
+    async deleteByCustomerId(customerId: string): Promise<void> {
+        const { error } = await supabase
+            .from("customer_payment_method")
+            .delete()
+            .eq("customer_id", customerId);
+
+        if (error) {
+            console.error("Error deleting payment methods by customer ID:", error);
+            throw error;
+        }
+    }
 }
 
 export const serviceCustomerPaymentMethod = new customerPaymentMethodService();

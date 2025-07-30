@@ -17,7 +17,7 @@ export class EmailTemplateModel implements EmailTemplate {
         this.subject = data.subject;
         this.bodyHtml = data.bodyHtml ?? data.body_html ?? '';
         this.bodyText = data.bodyText ?? data.body_text ?? '';
-        this.language = data.language;
+        this.language = data.language ?? 'he';
         this.variables = data.variables ?? [];
         let parsedVariables: string[] = [];
         if (Array.isArray(data.variables)) {
@@ -45,4 +45,3 @@ export class EmailTemplateModel implements EmailTemplate {
         };
     }
 }
-

@@ -33,6 +33,8 @@ import { useBookingCalendarStore } from '../../../Stores/Workspace/bookingCalend
 import { showAlert } from '../../../Common/Components/BaseComponents/ShowAlert';
 import { RoomReservations } from './RoomReservations'; 
 import type { FormFields } from './RoomReservations'; 
+import { Button } from '../../../Common/Components/BaseComponents/Button';
+import { useNavigate } from 'react-router-dom';
 interface BookingCalendarProps {
   roomId: string;
   roomName: string;
@@ -57,6 +59,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
   const [modalContent, setModalContent] = useState<any>(null);
   const [showFormModal, setShowFormModal] = useState(false);
   const [formInitialData, setFormInitialData] = useState<Partial<FormFields>>({});
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (roomId) {
@@ -461,7 +464,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         </ul>
       </div>
       <div className="mb-4 flex justify-end">
-      <button
+      {/* <button
         className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-bold"
         onClick={() => {
           setFormInitialData({
@@ -469,10 +472,12 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
             // אפשר להוסיף כאן עוד נתונים אם צריך
           });
           setShowFormModal(true);
+          
         }}
       >
         יצירת אירוע חדש
-      </button>
+      </button> */}
+      <Button onClick={()=>navigate('/meetingRooms')}>להוספת הזמנה חדשה</Button>
     </div>
 
       {/* לוח השנה */}
@@ -628,12 +633,7 @@ export const BookingCalendar: React.FC<BookingCalendarProps> = ({
         initialData={formInitialData}
         onSubmit={() => setShowFormModal(false)}
       />
-      <button
-        className="mt-4 w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
-        onClick={() => setShowFormModal(false)}
-      >
-        סגור
-      </button>
+
     </div>
   </div>
 )}

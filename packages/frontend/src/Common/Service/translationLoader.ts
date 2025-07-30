@@ -22,7 +22,7 @@ export async function fetchTranslations(keys: string[], lang: string): Promise<R
     return {};
   }
   console.log(keys, lang);
-  const url = `http://localhost:3001/api/translate/locales/${lang}/common.json?keys=${keys.join(",")}`;
+  const url = `${process.env.REACT_APP_API_URL}/translate/locales/${lang}/common.json?keys=${keys.join(",")}`;
 
   const res = await fetch(url);
   if (!res.ok) console.log("Failed to fetch translations:", res.status, res.statusText);

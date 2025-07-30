@@ -7,10 +7,11 @@ import {
   TableColumn,
 } from "../../../Common/Components/BaseComponents/Table";
 import { NavLink } from "react-router";
-
+import axios from "axios";
 import { Stack, TextField } from "@mui/material";
 import { Button } from "../../../Common/Components/BaseComponents/Button";
-import axiosInstance from "../../../Service/Axios";
+import { ShowAlertWarn } from "../../../Common/Components/BaseComponents/showAlertWarn";
+import { showAlert } from "../../../Common/Components/BaseComponents/ShowAlert";
 
 interface ValuesToTable {
   id: string;
@@ -28,10 +29,10 @@ export const PaymentList = () => {
   const [payment, setPayment] = useState<Payment[]>([]);
   const allPaymentsRef = useRef<Payment[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [term, setTerm] = useState("");
   const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+
+  const API_URL = process.env.REACT_APP_API_URL;
 
   const fetchPayment = async (
     page: number,
@@ -40,11 +41,15 @@ export const PaymentList = () => {
   ) => {
     try {
       setIsLoading(true);
-      const response = await axiosInstance.get('/payment/by-page', {
-        params: { page, limit },
-      });
+      const response = await axios.get(
+        `${API_URL}/payment/by-page`,
+        {
+          params: { page, limit },
+        }
+      );
 
       const data: Payment[] = response.data;
+      console.log("📊 נתוני תשלומים מהשרת:", data);
 
       // setHasMore(data.length === limit); // אם פחות מה-limit, אין עוד דפים
 
@@ -59,12 +64,13 @@ export const PaymentList = () => {
   };
 
   useEffect(() => {
-    fetchPayment(page, 20, searchTerm).then(() => {
+    fetchPayment(page, 20, "").then(() => {
       console.log(
         "✅ אחרי fetchPayment - כמות לקוחות ב־allPayment:",
         allPaymentsRef.current.length
       );
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   useEffect(() => {
@@ -81,7 +87,6 @@ export const PaymentList = () => {
   }, [isSearching]);
 
   const handleSearch = (term: string) => {
-    setTerm(term);
     setSearchTerm(term);
 
     if (!term.trim()) {
@@ -105,16 +110,18 @@ export const PaymentList = () => {
   };
 
   const getValuseToTable = (): ValuesToTable[] => {
-    return payment
-      .filter((p) => !!p.id) // מסנן רשומות שאין להן id
+    const result = payment
+      .filter((p) => !!p.id)
       .map((p) => ({
-        id: p.id!, // הבטחה שהוא קיים אחרי הסינון
+        id: p.id!,
         customer_name: p.customer_name || "—",
         amount: p.amount || 0,
-        method: p.method,
+        method: p.method || "—",
         invoice_number: p.invoice_number || "—",
         date: new Date(p.date).toLocaleDateString("he-IL"),
       }));
+    console.log("🔍 נתונים לטבלה:", result);
+    return result;
   };
 
   const columns: TableColumn<ValuesToTable>[] = [
@@ -131,18 +138,28 @@ export const PaymentList = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setTerm(value);
     setSearchTerm(value);
     debouncedSearch(value);
   };
 
-  function deleteCurrentPayment(row: ValuesToTable): void {
-    throw new Error("Function not implemented.");
-  }
+  const deleteCurrentPayment = async (row: ValuesToTable) => {
+    const confirmed = await ShowAlertWarn('האם אתה בטוח שברצונך למחוק את התשלום?', 'לא ניתן לשחזר את המידע לאחר מחיקה.', "warning");
+    if (confirmed) {
+      try {
+        await axios.delete(`${API_URL}/payment/${row.id}`);
+        showAlert("מחיקה", "תשלום נמחק בהצלחה", "success");
+        fetchPayment(page, 20, searchTerm);
+      } catch (error) {
+        console.error('שגיאה במחיקת תשלום:', error);
+        showAlert("שגיאה", "שגיאה במחיקת התשלום", "error");
+      }
+    }
+  };
 
-  function editCustomer(row: ValuesToTable): void {
-    throw new Error("Function not implemented.");
-  }
+  const editPayment = (row: ValuesToTable) => {
+    console.log("עריכת תשלום:", row.id);
+    navigate(`/billing/payment/edit/${row.id}`);
+  };
 
   return (
     <>
@@ -172,8 +189,8 @@ export const PaymentList = () => {
                 ) {
                   console.log("🔍 חיפוש בשרת עם המחרוזת:", searchTerm);
 
-                  axiosInstance
-                    .get("/payment/search", {
+                  axios
+                    .get(`${API_URL}/payment/search`, {
                       params: { text: searchTerm },
                     })
                     .then((response) => {
@@ -201,7 +218,7 @@ export const PaymentList = () => {
             data={getValuseToTable()}
             columns={columns}
             onDelete={deleteCurrentPayment}
-            onUpdate={editCustomer}
+            onUpdate={editPayment}
             renderActions={(row) => (
               <>
                 <NavLink

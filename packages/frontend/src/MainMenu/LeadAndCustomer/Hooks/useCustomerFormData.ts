@@ -53,5 +53,6 @@ export function useCustomerFormData({
       // כאשר המודאל נסגר, מאפסים את הדגל כדי לאפשר reset שוב בפעם הבאה
       didFetch.current = false;
     };
-  }, [open, customerId, fetchCustomerData,methods]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, customerId, fetchCustomerData]);
 }

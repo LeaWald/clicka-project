@@ -11,5 +11,4 @@ spaceRouter.put("/updateSpace/:id", spaceController.updateSpace.bind(spaceContro
 spaceRouter.delete("/deleteSpace/:id", spaceController.deleteSpace.bind(spaceController));
 spaceRouter.post("/checkConflicts", spaceController.checkConflicts.bind(spaceController));
 spaceRouter.get('/getHistory/:date',spaceController.getHistory.bind(spaceController));
-spaceRouter.get("/getOccupancyReport/:type/:startDate/:endDate", spaceController.getOccupancyReport.bind(spaceController));
 export default spaceRouter;

@@ -1,6 +1,6 @@
 import { Meta, StoryObj } from '@storybook/react-webpack5';
 import { FileInputField } from './FileInputFile';
-import { useForm, FormProvider } from 'react-hook-form'; // הוסף את ה־FormProvider ו־useForm
+import { useForm, FormProvider } from 'react-hook-form';
 
 const meta: Meta<typeof FileInputField> = {
   title: 'BaseComponents/FileInputFile',
@@ -14,17 +14,16 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    name: 'example',       // שמו של השדה (החיבור עם ה־useForm)
+    name: 'example',
     label: 'Test File Input',
-    required: true,        // אם דרוש
-    multiple: true,        // אם ניתן לבחור הרבה קבצים
+    required: true,
+    multiple: true,
   },
   render: (args) => {
-    // הגדרת useForm ו־FormProvider סביב ה־FileInputField
-    const methods = useForm();  // יצירת אובייקט useForm
+    const methods = useForm();
     return (
       <FormProvider {...methods}> {/* עוטף את הקומפוננטה ב־FormProvider */}
-        <FileInputField name={''} label={''} {...args} />
+        {/* <FileInputField {...args} /> */}
       </FormProvider>
     );
   },

@@ -1,9 +1,5 @@
-"use strict";
-// expense-types.d.ts
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ExpensePaymentMethod = exports.ExpenseStatus = exports.ExpenseCategory = void 0;
 // Expense category enum
-var ExpenseCategory;
+export var ExpenseCategory;
 (function (ExpenseCategory) {
     ExpenseCategory["RENT"] = "RENT";
     ExpenseCategory["UTILITIES"] = "UTILITIES";
@@ -22,17 +18,17 @@ var ExpenseCategory;
     ExpenseCategory["EQUIPMENT"] = "EQUIPMENT";
     ExpenseCategory["PETTY_CASH"] = "PETTY_CASH";
     ExpenseCategory["OTHER"] = "OTHER";
-})(ExpenseCategory || (exports.ExpenseCategory = ExpenseCategory = {}));
+})(ExpenseCategory || (ExpenseCategory = {}));
 // Expense status enum
-var ExpenseStatus;
+export var ExpenseStatus;
 (function (ExpenseStatus) {
     ExpenseStatus["PENDING"] = "PENDING";
     ExpenseStatus["APPROVED"] = "APPROVED";
     ExpenseStatus["PAID"] = "PAID";
     ExpenseStatus["REJECTED"] = "REJECTED";
-})(ExpenseStatus || (exports.ExpenseStatus = ExpenseStatus = {}));
+})(ExpenseStatus || (ExpenseStatus = {}));
 // Payment method (for expenses)
-var ExpensePaymentMethod;
+export var ExpensePaymentMethod;
 (function (ExpensePaymentMethod) {
     ExpensePaymentMethod["CREDIT_CARD"] = "CREDIT_CARD";
     ExpensePaymentMethod["BANK_TRANSFER"] = "BANK_TRANSFER";
@@ -40,4 +36,49 @@ var ExpensePaymentMethod;
     ExpensePaymentMethod["CASH"] = "CASH";
     ExpensePaymentMethod["PETTY_CASH"] = "PETTY_CASH";
     ExpensePaymentMethod["OTHER"] = "OTHER";
-})(ExpensePaymentMethod || (exports.ExpensePaymentMethod = ExpensePaymentMethod = {}));
+})(ExpensePaymentMethod || (ExpensePaymentMethod = {}));
+// export enum PaymentMethod {
+//   BankTransfer = 'BankTransfer',   
+//   CreditCard = 'CreditCard',      
+//   Cash = 'Cash',                  
+//   Other = 'Other'                 
+// }
+// export enum VendorStatus {
+//   Active = 'Active',
+//   Inactive = 'Inactive',
+//   Suspended = 'Suspended'
+// }
+// export enum VendorCategory {
+//   Equipment = 'Equipment',
+//   Services = 'Services',
+//   Maintenance = 'Maintenance',
+//   Other = 'Other'
+// }
+export var PaymentMethod;
+(function (PaymentMethod) {
+    PaymentMethod["CREDIT_CARD"] = "CREDIT_CARD";
+    PaymentMethod["BANK_TRANSFER"] = "BANK_TRANSFER";
+    PaymentMethod["CASH"] = "CASH";
+    PaymentMethod["CHECK"] = "CHECK";
+    PaymentMethod["OTHER"] = "OTHER";
+})(PaymentMethod || (PaymentMethod = {}));
+export var VendorStatus;
+(function (VendorStatus) {
+    VendorStatus["Active"] = "Active";
+    VendorStatus["Inactive"] = "Inactive";
+    VendorStatus["Suspended"] = "Suspended";
+})(VendorStatus || (VendorStatus = {}));
+export var VendorCategory;
+(function (VendorCategory) {
+    VendorCategory["Equipment"] = "Equipment";
+    VendorCategory["Services"] = "Services";
+    VendorCategory["Maintenance"] = "Maintenance";
+    VendorCategory["Other"] = "Other";
+})(VendorCategory || (VendorCategory = {}));
+export var PaymentTerms;
+(function (PaymentTerms) {
+    PaymentTerms["NET_15"] = "Net 15";
+    PaymentTerms["NET_30"] = "Net 30";
+    PaymentTerms["EOM"] = "End of Month";
+    PaymentTerms["COD"] = "Cash on Delivery";
+})(PaymentTerms || (PaymentTerms = {}));

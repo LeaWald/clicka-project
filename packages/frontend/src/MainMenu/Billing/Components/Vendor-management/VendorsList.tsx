@@ -35,6 +35,7 @@ export default function VendorsList({ vendors, setVendors }: VendorsListProps) {
       });
   }, [setVendors]);
 
+  // פונקציה למחיקת ספק
   const handleDelete = async (vendorId: string) => {
     if (window.confirm("האם למחוק את הספק?")) {
       try {
@@ -53,6 +54,7 @@ export default function VendorsList({ vendors, setVendors }: VendorsListProps) {
       .some((field) => field?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  // תצוגת ממשק המשתמש
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">

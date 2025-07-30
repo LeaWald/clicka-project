@@ -142,7 +142,6 @@ const LoungePricingForm: React.FC<Props> = ({ initialData, onSuccess }) => {
           required
           min={0}
         />
-
         <NumberInputField
           name="memberDiscountRate"
           label="הנחה לחברים (%)"

@@ -70,7 +70,6 @@ export const ExpenseList = () => {
                 setPage((prev) => prev + 1);
             }
         });
-
         observer.observe(loaderRef.current);
         return () => observer.disconnect();
     }, [hasMore, isSearching]);

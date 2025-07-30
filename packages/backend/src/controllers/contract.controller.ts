@@ -144,6 +144,38 @@ export const deleteContractDocument = async (req: Request, res: Response) => {
   }
 };
 
+// עדכון חוזה עם מזהה מסמך
+export const updateContractDocument = async (req: Request, res: Response) => {
+  const { contractId } = req.params;
+    const { document } = req.body;
+  
+  console.log('updateContractDocument controller called with:', { contractId, document, body: req.body });
+  
+  try {
+    await serviceContract.updateContractWithDocument(contractId, document);
+    console.log('Contract updated successfully');
+    res.status(200).json({ message: 'Contract updated with document successfully' });
+  } catch (error) {
+    console.error('Error updating contract with document:', error);
+    res.status(500).json({ message: 'Error updating contract with document', error });
+  }
+};
+
+// יצירה או עדכון חוזה עם מסמך
+export const createOrUpdateContractWithDocument = async (req: Request, res: Response) => {
+  const { customerId, documentId } = req.body;
+  
+  console.log('createOrUpdateContractWithDocument called with:', { customerId, documentId });
+  
+  try {
+    await serviceContract.createOrUpdateContractWithDocument(customerId, documentId);
+    res.status(200).json({ message: 'Contract created/updated with document successfully' });
+  } catch (error) {
+    console.error('Error creating/updating contract with document:', error);
+    res.status(500).json({ message: 'Error creating/updating contract with document', error });
+  }
+};
+
 // חיפוש חוזים לפי טקסט
 export const searchContractsByText = async (req: Request, res: Response) => {
   try {

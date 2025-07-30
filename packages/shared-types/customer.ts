@@ -18,14 +18,15 @@ export enum ContractStatus {
   SIGNED = 'SIGNED',
   ACTIVE = 'ACTIVE',
   EXPIRED = 'EXPIRED',
-  TERMINATED = 'TERMINATED'
+  TERMINATED = 'TERMINATED',
+  RENEWED = 'RENEWED'
 }
 
 // Workspace type enum
 export enum WorkspaceType {
-  PRIVATE_ROOM1 = 'PRIVATE_ROOM',
-  PRIVATE_ROOM2 = 'PRIVATE_ROOM',
-  PRIVATE_ROOM3 = 'PRIVATE_ROOM',
+  PRIVATE_ROOM1 = 'PRIVATE_ROOM1',
+  PRIVATE_ROOM2 = 'PRIVATE_ROOM2',
+  PRIVATE_ROOM3 = 'PRIVATE_ROOM3',
   DESK_IN_ROOM = 'DESK_IN_ROOM',
   OPEN_SPACE = 'OPEN_SPACE',
   KLIKAH_CARD = 'KLIKAH_CARD',
@@ -89,7 +90,7 @@ export interface Contract {
   startDate?: DateISO;
   endDate?: DateISO;
   terms?: ContractTerms;
-  documents: FileReference[]; // כאן ישמרו כל טפסי החוזה 
+  documents: ID[]; // כאן ישמרו כל טפסי החוזה 
   signedBy?: string;
   witnessedBy?: string;
   createdAt: DateISO;
@@ -132,6 +133,7 @@ export interface Customer {
   contractDocuments?: FileReference[];
   paymentMethods?: CustomerPaymentMethod[];
   paymentMethodType: PaymentMethodType;
+  ip: string;
   periods?: CustomerPeriod[];
   createdAt: DateISO;
   updatedAt: DateISO;
@@ -161,6 +163,7 @@ export interface CreateCustomerRequest {
     creditCardHolderPhone?: string;
   };
   paymentMethodType: PaymentMethodType;
+  ip: string;
   contractDocuments?: FileReference[];
 }
 
@@ -253,4 +256,3 @@ export interface StatusChangeRequest {
   notes?: string;
   notifyCustomer: boolean;
 }
-

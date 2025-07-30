@@ -62,8 +62,10 @@ export const exchangeCodeAndFetchUser = async (code: string): Promise<LoginRespo
 
           throw new Error("User not found");
         }
-        await userService.updateGoogleIdUser(checkUser.id ?? userInfo.id, userInfo.id);
-
+        await userService.updateGoogleIdUser(
+          checkUser.id ?? userInfo.id,
+          userInfo.id,
+        );
       } catch (error: any) {
         throw error;
       }

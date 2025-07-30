@@ -154,7 +154,6 @@ const WorkspacePricingForm: React.FC<Props> = ({ workspaceType, initialData, onS
             <p className="text-red-500 text-sm">{methods.formState.errors.effectiveDate.message}</p>
           )}
         </div>
-
         <button
           type="submit"
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-semibold transition-colors duration-200"

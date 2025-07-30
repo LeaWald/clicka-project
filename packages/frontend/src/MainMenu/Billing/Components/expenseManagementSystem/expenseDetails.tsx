@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import type { Expense } from "shared-types";
-
 interface ExpenseDetailsProps {
   id: string;
   onClose: () => void;
@@ -11,12 +10,11 @@ function formatDate(dateStr?: string) {
  return new Date(dateStr).toLocaleDateString("he-IL");
 }
 export const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ id, onClose }) => {
-  // const { fetchExpenseDetails, updateExpenseStatus, fetchExpenseDocuments, deleteExpense } = useExpenseStore();
   const [expense, setExpense] = useState<Expense | null>(null);
   const [loading, setLoading] = useState(true);
  useEffect(() => {
     axios
-      .get(`http://localhost:3001/api/expenses/getExpenseById/${id}`)
+      .get(`${process.env.REACT_APP_API_URL}/expenses/getExpenseById/${id}`)
       .then((res) => setExpense(res.data))
       .finally(() => setLoading(false));
   }, [id]);
