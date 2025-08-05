@@ -71,7 +71,7 @@ export const UpdateBooking = () => {
     await getAllRooms();
     console.log("📦 rooms:", rooms);
     setRoomOptions(
-      rooms.map((r) => ({ label: r.name, value: r.name }))
+      rooms.map((r) => ({ label: r.name, value: r.id ? r.id: "" }))
     );
   };
   init();
@@ -99,12 +99,12 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
  // המרת נתוני טופס לאובייקט הזמנה
   const convertFormToBooking = (data: BookingUpdateData) => {
     const totalHours = calculateHours(data.date, data.startTime, data.endTime);
-    const roomName = roomOptions.find((room) => room.label === data.roomId)?.label || "";
-    console.log("👉 שם החדר:", roomName);
+    const selectedRoomName = roomOptions.find((room) => room.value === data.roomId)
+    console.log("👉 שם החדר:", selectedRoomName);
     const base = {
       id: booking.id,
-      roomId: data.roomId || booking.roomId,
-      roomName: roomName || booking.roomName ,
+      roomId: selectedRoomName?.value || booking.roomId,
+      roomName: selectedRoomName?.label || booking.roomName ,
       startTime:  `${data.date || getDateFromISO(booking.endTime)}T${data.startTime}`|| booking.startTime,
       endTime:`${data.date}T${data.endTime}`||booking.endTime,
       totalHours: totalHours || booking.totalHours,

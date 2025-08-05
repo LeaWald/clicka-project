@@ -3,7 +3,6 @@ import { BookingModel } from "../models/booking.model";
 import dotenv from 'dotenv';
 import { customerService } from './customer.service';
 import { getCurrentMeetingRoomPricing, getMeetingRoomPricingHistory } from './pricing.service';
-import { EmailTemplateService } from './emailTemplate.service';
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL || '';

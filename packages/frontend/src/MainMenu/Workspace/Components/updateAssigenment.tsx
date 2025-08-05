@@ -48,7 +48,7 @@ export const UpdateAssigenment = () => {
       });
       const didReset = useRef(false);
   const watch = methods.watch;
-  const reset = methods.reset;
+  // const reset = methods.reset;
   const watchedWorkspaceId = watch("workspaceId");
   const watchedAssignedDate = watch("assignedDate");
   const watchedUnassignedDate = watch("unassignedDate");
@@ -115,7 +115,7 @@ export const UpdateAssigenment = () => {
 
     const timeoutId = setTimeout(checkForConflicts, 500);
     return () => clearTimeout(timeoutId);
-  }, [watchedWorkspaceId, watchedAssignedDate, watchedUnassignedDate, watchedDaysOfWeek, checkConflicts,onchange]);
+  }, [watchedWorkspaceId, watchedAssignedDate, watchedUnassignedDate, watchedDaysOfWeek, checkConflicts]);
   const handleSubmit = async (data: SpaceAssignUpdateData) => {
     console.log(data)
     try {
@@ -211,7 +211,6 @@ console.log(assignment);
             className="w-full border rounded px-3 py-2"
           />
           <InputField
-            label="תאריך הקצאה"
             label="תאריך הקצאה"
             name="assignedDate"
             type="date"

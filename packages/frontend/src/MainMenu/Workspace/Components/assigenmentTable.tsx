@@ -81,7 +81,7 @@ useEffect(() => {
     getAssignments()
     setIsLoading(false);
   }
-
+// eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 //מחיקת הקצאה
   const handleDelete = async (ass: SpaceAssign) => {

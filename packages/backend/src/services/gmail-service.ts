@@ -222,7 +222,7 @@ export const sendEmailToConfrim = async (email: string | undefined, id: ID) => {
     {
       "name": customer.name,
       "link":
-        `${process.env.REACT_APP_API_URL_FE}/customers/confirm-email/${id}/${email}`,
+        `${process.env.REACT_APP_API_URL}/customers/confirm-email/${id}/${email}`,
     },
   );
   await sendEmail(

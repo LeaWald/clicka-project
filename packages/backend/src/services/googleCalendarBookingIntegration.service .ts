@@ -27,7 +27,7 @@ export const getGoogleCalendarEvents = async (calendarId: string, token: string)
         console.log(bookings, "bookings in the getGoogleCalendarEvents\n");
         
         // בחר את הסטטוס של ההזמנה הראשונה אם קיים
-        const status = bookings && bookings.length > 0 ? bookings[0].status : null;
+        const status = bookings && bookings.status ? bookings.status : null;
 
         console.log(status, "status in the getGoogleCalendarEvents\n");
 

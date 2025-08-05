@@ -172,19 +172,19 @@ ${currentDocumentTemplate.variables?.join(', ') || 'אין משתנים'}`;
    * יצירת תבנית חדשה על בסיס הנוכחית
    * מעביר לעמוד הוספה עם נתונים מועתקים
    */
-  const handleDuplicate = () => {
-    if (!currentDocumentTemplate) return;
-    const templateToDuplicate = {
-      ...currentDocumentTemplate,
-      id: undefined,
-          name: `- תבנית- עותק`,
+  // const handleDuplicate = () => {
+  //   if (!currentDocumentTemplate) return;
+  //   const templateToDuplicate = {
+  //     ...currentDocumentTemplate,
+  //     id: undefined,
+  //         name: `- תבנית- עותק`,
 
-      // name: `${currentDocumentTemplate.name || 'תבנית'} - עותק`,
-      isDefault: false
-    };   
-    setCurrentDocumentTemplate(templateToDuplicate);
-    navigate('/document-templates/add');
-  };
+  //     // name: `${currentDocumentTemplate.name || 'תבנית'} - עותק`,
+  //     isDefault: false
+  //   };   
+  //   setCurrentDocumentTemplate(templateToDuplicate);
+  //   navigate('/document-templates/add');
+  // };
 
   /**
    * חזרה לעמוד הראשי

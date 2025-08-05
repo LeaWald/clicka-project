@@ -142,7 +142,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       resolver: zodResolver(bookingSchema),
     });
 
-    const { createBookingInCalendar, createBooking, getCustomerByPhoneOrEmail} = useBookingStore();
+    const {bookings,createBooking, getCustomerByPhoneOrEmail} = useBookingStore();
     const {getAllRooms,rooms} = useRoomStore();
     const customers = useCustomerStore((s) => s.customers);
     const fetchCustomers = useCustomerStore((s) => s.fetchCustomers);
@@ -330,17 +330,15 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
         }
         //להכניס את נתוני הטופס ולהמירם לסוג של הדטה
         const bookingPayload = convertFormToBooking(data) as Booking;
-        const result = await createBooking(bookingPayload);
-
-          if(result){
-            navigate('/bookings')
-            methods.reset();
-            onSubmit?.();
-            navigate (-1);
-          }
+        console.log(bookingPayload)
+        await createBooking(bookingPayload);  
+        console.log(bookings)
+          // methods.reset()
+          navigate (-1);
+        
 
       } catch (err) {
-
+          console.log(""+ err)
       }
     };
 //הטופס הזמנת חדרים
@@ -421,7 +419,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
 </ul>
                 </div>
               )}  
-                <InputField name="startDate" label="תאריך התחלה" type="date" required />
+                <InputField name="startDate" label="תאריך" type="date" required />
                 <InputField name="startTime" label="שעת התחלה" type="time" required />
                 <InputField name="endTime" label="שעת סיום" type="time" required />
               <div className="form-actions">

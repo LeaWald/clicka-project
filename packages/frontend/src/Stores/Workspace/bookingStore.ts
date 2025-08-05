@@ -11,7 +11,7 @@ interface BookingState {
   // CRUD actions
   getAllBookings: () => Promise<void>;
   getBookingById: (id: string) => Promise<Booking | null>;
-  createBooking: (booking: Booking) => Promise<Booking | null>;
+  createBooking: (booking: Booking) => Promise<void>;
   createBookingInCalendar: (booking: Booking, calendarId: string) => Promise<Booking | null>;
   //|boolean
   updateBooking: (id: string, updated: Booking) => Promise<Booking | null>;
@@ -62,11 +62,9 @@ export const useBookingStore = create<BookingState>((set, get) => ({
         bookings: [...state.bookings, created],
         loading: false,
       }));
-      return created;
     } catch (error) {
       console.error('Error creating booking:', error);
       set({ error: 'שגיאה ביצירת הזמנה', loading: false });
-      return null;
     }
   },
  createBookingInCalendar: async (booking: Booking, calendarId: string) => {
