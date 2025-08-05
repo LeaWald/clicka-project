@@ -38,7 +38,6 @@ export const UpdateDocumentTemplate = ({
     const navigate = useNavigate();
     
     const {
-        currentDocumentTemplate,
         updateDocumentTemplate,
         getDocumentTemplateById,
         loading
@@ -74,7 +73,7 @@ export const UpdateDocumentTemplate = ({
              })();
              console.log("Loaded template:", templateToEdit);
            }
-    }, [id, documentTemplate, getDocumentTemplateById]);
+    }, [id, documentTemplate, getDocumentTemplateById,templateToEdit]);
 
     // מילוי הטופס עם נתוני התבנית הקיימת
     useEffect(() => {

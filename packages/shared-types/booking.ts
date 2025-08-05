@@ -40,7 +40,7 @@ export interface Room {
   capacity: number;
   features?: ID[];
   equipment?: string[];
-  hourlyRate: number;
+  hourlyRate: number ;
   discountedHourlyRate: number; // For 4+ hours
   googleCalendarId?: string;
   location?: string;

@@ -16,6 +16,7 @@ import "../Css/roomReservations.css";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import { Booking } from "shared-types";
 
 export enum BookingStatus {
   PENDING = "PENDING",
@@ -24,7 +25,6 @@ export enum BookingStatus {
   CANCELED = "CANCELED",
   COMPLETED = "COMPLETED",
 }
-
 export type FormFields = {
   customerStatus: "external" | "customer";
   phoneOrEmail?: string;
@@ -40,7 +40,6 @@ export type FormFields = {
 export type RoomReservationsRef = {
   fillFormWithExternalData: (data: Partial<FormFields>) => void;
 };
-
 export type RoomReservationsProps = {
   initialData?: Partial<FormFields>;
   onSubmit?: () => void;
@@ -73,13 +72,10 @@ const isTodayAndStartTimeInPast = (startDate: string, startTime: string) => {
 const isFullHourDifference = (startTime: string, endTime: string) => {
   const [startHour, startMinute] = startTime.split(":").map(Number);
   const [endHour, endMinute] = endTime.split(":").map(Number);
-
   const start = new Date();
   start.setHours(startHour, startMinute, 0, 0);
-
   const end = new Date();
   end.setHours(endHour, endMinute, 0, 0);
-
   const diffInMinutes = (end.getTime() - start.getTime()) / 1000 / 60;
   return diffInMinutes >= 60 && diffInMinutes % 60 === 0;
 };
@@ -135,8 +131,6 @@ const bookingSchema = z.object({
     message: "יש למלא את כל פרטי הלקוח לפי הסוג",
     path: ["customerId"],
   });
-
-
 export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservationsProps>(
   ({ initialData, onSubmit }, ref) => {
     const methods = useForm<FormFields>({
@@ -148,7 +142,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       resolver: zodResolver(bookingSchema),
     });
 
-    const { createBookingInCalendar, createBooking, getCustomerByPhoneOrEmail} = useBookingStore();
+    const {bookings,createBooking, getCustomerByPhoneOrEmail} = useBookingStore();
     const {getAllRooms,rooms} = useRoomStore();
     const customers = useCustomerStore((s) => s.customers);
     const fetchCustomers = useCustomerStore((s) => s.fetchCustomers);
@@ -273,9 +267,8 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       const name = data.name?.trim() || "";
       const startTime = `${data.startDate}T${data.startTime}`;
       const endTime = `${data.startDate}T${data.endTime}`;
-      const selectedRoom = roomOptions.find((room) => room.value === data.selectedRoomId);
-      const roomName = selectedRoom?.label ?? "Unknown";
-
+      const roomName = rooms.find((room) => room.id === data.selectedRoomId)?.name || "";
+      console.log(roomName);
       const totalMinutes = calculateDurationInMinutes(startTime, endTime);
       //האוביקט המלא של הבוקינג
       const base = {
@@ -293,7 +286,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
         notes: "",
         googleCalendarEventId: null,
         totalHours: totalMinutes,
-        chargeableHours: 0,
+        chargeableHours: data.customerStatus==="external"? totalMinutes:"",
         totalCharge: 0,
         isPaid: false,
         approvedBy: "",
@@ -317,18 +310,18 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
         externalUserPhone: data.phone ?? "",
       };
     };
-    useEffect(() => {
-       //eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [methods.formState.errors]);
+    // useEffect(() => {
+    //    //eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [methods.formState.errors]);
 
     const handleSubmit = async (data: FormFields) => {
 //שלא ישאר שדות ריקים
       try {
         if (data.customerStatus === "customer") {
-          if (!data.customerId) {
-            alert("יש לבחור לקוח מהרשימה או לפי מייל/טלפון");
-            return;
-          }
+          // if (!data.customerId) {
+          
+          //   return;
+          // }
         } else {
           if (!data.name || !data.phone || !data.email) {
             alert("נא למלא את כל פרטי הלקוח החיצוני");
@@ -336,30 +329,29 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
           }
         }
         //להכניס את נתוני הטופס ולהמירם לסוג של הדטה
-        const bookingPayload = convertFormToBooking(data);
-        const result = await createBooking(bookingPayload);
-        const resultCalendar = await createBookingInCalendar(bookingPayload, "primary");
-//הוספת ההזמנה גם לגוגל קלנדר
-          if(result){
-            methods.reset();
-            onSubmit?.();
-            navigate (-1);
-          }
-          if (resultCalendar) {
-        }
-      } catch (err) {
+        const bookingPayload = convertFormToBooking(data) as Booking;
+        console.log(bookingPayload)
+        await createBooking(bookingPayload);  
+        console.log(bookings)
+          // methods.reset()
+          navigate (-1);
+        
 
+      } catch (err) {
+          console.log(""+ err)
       }
     };
 //הטופס הזמנת חדרים
     return (
-      <div className="form-page">
+      <div className="flex items-center justify-center">
+      {/* <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"></div> */}
+      {/* <div className="form-page"> */}
         <div className="form-wrapper">
           <h1 className="form-title">הזמנות חדרים</h1>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleSubmit)}>
               <fieldset>
-                <legend>סטטוס לקוח</legend>
+                <label>סטטוס לקוח:  </label>
                 <label>
                   <input
                     type="radio"
@@ -367,21 +359,18 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
                     {...methods.register("customerStatus")}
                     defaultChecked
                   />
-                  לקוח קיים
+                  לקוח קיים       
                 </label>
-                <br></br>
-                <br></br>
+             
                 <label>
                   <input
                     type="radio"
                     value="external"
                     {...methods.register("customerStatus")}
                   />
-                  לקוח חיצוני
+                  לקוח חיצוני  
                 </label>
               </fieldset>
-
-
               {status === "customer" ? (
                 <>
                   <div className="form-field">
@@ -409,7 +398,6 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
                   </div>
                 </>
               )}
-
               <div className="form-field">
                 <SelectField name="selectedRoomId" label="בחירת חדר" options={rooms.map((r) => ({
                         label: `${r.name}`,
@@ -430,24 +418,17 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     )}
 </ul>
                 </div>
-              )}
-              <div className="form-field">
-                <InputField name="startDate" label="תאריך התחלה" type="date" required />
-              </div>
-              <div className="form-field">
+              )}  
+                <InputField name="startDate" label="תאריך" type="date" required />
                 <InputField name="startTime" label="שעת התחלה" type="time" required />
-              </div>
-              <div className="form-field">
                 <InputField name="endTime" label="שעת סיום" type="time" required />
-              </div>
-
               <div className="form-actions">
                 <Button type="submit">שלח</Button>
                       <Button
-        className="mt-4 w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+        className="form-actions"
         onClick={() => {navigate(-1);}}
       >
-        סגור
+        בטל
       </Button>
               </div>
             </form>
@@ -457,5 +438,4 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     );
   }
 );
-
 RoomReservations.displayName = "RoomReservations";

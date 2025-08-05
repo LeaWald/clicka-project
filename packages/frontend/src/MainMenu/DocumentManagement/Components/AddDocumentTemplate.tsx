@@ -468,7 +468,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDocumentTemplateStore } from '../../../Stores/DocumentManagement/DocumentTemplateStore';
-import { FaSave, FaArrowLeft, FaPlus, FaMinus, FaEye } from 'react-icons/fa';
 import { DocumentType } from 'shared-types'; // או מהנתיב הנכון
 
 interface FormData {
@@ -482,7 +481,7 @@ interface FormData {
 }
 const AddDocumentTemplate: React.FC = () => {
   const navigate = useNavigate();
-  const { createDocumentTemplate, loading, error, clearError } = useDocumentTemplateStore();
+  const { createDocumentTemplate, error, clearError } = useDocumentTemplateStore();
   const currentDocumentTemplate = useDocumentTemplateStore(state => state.currentDocumentTemplate);
   const [formData, setFormData] = useState<FormData>(  currentDocumentTemplate
     ? {
@@ -507,7 +506,7 @@ const AddDocumentTemplate: React.FC = () => {
 
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [newVariable, setNewVariable] = useState('');
-  const [showPreview, setShowPreview] = useState(false);
+  const [showPreview] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;

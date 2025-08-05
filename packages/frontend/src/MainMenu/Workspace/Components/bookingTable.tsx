@@ -16,7 +16,7 @@ export const BookingTable = () => {
    const [isLoading, setIsLoading] = useState(false);
 const allBookingFields: (keyof Booking)[] = [
   'roomName', 'customerName', 'externalUserName', 'externalUserEmail', 'externalUserPhone',
-  'startTime', 'endTime', 'status', 'totalHours',
+  'startTime', 'endTime', 'status', 'totalHours','totalCharge','chargeableHours'
 ];
 const navigate = useNavigate();
 // תרגום לתצוגה בלבד
@@ -30,6 +30,8 @@ const fieldLabels: Partial<Record<keyof Booking, string>> = {
   endTime: 'שעת סיום',
   status: 'סטטוס',
   totalHours: 'סך שעות',
+  totalCharge:'סה"כ חיובים',
+  chargeableHours:'שעות לחיוב',
   approvedBy: 'מאושר על ידי',
   id: 'מזהה'
 };
@@ -64,20 +66,17 @@ const columns: TableColumn<Booking>[] = [
 ];
 useEffect(() => {
   const fetchData = async () => {
-    if (bookings.length === 0) {
-      console.log("📢 calling getAllBookings");
+ if (bookings.length === 0) {
+    console.log("calling getAllBookings");
       setIsLoading(true);  
-      await getAllBookings(); 
+      await getAllBookings();
+       console.log(" Bookings"+bookings);
       setIsLoading(false);
-    }
+      }
   };
   fetchData();
-}, [getAllBookings,setIsLoading,bookings.length]);
-// const validBookings = bookings.filter(booking => 
-//   booking && 
-//   booking.id && 
-//   (booking.roomName || booking.customerName || booking.externalUserName)
-// );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 const validBookings = bookings.filter(booking => 
   booking?.id &&
   (booking.roomName?.trim() || booking.customerName?.trim() || booking.externalUserName?.trim())
@@ -98,7 +97,6 @@ const validBookings = bookings.filter(booking =>
       try {
         await deleteBooking(booking.id!);
         showAlert('נמחק בהצלחה!','ההזמנה נמחקה מהמערכת','success');
-        getAllBookings();
       } 
       catch (error) {
         console.error('Error deleting booking:', error);
@@ -138,13 +136,11 @@ const validBookings = bookings.filter(booking =>
     navigate(`/updateBooking`, { state: { booking } });
     console.log('Update booking:', booking);
   };
-console.log("bookings length:", bookings.length);
-console.log("validBookings length:", validBookings.length);
+
   
-   return <div>{/* //טבלת הזמנות */}
-{/* {(!bookings || bookings.length === 0) && <h1 className="text-center text-gray-500">אין הזמנות זמינות</h1>} */}
+   return <div>
     <h1  className="text-3xl font-bold text-center text-blue-600 my-4">הזמנות</h1>
-    {isLoading && <h1>טוען...</h1>}
+    {isLoading && <h2>טוען...</h2>}
    
    {!isLoading && <>
 <Button onClick={()=>navigate('/meetingRooms')}>להוספת הזמנה חדשה</Button>

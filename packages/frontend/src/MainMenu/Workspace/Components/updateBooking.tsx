@@ -24,7 +24,7 @@ const bookingUpdateSchema = z.object({
   externalUserName: z.string().optional(),
   externalUserEmail: z.string().email("אימייל לא תקין").optional().or(z.literal("")),
   externalUserPhone: z.string().optional(),
-  roomId: z.string(),
+  roomId: z.string().optional(),
   date: z.string().min(1, "תאריך נדרש"),
   startTime: z.string()
     .min(1, "שעת התחלה נדרשת")
@@ -32,7 +32,7 @@ const bookingUpdateSchema = z.object({
   endTime: z.string()
     .min(1, "שעת סיום נדרשת")
     .refine( isQuarter , {message:"ניתן לבחור רק רבעי שעות (00, 15, 30, 45 דקות)"}),
-  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]),
+  status: z.enum(["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"]).optional(),
   notes: z.string().optional(),
 }).refine((data) => {
   if (data.startTime && data.endTime) {
@@ -53,7 +53,7 @@ const bookingUpdateSchema = z.object({
 
 
 export const UpdateBooking = () => { 
-  // const [formKey, setFormKey] = useState(0);
+  const [formKey, setFormKey] = useState(0);
   const location = useLocation();
   const booking = location.state?.booking;
   const navigate = useNavigate();
@@ -61,28 +61,27 @@ export const UpdateBooking = () => {
     booking?.customerId ? 'customer' : 'external');
   const [roomOptions, setRoomOptions] = useState<{ label: string; value: string }[]>([]);
   const { updateBooking } = useBookingStore();
-  const {rooms,getAllRooms}  = useRoomStore()
-  const customers = useCustomerStore((s) => s.customers);
-  const fetchCustomers = useCustomerStore((s) => s.fetchCustomers);
+  const {rooms,getAllRooms } = useRoomStore();
+  const {customers,fetchCustomers} = useCustomerStore();
+  
   // טעינת נתונים ראשונית
   useEffect(() => {
-    fetchCustomers();
-    getAllRooms()
-      setRoomOptions(rooms.map((r)=>(
-        {
-          label:r.name,
-          value:r.name
-        }
-  
-      )))
-      },[fetchCustomers,getAllRooms,setRoomOptions,rooms]);
-  
-
-// useEffect(() => {
-//     if (booking  && roomOptions.length > 0) {
-//       setFormKey(prev => prev + 1); // 🎯 זה יאלץ רה-רנדר מלא
-//     }
-//   }, [booking, roomOptions]);
+  const init = async () => {
+    await fetchCustomers();
+    await getAllRooms();
+    console.log("📦 rooms:", rooms);
+    setRoomOptions(
+      rooms.map((r) => ({ label: r.name, value: r.id ? r.id: "" }))
+    );
+  };
+  init();
+         // eslint-disable-next-line react-hooks/exhaustive-deps
+       },[]);
+useEffect(() => {
+    if (booking && customers.length > 0 && roomOptions.length > 0) {
+      setFormKey(prev => prev + 1); // 🎯 זה יאלץ רה-רנדר מלא
+    }
+  }, [booking, customers, roomOptions]);
 
 // חילוץ שעה בפורמט HH:MM
 const getTimeFromISO = (isoString: string): string => {
@@ -97,16 +96,15 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
     console.log("🕒 שעות מחושבות:",hours );
      return hours;
 };
-  // המרת נתוני טופס לאובייקט הזמנה
+ // המרת נתוני טופס לאובייקט הזמנה
   const convertFormToBooking = (data: BookingUpdateData) => {
     const totalHours = calculateHours(data.date, data.startTime, data.endTime);
-    const roomName = roomOptions.find((room) => room.value === data.roomId)?.label || "";
-    console.log("👉 שם החדר:", roomName);
-    
+    const selectedRoomName = roomOptions.find((room) => room.value === data.roomId)
+    console.log("👉 שם החדר:", selectedRoomName);
     const base = {
       id: booking.id,
-      roomId: data.roomId || booking.roomId,
-      roomName: roomName || booking.roomName ,
+      roomId: selectedRoomName?.value || booking.roomId,
+      roomName: selectedRoomName?.label || booking.roomName ,
       startTime:  `${data.date || getDateFromISO(booking.endTime)}T${data.startTime}`|| booking.startTime,
       endTime:`${data.date}T${data.endTime}`||booking.endTime,
       totalHours: totalHours || booking.totalHours,
@@ -114,7 +112,6 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
       notes: data.notes || booking.notes,
       updatedAt: new Date().toISOString(),
     };
-
     if (customerStatus === "customer") {
       return {
         ...base,
@@ -135,12 +132,10 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
       };
     }
   };
-
   const handleSubmit = async (data: BookingUpdateData) => {
-    console.log("👉 נתוני הטופס בפועל:", data.customerName);
     try {
       const bookingPayload = convertFormToBooking(data) as Booking;
-      console.log("🚀 לפני שליחת הטופס: לשרת", bookingPayload);
+          console.log("🚀 לפני שליחת הטופס: לשרת", bookingPayload);
       const result = await updateBooking(booking.id, bookingPayload);
       
       if (result) {
@@ -160,17 +155,18 @@ const calculateHours = (date: string, startTime: string, endTime: string): numbe
   const handleCancel = () => {
     navigate("/bookings");
   };
-const getDateFromISO = (isoString: string): string => {
+  const getDateFromISO = (isoString: string): string => {
   if (!isoString) return '';
   return isoString.split('T')[0];
 };
+
   return (
 <div className="flex items-center justify-center">
       <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <Form<BookingUpdateData>
           schema={bookingUpdateSchema}
           onSubmit={handleSubmit}
-          // key={formKey}
+          key={formKey}
           label="עדכון פרטי הזמנה">
               {/* בחירת סוג לקוח */}
               <div className="mb-4">
@@ -202,7 +198,7 @@ const getDateFromISO = (isoString: string): string => {
                     label="בחר לקוח מהרשימה"
                     name="customerId"
                     options={customers.map((c) => ({
-                      label: `${c.name}`,
+                     label: `${c.name} - ${c.phone}`,
                       value: c.id || "",
                     }))}
                     className="w-full border rounded px-3 py-2"
@@ -264,7 +260,7 @@ const getDateFromISO = (isoString: string): string => {
                   label="שעת סיום"
                   name="endTime"
                   type="time"
-                  defaultValue={getTimeFromISO(booking.endTime) }
+                  defaultValue={ getTimeFromISO(booking.endTime) }
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
@@ -277,25 +273,24 @@ const getDateFromISO = (isoString: string): string => {
                   className="w-full border rounded px-3 py-2"
                 />
               </div>
-              {/* <div>
+              <div>
                 <InputField
                   label="הערות"
                   name="notes"
                   defaultValue={booking.notes || ""}
                   className="w-full border rounded px-3 py-2"
                 />
-              </div> */}
+              </div>
             
             <div>
               <Button
-                type="button"
+                type="button" 
                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                onClick={handleCancel}
-              > בטל</Button>
+onClick={handleCancel} 
+         > בטל</Button>
               <Button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600" 
-                >שמור</Button>
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >שמור</Button>
             </div>
         </Form>
       </div>
