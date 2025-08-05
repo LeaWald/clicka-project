@@ -4,6 +4,7 @@ import { BookingModel } from "../models/booking.model";
 import dotenv from 'dotenv';
 import { customerService } from './customer.service';
 import { getCurrentMeetingRoomPricing, getMeetingRoomPricingHistory } from './pricing.service';
+import { EmailTemplateService } from './emailTemplate.service';
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -11,78 +12,11 @@ const supabaseKey = process.env.SUPABASE_KEY || '';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 
-
 function logUserActivity(userId: string, action: string) {
   console.log(`[Activity Log] ${userId}: ${action}`);
 }
 
 export class BookingService {
-
-
-  async createBooking(book: BookingModel): Promise<BookingModel | null> {
-    try {
-      // // אם יש לקוח קיים - ננסה לשלוף את שמו
-      // if (book.customerId) {
-      //   console.log('🔍 Trying to fetch customer name by ID:', book.customerId);
-
-      //   const { data: customer, error: customerError } = await supabase
-      //     .from('customers')
-      //     .select('name')
-      //     .eq('id', book.customerId)
-      //     .single();
-
-      //   if (customerError || !customer) {
-      //     console.warn('⚠️ לא נמצא שם לקוח, נמשיך בלי זה');
-      //   } else {
-      //     console.log('✅ Customer found:', customer.name);
-      //     book.customerName = customer.name;
-      //   }
-      // }
-
-      console.log('📦 Inserting booking:', book.toDatabaseFormat());
-      console.log('📦 """""""""""""""""""""""""""""""""""""""""""""":', book.toDatabaseFormat());
-
-      const { data, error } = await supabase
-        .from('booking')
-        .insert([book.toDatabaseFormat()])
-        .select()
-        .single();
-
-      if (error) {
-        console.log('❌ Supabase Insert Error:', error);
-        throw new Error(`Failed to create booking: ${error.message}`);
-      }
-
-      const createdBook = BookingModel.fromDatabaseFormat(data);
-      logUserActivity(book.id ?? book.roomName, 'book created');
-      return createdBook;
-    } catch (err) {
-      console.error('❌ Error in createBooking:', err);
-      return null;
-    }
-  }
-
-
-  async getAllBooking() {
-    try {
-      const { data, error } = await supabase
-        .from('booking')
-        .select('*');
-
-
-
-      if (error) {
-        console.error('Supabase error:', error.message);
-        return null;
-      }
-      const booking = BookingModel.fromDatabaseFormatArray(data)
-      console.log(booking);
-      return booking;
-    } catch (err) {
-      console.error('Unexpected error:', err);
-      return null;
-    }
-  }
   //פונקציה לחישוב סכום חיובים עבור הזמנת חדר ישיבות
   //אם הלקוח הוא חיצוני תשלום רגיל
   //אם  הלקוח הוא קיים:
@@ -137,6 +71,64 @@ export class BookingService {
       totalCharge
     }
   }
+  async createBooking(book: BookingModel): Promise<BookingModel | null> {
+    try {
+      let chargeableHour: number = 0 ;
+let totalCharge: number = 0;
+
+if (book.externalUserName) {
+  const result = await BookingService.calculateExtrenalCharges(book.totalHours);
+  if (result) {
+    chargeableHour = result.chargeableHours;
+    totalCharge = result.totalCharge;
+  }
+} else if (book.customerId) {
+  const result = await BookingService.calculateCustomerCharges(book.customerId, book.totalHours);
+  if (result) {
+    chargeableHour = result.chargeableHours;
+    totalCharge = result.totalCharge;
+  }
+}
+console.log("chargeableHour , totalCharge"+chargeableHour , totalCharge);
+ 
+book.chargeableHours = chargeableHour
+book.totalCharge = totalCharge
+      console.log('📦 Inserting booking:', book);
+      const { data, error } = await supabase
+        .from('booking')
+        .insert([book.toDatabaseFormat()])
+        .select()
+        .single();
+      if (error) {
+        console.log('❌ Supabase Insert Error:', error);
+        throw new Error(`Failed to create booking: ${error.message}`);
+      }
+
+      const createdBook = BookingModel.fromDatabaseFormat(data);
+      logUserActivity(book.id ?? book.roomName, 'book created');
+      return createdBook;
+    } catch (err) {
+      console.error('❌ Error in createBooking:', err);
+      return null;
+    }
+  }
+  async getAllBooking() {
+    try {
+      const { data, error } = await supabase
+        .from('booking')
+        .select('*');
+      if (error) {
+        console.error('Supabase error:', error.message);
+        return null;
+      }
+      const booking = BookingModel.fromDatabaseFormatArray(data)
+      return booking;
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      return null;
+    }
+  }
+  
   static async updateBooking(id: string, updatedData: BookingModel): Promise<BookingModel | null> {
     //אם התקבל לקוח יש לו מחיר מיוחד ואם זה משתמש חיצוני המחיר שלו הוא רגיל
   let chargeableHours: number ;
@@ -230,10 +222,10 @@ if (updatedData.externalUserName) {
     // logUserActivity(feature.id? feature.id:feature.description, 'User fetched by ID');
     // מחזיר את המשתמש שנמצא
     return booking;
-  }
- 
-   //אישור הזמנה 
-   async bookingApproval(id: string): Promise<BookingModel | null> {
+  } 
+  //אישור הזמנה 
+  async bookingApproval(id: string): Promise<BookingModel | null> {
+
     const { data, error } = await supabase
       .from('booking')
       .update({ 'approved_by': "", 'status': "APPROVED", 'approved_at': new Date() })
@@ -244,7 +236,41 @@ if (updatedData.externalUserName) {
       console.error('Error updating booking:', error);
       return null;
     }
+//  const sendCustomerEmail = async () => {
+ 
+//     const emailService = new EmailTemplateService()
+//       const template =
+//         await emailService.getTemplateByName("");
+//       if (!template) {
+//         console.warn("Customer email template not found");
+//         return;
+//       }
+      //const renderedHtml = await emailService.renderTemplate(
+        //template.bodyHtml,
+//         {
+//           שם:data.customerId,
+//            שם חדר ישיבות:data.roo,
+//             שעת התחלה,
+//  שעת סיום
+        
+//         }
+    //  );
+    //  console.log("HTML before sending:\n", renderedHtml);
+      // return sendEmail(
+      //   "me",
+      //   {
+      //     to: [customer.email ?? ""],
+      //     subject:  encodeSubject(template.subject),
+      //     body: renderedHtml,
+      //     isHtml: true,
+      //   },
+      //   token
+      // );
+    
+  
+  
     const booking = BookingModel.fromDatabaseFormat(data);
     return booking;
   }
+  
 }

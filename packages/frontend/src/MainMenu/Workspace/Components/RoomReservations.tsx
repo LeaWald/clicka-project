@@ -16,6 +16,7 @@ import "../Css/roomReservations.css";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "react-router-dom";
+import { Booking } from "shared-types";
 
 export enum BookingStatus {
   PENDING = "PENDING",
@@ -266,9 +267,8 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
       const name = data.name?.trim() || "";
       const startTime = `${data.startDate}T${data.startTime}`;
       const endTime = `${data.startDate}T${data.endTime}`;
-      const selectedRoom = roomOptions.find((room) => room.value === data.selectedRoomId);
-      const roomName = selectedRoom?.label ?? "Unknown";
-
+      const roomName = rooms.find((room) => room.id === data.selectedRoomId)?.name || "";
+      console.log(roomName);
       const totalMinutes = calculateDurationInMinutes(startTime, endTime);
       //האוביקט המלא של הבוקינג
       const base = {
@@ -286,7 +286,7 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
         notes: "",
         googleCalendarEventId: null,
         totalHours: totalMinutes,
-        chargeableHours: 0,
+        chargeableHours: data.customerStatus==="external"? totalMinutes:"",
         totalCharge: 0,
         isPaid: false,
         approvedBy: "",
@@ -310,18 +310,18 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
         externalUserPhone: data.phone ?? "",
       };
     };
-    useEffect(() => {
-       //eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [methods.formState.errors]);
+    // useEffect(() => {
+    //    //eslint-disable-next-line react-hooks/exhaustive-deps
+    // }, [methods.formState.errors]);
 
     const handleSubmit = async (data: FormFields) => {
 //שלא ישאר שדות ריקים
       try {
         if (data.customerStatus === "customer") {
-          if (!data.customerId) {
-            alert("יש לבחור לקוח מהרשימה או לפי מייל/טלפון");
-            return;
-          }
+          // if (!data.customerId) {
+          
+          //   return;
+          // }
         } else {
           if (!data.name || !data.phone || !data.email) {
             alert("נא למלא את כל פרטי הלקוח החיצוני");
@@ -329,28 +329,29 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
           }
         }
         //להכניס את נתוני הטופס ולהמירם לסוג של הדטה
-        const bookingPayload = convertFormToBooking(data);
+        const bookingPayload = convertFormToBooking(data) as Booking;
         const result = await createBooking(bookingPayload);
-        const resultCalendar = await createBookingInCalendar(bookingPayload, "primary");
-//הוספת ההזמנה גם לגוגל קלנדר
+
           if(result){
+            navigate('/bookings')
             methods.reset();
             onSubmit?.();
           }
-          if (resultCalendar) {
-        }
+
       } catch (err) {
       }
     };
 //הטופס הזמנת חדרים
     return (
-      <div className="form-page">
+      <div className="flex items-center justify-center">
+      {/* <div className="bg-white p-6 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"></div> */}
+      {/* <div className="form-page"> */}
         <div className="form-wrapper">
           <h1 className="form-title">הזמנות חדרים</h1>
           <FormProvider {...methods}>
             <form onSubmit={methods.handleSubmit(handleSubmit)}>
               <fieldset>
-                <legend>סטטוס לקוח</legend>
+                <label>סטטוס לקוח:  </label>
                 <label>
                   <input
                     type="radio"
@@ -358,17 +359,16 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
                     {...methods.register("customerStatus")}
                     defaultChecked
                   />
-                  לקוח קיים
+                  לקוח קיים       
                 </label>
-                <br></br>
-                <br></br>
+             
                 <label>
                   <input
                     type="radio"
                     value="external"
                     {...methods.register("customerStatus")}
                   />
-                  לקוח חיצוני
+                  לקוח חיצוני  
                 </label>
               </fieldset>
               {status === "customer" ? (
@@ -418,23 +418,17 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
     )}
 </ul>
                 </div>
-              )}
-              <div className="form-field">
+              )}  
                 <InputField name="startDate" label="תאריך התחלה" type="date" required />
-              </div>
-              <div className="form-field">
                 <InputField name="startTime" label="שעת התחלה" type="time" required />
-              </div>
-              <div className="form-field">
                 <InputField name="endTime" label="שעת סיום" type="time" required />
-              </div>
               <div className="form-actions">
                 <Button type="submit">שלח</Button>
                       <Button
-        className="mt-4 w-full bg-gray-600 text-white py-2 px-4 rounded hover:bg-gray-700"
+        className="form-actions"
         onClick={() => {navigate(-1);}}
       >
-        סגור
+        בטל
       </Button>
               </div>
             </form>

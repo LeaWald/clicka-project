@@ -196,8 +196,8 @@ export function RoomManager() {
                   <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>סוג חדר</th>
                   <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>סטטוס</th>
                   <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>קיבולת</th>
-                  <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מחיר לשעה</th>
-                  <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מחיר מוזל</th>
+                  {/* <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מחיר לשעה</th> */}
+                  {/* <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מחיר מוזל</th> */}
                   <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>ציוד</th>
                   {/* <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מאפיינים</th> */}
                   <th style={{ padding: 12, borderBottom: "1px solid #ddd" }}>מינימום זמן הזמנה (בדקות)</th>
@@ -225,8 +225,8 @@ export function RoomManager() {
                       <td style={{ padding: 10 }}>{room.type}</td>
                       <td style={{ padding: 10 }}>{room.status}</td>
                       <td style={{ padding: 10 }}>{room.capacity}</td>
-                      <td style={{ padding: 10 }}>{room.hourlyRate} ש"ח</td>
-                      <td style={{ padding: 10 }}>{room.discountedHourlyRate} ש"ח</td>
+                      {/* <td style={{ padding: 10 }}>{room.hourlyRate} ש"ח</td> */}
+                      {/* <td style={{ padding: 10 }}>{room.discountedHourlyRate} ש"ח</td> */}
                       <td style={{ padding: 10 }}>
                         {(room.equipment ?? []).join(", ")}
                       </td>
@@ -349,7 +349,7 @@ export function RoomManager() {
               helperText={errors.capacity?.message}
             />
 
-            <TextField
+            {/* <TextField
               label="מחיר לשעה"
               fullWidth margin="normal" type="number" inputProps={{ min: 0 }}
               {...methods.register("hourlyRate", {
@@ -359,9 +359,9 @@ export function RoomManager() {
               })}
               error={!!errors.hourlyRate}
               helperText={errors.hourlyRate?.message}
-            />
+            /> */}
 
-            <TextField
+            {/* <TextField
               label="מחיר מוזל"
               fullWidth margin="normal" type="number" inputProps={{ min: 0 }}
               {...methods.register("discountedHourlyRate", {
@@ -372,8 +372,7 @@ export function RoomManager() {
               })}
               error={!!errors.discountedHourlyRate}
               helperText={errors.discountedHourlyRate?.message}
-            />
-
+            /> */}
             <TextField
               label="ציוד (מופרד בפסיקים)"
               fullWidth margin="normal"
@@ -507,7 +506,6 @@ export function RoomManager() {
     לא
   </label>
 </Box>
-
 
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
              

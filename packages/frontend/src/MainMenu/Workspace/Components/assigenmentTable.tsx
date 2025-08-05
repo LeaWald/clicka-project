@@ -6,11 +6,15 @@ import { Button } from "../../../Common/Components/BaseComponents/Button"
 import { useAssignmentStore } from "../../../Stores/Workspace/assigmentStore"
 import { SpaceAssign } from "shared-types/spaceAssignment"
 import Swal from "sweetalert2"
+import { useCustomerStore } from "../../../Stores/LeadAndCustomer/customerStore"
+import { useWorkSpaceStore } from "../../../Stores/Workspace/workspaceStore"
 // import { useAuthStore } from "../../../Stores/CoreAndIntegration/useAuthStore"
 // const { user } = useAuthStore()
 // const userRole = user?.role;
 export const AssigmentTable = () => {
   const { assignments, deleteAssignment,getAssignments } = useAssignmentStore();
+  const { customers,fetchCustomers } = useCustomerStore();
+  const { workSpaces,getAllWorkspace } = useWorkSpaceStore();
    const [isLoading, setIsLoading] = useState(false);
 const allAssignmentFields: (keyof SpaceAssign)[] = [
   'workspaceId', 'customerId', 'assignedDate', 'unassignedDate', 'status', 'assignedBy'
@@ -29,19 +33,56 @@ const fieldLabels: Partial<Record<keyof SpaceAssign, string>> = {
 // const getFieldLabel = (field: keyof SpaceAssign): string => {
 //   return fieldLabels[field] || field;
 // };
+// const columns: TableColumn<SpaceAssign>[] = [
+//   ...allAssignmentFields.map(field => ({
+//      header: fieldLabels[field] || field,
+//     accessor: field
+//   })),
+// ];
 const columns: TableColumn<SpaceAssign>[] = [
-  ...allAssignmentFields.map(field => ({
-     header: fieldLabels[field] || field,
-    accessor: field
-  })),
+  {
+    header: "מרחב עבודה",
+    accessor: "workspaceId",
+    render: (value) => {
+      const space = workSpaces.find(ws => ws.id === value);
+      return space?.name || "—";
+    }
+  },
+  {
+    header: "לקוח",
+    accessor: "customerId",
+    render: (value) => {
+      const customer = customers.find(c => c.id === value);
+      return customer?.name || "—";
+    }
+  },
+  {
+    header: "תאריך התחלה",
+    accessor: "assignedDate"
+  },
+  {
+    header: "תאריך סיום",
+    accessor: "unassignedDate"
+  },
+  {
+    header: "סטטוס",
+    accessor: "status"
+  },
+  {
+    header: "שובץ ע\"י",
+    accessor: "assignedBy"
+  }
 ];
 useEffect(() => {
   if (assignments.length === 0) {
+    fetchCustomers()
+    getAllWorkspace()
     setIsLoading(true);
     getAssignments()
     setIsLoading(false);
   }
-}, [setIsLoading,getAssignments,assignments.length]);
+
+}, []);
 //מחיקת הקצאה
   const handleDelete = async (ass: SpaceAssign) => {
     const result = await Swal.fire({
