@@ -1,6 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { RoomModel } from "../models/room.model";
-import { SpaceStatus, type DateRangeFilter, type ID, type OccupancyReportResponse, type Space } from "shared-types";
 import dotenv from 'dotenv';
 import { SpaceAssignmentModel } from '../models/spaceAssignment.model';
 dotenv.config();
@@ -149,78 +147,90 @@ export class SpaceAssignmentService {
 
   // בדיקת קונפליקטים
   async checkConflicts(
-    workspaceId: string,
-    assignedDate: string,
-    unassignedDate?: string,
-    excludeId?: string,
-    daysOfWeek?: number[]
-  ): Promise<SpaceAssignmentModel[]> {
+  workspaceId: string,
+  assignedDate: string,
+  unassignedDate?: string,
+  excludeId?: string,
+  daysOfWeek?: number[]
+): Promise<SpaceAssignmentModel[]> {
+  try {
+    console.log('Checking conflicts in DB for:', {
+      workspaceId, assignedDate, unassignedDate, excludeId
+    });
 
-    try {
-      console.log('Checking conflicts in DB for:', { workspaceId, assignedDate, unassignedDate, excludeId });
+    let query = supabase
+      .from('space_assignment')
+      .select('*')
+      .eq('workspace_id', workspaceId)
+      .in('status', ['ACTIVE']);
 
-      let query = supabase
-        .from('space_assignment')
-        .select('*')
-        .eq('workspace_id', workspaceId)
-        .in('status', ['ACTIVE']); // לא כולל ENDED
-      // אם יש excludeId (למקרה של עדכון), לא לכלול אותו
-      if (excludeId) {
-        query = query.neq('id', excludeId);
-      }
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Supabase error in checkConflicts:', error);
-        throw new Error(`Failed to check conflicts: ${error.message}`);
-      }
-
-      if (!data || data.length === 0) {
-        console.log('No existing assignments found');
-        return [];
-      }
-
-      // המרה לאובייקטים
-      const existingAssignments = data.map(item => SpaceAssignmentModel.fromDatabaseFormat(item));
-      console.log('Found existing assignments:', existingAssignments.length);
-
-      // בדיקת חפיפות
-      const conflicts = existingAssignments.filter(existing => {
-        const existingStart = new Date(existing.assignedDate);
-        const existingEnd = existing.unassignedDate ? new Date(existing.unassignedDate) : null;
-        const newStart = new Date(assignedDate);
-        const newEnd = unassignedDate ? new Date(unassignedDate) : null;
-        // בדיקת חפיפת ימים בשבוע
-        if (daysOfWeek && existing.daysOfWeek) {
-          const overlapDays = daysOfWeek.some(day => existing.daysOfWeek!.includes(day));
-          if (!overlapDays) return false; // אין חפיפה בימים, אין קונפליקט
-        }
-
-        // אם ההקצאה הקיימת אין לה תאריך סיום - היא פעילה לתמיד
-        if (!existingEnd) {
-          // אם ההקצאה החדשה מתחילה אחרי הקיימת - יש קונפליקט
-          return newStart >= existingStart;
-        }
-
-        // אם להקצאה החדשה אין תאריך סיום
-        if (!newEnd) {
-          // אם היא מתחילה לפני שהקיימת מסתיימת - יש קונפליקט
-          return newStart <= existingEnd;
-        }
-
-        // בדיקת חפיפה רגילה
-        return (newStart <= existingEnd && newEnd >= existingStart);
-      });
-
-      console.log('Found conflicts:', conflicts.length);
-      return conflicts;
-
-    } catch (error) {
-      console.error('Error in checkConflicts:', error);
-      throw error;
+    if (excludeId) {
+      query = query.neq('id', excludeId);
     }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('Supabase error in checkConflicts:', error);
+      throw new Error(`Failed to check conflicts: ${error.message}`);
+    }
+
+    if (!data || data.length === 0) {
+      console.log('No existing assignments found');
+      return [];
+    }
+
+    const existingAssignments = data.map(item =>
+      SpaceAssignmentModel.fromDatabaseFormat(item)
+    );
+    console.log('Found existing assignments:', existingAssignments.length);
+
+    const conflicts = existingAssignments.filter(existing => {
+      const existingStart = new Date(existing.assignedDate);
+      const existingEnd = existing.unassignedDate
+        ? new Date(existing.unassignedDate)
+        : null;
+      const newStart = new Date(assignedDate);
+      const newEnd = unassignedDate ? new Date(unassignedDate) : null;
+
+      // שלב 1: בדיקת חפיפת תאריכים
+      let hasDateConflict = false;
+
+      if (!existingEnd) {
+        hasDateConflict = newStart >= existingStart;
+      } else if (!newEnd) {
+        hasDateConflict = newStart <= existingEnd;
+      } else {
+        hasDateConflict = newStart <= existingEnd && newEnd >= existingStart;
+      }
+
+      if (!hasDateConflict) return false;
+
+      // שלב 2: בדיקת חפיפת ימים – רק אם שני הצדדים כוללים daysOfWeek
+      const existingDays = existing.daysOfWeek;
+      const newDays = daysOfWeek;
+
+      if (
+        Array.isArray(existingDays) && existingDays.length > 0 &&
+        Array.isArray(newDays) && newDays.length > 0
+      ) {
+        const overlap = newDays.some(day => existingDays.includes(day));
+        if (!overlap) return false;
+      }
+
+      // יש חפיפה בלו"ז ובימים – קונפליקט
+      return true;
+    });
+
+    console.log('Found conflicts:', conflicts.length);
+    return conflicts;
+
+  } catch (error) {
+    console.error('Error in checkConflicts:', error);
+    throw error;
   }
+}
+
 async getHistory(date: Date): Promise<SpaceAssignmentModel[]> {
   try {
     const { data, error } = await supabase
@@ -255,4 +265,3 @@ async getHistory(date: Date): Promise<SpaceAssignmentModel[]> {
 }
 
 }
-

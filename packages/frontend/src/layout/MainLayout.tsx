@@ -1,19 +1,15 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import TopNav from './TopNav/TopNav';
 import { Outlet, useNavigate } from 'react-router-dom';
-
 const shortcutMap: Record<string, string> = {
     '0': '/',
-    '1': '/dashboard',
-    '2': '/leadAndCustomer',
-    '3': '/workspaceMap',
-    '4': '/billing',
-    '5': '/occupancyReports',
-    '6': '/users',
-    '7': '/emailTemplates',
-    '8': '/faq',
+    '1': '/leadAndCustomer',
+    '2': '/workspaceMap',
+    '3': '/billing',
+    '4': '/occupancyReports',
+    '5': '/users',
+    '6': '/emailTemplates',
 };
-
 const MainLayout = () => {
     const navigate = useNavigate();
     useEffect(() => {
@@ -23,13 +19,11 @@ const MainLayout = () => {
                 navigate(shortcutMap[e.key]);
             }
         };
-
         window.addEventListener('keydown', handleKeydown);
         return () => {
             window.removeEventListener('keydown', handleKeydown);
         };
     }, [navigate]);
-
     return (
         <>
             <TopNav />
@@ -37,5 +31,4 @@ const MainLayout = () => {
         </>
     );
 };
-
 export default MainLayout;

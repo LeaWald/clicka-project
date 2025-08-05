@@ -1,5 +1,4 @@
-import { ID, DateISO, FileReference } from 'shared-types/core';
-import { DocumentType } from 'shared-types';
+import { ID, DateISO } from 'shared-types/core';
 export interface Document {
   id: ID;
   name: string;

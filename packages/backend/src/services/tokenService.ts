@@ -2,9 +2,7 @@ import { Request, Response } from 'express';
 import { LoginResponse, UserRole } from "shared-types"
 import { UserTokenService } from './userTokenService';
 import { generateJwtToken, verifyJwtToken } from './authService';
-import { decrypt } from './cryptoService';
-import { refreshAccessToken } from './googleAuthService';
-import { UserService } from './user.service';
+
 
 const userTokenService = new UserTokenService();
 export const setAuthCookie = (res: Response<LoginResponse | { error: string }>, token: string, sessionId?: string): void => {

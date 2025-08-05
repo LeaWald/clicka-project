@@ -16,7 +16,6 @@ import {
     LoungePricingModel,
     PricingTierModel
 } from '../models/pricing.model';
-import { SupabaseClient } from "@supabase/supabase-js";
 
 
 // בדיקה שמחירים אינם שליליים - פונקציה זו נשארת ללא שינוי

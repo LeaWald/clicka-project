@@ -1,26 +1,29 @@
 // expense-types.d.ts
-import { ID, DateISO, FileReference, ApiResponse, PaginatedResponse } from './core';
+import { ID, DateISO, FileReference } from './core';
 // Expense category enum
-export enum ExpenseCategory {
-  RENT = 'RENT',
-  UTILITIES = 'UTILITIES',
-  CLEANING = 'CLEANING',
-  MAINTENANCE = 'MAINTENANCE',
-  OFFICE_SUPPLIES = 'OFFICE_SUPPLIES',
-  REFRESHMENTS = 'REFRESHMENTS',
-  MARKETING = 'MARKETING',
-  SALARIES = 'SALARIES',
-  INSURANCE = 'INSURANCE',
-  SOFTWARE = 'SOFTWARE',
-  PROFESSIONAL_SERVICES = 'PROFESSIONAL_SERVICES',
-  TAXES = 'TAXES',
-  EVENTS = 'EVENTS',
-  FURNITURE = 'FURNITURE',
-  EQUIPMENT = 'EQUIPMENT',
-  PETTY_CASH = 'PETTY_CASH',
-  OTHER = 'OTHER'
+// export enum ExpenseCategory {
+//   RENT = 'RENT',
+//   UTILITIES = 'UTILITIES',
+//   CLEANING = 'CLEANING',
+//   MAINTENANCE = 'MAINTENANCE',
+//   OFFICE_SUPPLIES = 'OFFICE_SUPPLIES',
+//   REFRESHMENTS = 'REFRESHMENTS',
+//   MARKETING = 'MARKETING',
+//   SALARIES = 'SALARIES',
+//   INSURANCE = 'INSURANCE',
+//   SOFTWARE = 'SOFTWARE',
+//   PROFESSIONAL_SERVICES = 'PROFESSIONAL_SERVICES',
+//   TAXES = 'TAXES',
+//   EVENTS = 'EVENTS',
+//   FURNITURE = 'FURNITURE',
+//   EQUIPMENT = 'EQUIPMENT',
+//   PETTY_CASH = 'PETTY_CASH',
+//   OTHER = 'OTHER'
+// }
+export interface ExpenseCategory {
+  id: string;
+  name: string;
 }
-
 // Expense status enum
 export enum ExpenseStatus {
   PENDING = 'PENDING',
@@ -28,7 +31,6 @@ export enum ExpenseStatus {
   PAID = 'PAID',
   REJECTED = 'REJECTED'
 }
-
 // Payment method (for expenses)
 export enum ExpensePaymentMethod {
   CREDIT_CARD = 'CREDIT_CARD',
@@ -38,7 +40,6 @@ export enum ExpensePaymentMethod {
   PETTY_CASH = 'PETTY_CASH',
   OTHER = 'OTHER'
 }
-
 // Vendor model
 export interface Vendor {
   id: ID;
@@ -58,15 +59,19 @@ export interface Vendor {
   createdAt: DateISO;
   updatedAt: DateISO;
 }
-
 // Expense model
 export interface Expense {
   id: ID;
   vendor_id: ID;
   vendor_name: string;
-  category: ExpenseCategory;
+  category_id: string; // מזהה בלבד - נשמר במסד
+  category?: ExpenseCategory; // אובייקט מלא - צד לקוח בלבד
   description: string;
   amount: number;
+  // שדות חדשים
+  is_income: boolean; // האם זו הכנסה או הוצאה
+  source_type: 'vendor' | 'store'; // חנות או ספק
+  purchaser_name: string; // מי ביצע את הקנייה
   tax?: number;
   date: DateISO;
   due_date?: DateISO;
@@ -82,23 +87,11 @@ export interface Expense {
   updatedAt: DateISO;
 }
 // export enum PaymentMethod {
-//   BankTransfer = 'BankTransfer',   
-//   CreditCard = 'CreditCard',      
-//   Cash = 'Cash',                  
-//   Other = 'Other'                 
-// }
-// export enum VendorStatus {
-//   Active = 'Active',
-//   Inactive = 'Inactive',
-//   Suspended = 'Suspended'
-// }
-// export enum VendorCategory {
-//   Equipment = 'Equipment',
-//   Services = 'Services',
-//   Maintenance = 'Maintenance',
+//   BankTransfer = 'BankTransfer',
+//   CreditCard = 'CreditCard',
+//   Cash = 'Cash',
 //   Other = 'Other'
 // }
-
 export enum PaymentMethod {
   CREDIT_CARD = "CREDIT_CARD",
   BANK_TRANSFER = "BANK_TRANSFER",
@@ -117,7 +110,6 @@ export enum VendorCategory {
   Maintenance = 'Maintenance',
   Other = 'Other'
 }
-
 // Create vendor request
 export interface CreateVendorRequest {
   name: string;
@@ -132,9 +124,7 @@ export interface CreateVendorRequest {
   category?: VendorCategory | undefined;
   preferred_payment_method?: PaymentMethod | undefined;
   payment_terms?: string | undefined;
-
 }
-
 // Update vendor request
 export interface UpdateVendorRequest {
   name?: string;
@@ -146,7 +136,6 @@ export interface UpdateVendorRequest {
   taxId?: string;
   notes?: string;
 }
-
 // Get vendors request
 export interface GetVendorsRequest {
   search?: string;
@@ -155,13 +144,16 @@ export interface GetVendorsRequest {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
 }
-
 // Create expense request
 export interface CreateExpenseRequest {
   vendorId: ID;
   category: ExpenseCategory;
   description: string;
   amount: number;
+  // שדות חדשים גם כאן
+  is_income: boolean;
+  source_type: 'vendor' | 'store';
+  purchaser_name: string;
   tax?: number;
   date: DateISO;
   dueDate?: DateISO;
@@ -171,13 +163,16 @@ export interface CreateExpenseRequest {
   receiptFile?: FileReference;
   notes?: string;
 }
-
 // Update expense request
 export interface UpdateExpenseRequest {
   vendorId?: ID;
   category?: ExpenseCategory;
   description?: string;
   amount?: number;
+  // שדות חדשים גם כאן
+  is_income?: boolean;
+  source_type?: 'vendor' | 'store';
+  purchaser_name?: string;
   tax?: number;
   date?: DateISO;
   dueDate?: DateISO;
@@ -187,11 +182,10 @@ export interface UpdateExpenseRequest {
   receiptFile?: FileReference;
   notes?: string;
 }
-
 // Get expenses request
 export interface GetExpensesRequest {
   vendorId?: ID;
-  category?: ExpenseCategory[];
+  category?: string[];
   status?: ExpenseStatus[];
   dateFrom?: DateISO;
   dateTo?: DateISO;
@@ -201,7 +195,6 @@ export interface GetExpensesRequest {
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
 }
-
 // Mark expense as paid request
 export interface MarkExpenseAsPaidRequest {
   paidDate: DateISO;
@@ -214,4 +207,9 @@ export enum PaymentTerms {
   NET_30 = 'Net 30',
   EOM = 'End of Month',
   COD = 'Cash on Delivery'
+}
+// Enum חדש בלבד
+export enum SourceType {
+  VENDOR = 'VENDOR',
+  STORE = 'STORE',
 }

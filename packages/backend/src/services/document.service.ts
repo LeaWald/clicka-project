@@ -1,6 +1,5 @@
 import { DocumentModel } from '../models/document.model';
 import { supabase } from '../db/supabaseClient';
-import { v4 as uuidv4 } from 'uuid';
 import { uploadFileAndReturnReference } from './drive-service';
 import { UserTokenService } from './userTokenService';
 

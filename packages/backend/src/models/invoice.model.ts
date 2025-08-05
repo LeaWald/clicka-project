@@ -2,7 +2,7 @@ import { UUID } from 'crypto';
 import type { BillingItem, BillingItemType, DateISO, ID, Invoice } from 'shared-types';
 import { InvoiceStatus } from 'shared-types';
 export class InvoiceModel implements Invoice {
-    id: ID;
+    id?: ID;
     invoice_number: string;
     customer_id: ID;
     customer_name: string;
@@ -53,12 +53,14 @@ export class InvoiceModel implements Invoice {
 
     toDatabaseFormat() {
         return {
+            //id: this.id,
             invoice_number: this.invoice_number,
             customer_id: this.customer_id,
             customer_name: this.customer_name,
             status: this.status,
             issue_date: this.issue_date,
             due_date: this.due_date,
+            //items: this.items,
             subtotal: this.subtotal,
             tax_total: this.tax_total,
             payment_due_reminder: this.payment_due_reminder,
@@ -71,7 +73,7 @@ export class InvoiceModel implements Invoice {
 
 export class InvoiceItemModel implements BillingItem {
     id: ID;
-    invoice_id: UUID;
+    invoice_id:UUID;
     type: BillingItemType;
     description: string;
     quantity: number;
@@ -99,7 +101,7 @@ export class InvoiceItemModel implements BillingItem {
         updatedAt?: DateISO
     ) {
         this.id = id;
-        this.invoice_id = invoice_id;
+        this.invoice_id =invoice_id;
         this.type = type;
         this.description = description;
         this.quantity = quantity;
@@ -129,8 +131,6 @@ export class InvoiceItemModel implements BillingItem {
             booking_id: this.booking_id,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
-
         };
     }
 }
-

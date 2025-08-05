@@ -52,27 +52,27 @@ export const WorkspaceMap = () => {
     const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
     // const [isLoading, setIsLoading] = useState(true);
 
-   useEffect(() => {
-    const loadData = async () => {
-        // setIsLoading(true);
-        await Promise.all([
-            getAllWorkspace(),
-            getAllRooms()
-        ]);
-        // setIsLoading(false);
-    };
-    loadData();
+    useEffect(() => {
+        const loadData = async () => {
+            // setIsLoading(true);
+            await Promise.all([
+                getAllWorkspace(),
+                getAllRooms()
+            ]);
+            // setIsLoading(false);
+        };
+        loadData();
 
-    const updateSize = () => {
-        if (containerRef.current) {
-            const rect = containerRef.current.getBoundingClientRect();
-            setContainerSize({ width: rect.width, height: rect.height });
-        }
-    };
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-}, [getAllRooms,getAllWorkspace]);
+        const updateSize = () => {
+            if (containerRef.current) {
+                const rect = containerRef.current.getBoundingClientRect();
+                setContainerSize({ width: rect.width, height: rect.height });
+            }
+        };
+        updateSize();
+        window.addEventListener("resize", updateSize);
+        return () => window.removeEventListener("resize", updateSize);
+    }, [getAllRooms ,getAllWorkspace]);
 
     useEffect(() => {
         const updateSize = () => {
@@ -347,7 +347,7 @@ export const WorkspaceMap = () => {
                 <h2>חיפוש וסינון</h2>
                 <label>סטטוס</label>
                 <select value={selectedStatus} onChange={(e) => { setSelectedStatus(e.target.value) }}>
-                    <option value="PLACEHOLDER" disabled>בחר ססטוס חלל לחיפוש</option>
+                    <option value="PLACEHOLDER" disabled>בחר סטטוס חלל לחיפוש</option>
                     {uniqueStatus.map((status, index) => {
                         return <option key={status} value={status}>{status}</option>
                     })}
@@ -431,7 +431,13 @@ export const WorkspaceMap = () => {
                                                         }
                                                         else if (w.status === SpaceStatus.OCCUPIED) {
                                                             if (w.type === WorkspaceType.PRIVATE_ROOM1 || w.type === WorkspaceType.PRIVATE_ROOM2 || w.type === WorkspaceType.PRIVATE_ROOM3) {
-                                                                navigate('/customerChange', { state: { space: w, displayDate } });
+                                                                navigate('/customerChange', {
+                                                                    state: {
+                                                                        customerId: w.currentCustomerId,
+                                                                        workspaceId: w.id,
+                                                                        displayDate,
+                                                                    },
+                                                                });
                                                             }
                                                         }
                                                     }}

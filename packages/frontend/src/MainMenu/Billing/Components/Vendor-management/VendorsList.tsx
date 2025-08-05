@@ -1,12 +1,67 @@
-// ייבוא רכיבים וספריות רלוונטיות
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Vendor } from "shared-types";
 import { Button } from "../../../../Common/Components/BaseComponents/Button";
 import React, { useState, useEffect } from "react";
-import { FaTrash, FaPen, FaEye } from "react-icons/fa";
-import VendorSummary from "./VendorSummary";
+import { TextField, Stack } from "@mui/material";
+import { showAlert } from "../../../../Common/Components/BaseComponents/ShowAlert";
 import axiosInstance from "../../../../Service/Axios";
 import { useVendorsStore } from "../../../../Stores/Billing/vendorsStore";
+import VendorSummary from "./VendorSummary";
+import { ShowAlertWarn } from "../../../../Common/Components/BaseComponents/showAlertWarn";
+
+interface VendorCardProps {
+  vendor: Vendor;
+  onEdit: () => void;
+  onDelete: () => void;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+}
+
+const VendorCard: React.FC<VendorCardProps> = ({ vendor, onEdit, onDelete, isExpanded, onToggleExpand }) => {
+  return (
+    <div className="bg-white border rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <h3 className="text-lg font-semibold text-gray-800">{vendor.name}</h3>
+          <p className="text-sm text-gray-600">{vendor.category}</p>
+          <div className="mt-2 space-y-1">
+            <p className="text-sm"><span className="font-medium">טלפון:</span> {vendor.phone}</p>
+            <p className="text-sm"><span className="font-medium">אימייל:</span> {vendor.email}</p>
+            <p className="text-sm"><span className="font-medium">כתובת:</span> {vendor.address}</p>
+          </div>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={onToggleExpand}
+            className="text-blue-500 hover:text-blue-700 p-2"
+            title="צפייה"
+          >
+            👁️
+          </button>
+          <button
+            onClick={onEdit}
+            className="text-yellow-500 hover:text-yellow-700 p-2"
+            title="עריכה"
+          >
+            ✏️
+          </button>
+          <button
+            onClick={onDelete}
+            className="text-red-500 hover:text-red-700 p-2"
+            title="מחיקה"
+          >
+            🗑️
+          </button>
+        </div>
+      </div>
+      {isExpanded && (
+        <div className="mt-4 pt-4 border-t">
+          <VendorSummary vendor={vendor} />
+        </div>
+      )}
+    </div>
+  );
+};
 
 type VendorsListProps = {
   vendors: Vendor[];
@@ -35,15 +90,15 @@ export default function VendorsList({ vendors, setVendors }: VendorsListProps) {
       });
   }, [setVendors]);
 
-  // פונקציה למחיקת ספק
   const handleDelete = async (vendorId: string) => {
-    if (window.confirm("האם למחוק את הספק?")) {
+    const confirmed = await ShowAlertWarn('האם אתה בטוח שברצונך למחוק את הספק לצמיתות?', 'לא ניתן לשחזר את המידע לאחר מחיקה.');
+    if (confirmed) {
       try {
         await deleteVendor(vendorId);
         setVendors(vendors.filter((v) => v.id !== vendorId));
-        alert("הספק נמחק בהצלחה");
+        showAlert("מחיקה", "ספק נמחק בהצלחה", "success");
       } catch (error) {
-        alert("שגיאה במחיקת ספק");
+        showAlert("שגיאה", "שגיאה במחיקת ספק", "error");
         console.error("Error:", error);
       }
     }
@@ -54,73 +109,53 @@ export default function VendorsList({ vendors, setVendors }: VendorsListProps) {
       .some((field) => field?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  // תצוגת ממשק המשתמש
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">רשימת ספקים</h2>
-        <Link to="/vendors/new">
-          <Button variant="primary" size="sm">הוסף ספק חדש</Button>
-        </Link>
+    <div className="p-6">
+      <h2 className="text-3xl font-bold text-center text-blue-600 my-4">
+        ספקים
+      </h2>
+
+      <div className="flex items-center gap-4 mb-4">
+        <Button 
+          variant="primary" 
+          size="sm" 
+          onClick={() => navigate("/vendors/new")} 
+          className="flex gap-1 items-center"
+        >
+          ➕ הוספת ספק חדש
+        </Button>
       </div>
 
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="חפש לפי שם, טלפון, מייל, כתובת או קטגוריה"
+      <br />
+      <Stack spacing={2} direction="row">
+        <TextField
+          label="חיפוש"
+          fullWidth
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="border px-3 py-2 rounded w-full max-w-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
+          placeholder="חפש לפי שם, טלפון, מייל, כתובת או קטגוריה"
         />
-      </div>
+      </Stack>
 
-      <div className="flex flex-wrap gap-4">
-        {filteredVendors.length > 0 ? (
-          filteredVendors.map((vendor) => (
-            <div
-              key={vendor.id}
-              className={`p-4 border rounded-lg shadow-md bg-white transition-all duration-300 ${
-                selectedVendorId === vendor.id ? "w-full" : "w-64"
-              }`}
-            >
-              <p className="font-semibold">שם: {vendor.name}</p>
-              <p className="font-semibold">קטגוריה: {vendor.category}</p>
-              <p className="font-semibold">טלפון: {vendor.phone}</p>
-              <p className="font-semibold">אימייל: {vendor.email}</p>
-              <p className="font-semibold">כתובת: {vendor.address}</p>
-
-              <div className="flex gap-2 mt-4 justify-center">
-                <button
-                  onClick={() => setSelectedVendorId(selectedVendorId === vendor.id ? null : vendor.id)}
-                  className="text-blue-500 hover:text-blue-700"
-                  title="צפייה"
-                >
-                  <FaEye />
-                </button>
-                <button
-                  onClick={() => navigate(`/vendors/${vendor.id}/edit`)}
-                  className="text-yellow-500 hover:text-yellow-700"
-                  title="עריכה"
-                >
-                  <FaPen />
-                </button>
-                <button
-                  onClick={() => handleDelete(vendor.id)}
-                  className="text-red-500 hover:text-red-700"
-                  title="מחיקה"
-                >
-                  <FaTrash />
-                </button>
-              </div>
-
-              {selectedVendorId === vendor.id && (
-                <VendorSummary vendor={vendor} />
-              )}
+      <div className="relative mt-6">
+        <div className="grid gap-4">
+          {filteredVendors.length > 0 ? (
+            filteredVendors.map((vendor) => (
+              <VendorCard
+                key={vendor.id}
+                vendor={vendor}
+                onEdit={() => navigate(`/vendor/${vendor.id}/edit`)}
+                onDelete={() => handleDelete(vendor.id)}
+                isExpanded={selectedVendorId === vendor.id}
+                onToggleExpand={() => setSelectedVendorId(selectedVendorId === vendor.id ? null : vendor.id)}
+              />
+            ))
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p>לא נמצאו ספקים</p>
             </div>
-          ))
-        ) : (
-          <p>לא נמצאו ספקים</p>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

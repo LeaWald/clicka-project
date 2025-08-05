@@ -119,15 +119,19 @@ export async function deleteFile(req: Request, res: Response, next: NextFunction
 }
 
 export async function shareFile(req: Request, res: Response, next: NextFunction) {
-  const userTokenService = new UserTokenService();
-  const token = await userTokenService.getSystemAccessToken(); 
+  console.log('Headers:', req.headers);
+  console.log('Cookies:', req.cookies);
+  const token = req.headers.authorization?.split(' ')[1] || req.cookies.google_access_token;
+  console.log('Token extracted:', token);
   const fileId = req.params.fileId;
-  const permissions = req.body;
+  // שימי לב: מייל קבוע
+  const clientEmail = req.body.emailToShare;
+  // const clientEmail = req.body.email
   if (!token) return next({ status: 401, message: 'Missing token' });
   try {
     validateFileId(fileId);
-    await shareDriveFile(fileId, permissions, token);
-    res.sendStatus(200);
+    await shareDriveFile(fileId, clientEmail, token);
+    res.status(200).json({ message: `File shared with ${clientEmail}` });
   } catch (err: any) {
     if (!err.status) err.status = 500;
     next(err);

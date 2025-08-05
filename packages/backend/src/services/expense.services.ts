@@ -1,7 +1,6 @@
-
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import type { CreateExpenseRequest, UpdateExpenseRequest, GetExpensesRequest, MarkExpenseAsPaidRequest, Expense } from 'shared-types';
+import type { CreateExpenseRequest, UpdateExpenseRequest, GetExpensesRequest, MarkExpenseAsPaidRequest, Expense ,ExpenseCategory } from 'shared-types';
 import { ExpenseModel } from '../models/expense.model';
 import { baseService } from './baseService';
 dotenv.config();
@@ -46,11 +45,25 @@ export class ExpenseService extends baseService<ExpenseModel> {
     const from = (pageNum - 1) * limitNum;
     const to = from + limitNum - 1;
 
-    const { data, error } = await supabase
+    // שליפת מזהה קטגוריית קופה קטנה
+    const { data: pettyCashCategories } = await supabase
+      .from('expense_category')
+      .select('id')
+      .or('name.eq.קופה קטנה,name.eq.PETTY_CASH,name.eq.Petty Cash');
+
+    const pettyCashCategoryIds = pettyCashCategories?.map(cat => cat.id) || [];
+
+    let query = supabase
       .from("expense")
       .select("*")
-      .order("id", { ascending: false })
-      .range(from, to);
+      .order("id", { ascending: false });
+
+    // סינון הוצאות של קופה קטנה
+    if (pettyCashCategoryIds.length > 0) {
+      query = query.not('category_id', 'in', `(${pettyCashCategoryIds.join(',')})`);
+    }
+
+    const { data, error } = await query.range(from, to);
 
     console.log("Supabase data:", data);
     console.log("Supabase error:", error);
@@ -202,24 +215,129 @@ export class ExpenseService extends baseService<ExpenseModel> {
     }
   }
 
+  async getAllExpenseCategories(): Promise<ExpenseCategory[] | null> {
+    try {
+      const { data, error } = await supabase
+        .from('expense_category')
+        .select('*');
 
-async getPettyCashExpenses() {
-  try {
-    const { data, error } = await supabase
-      .from('expense')
-      .select('*')
-      .eq('category', 'PETTY_CASH'); // משתמש בערך מתוך ה-enum
+      if (error) {
+        console.error('Error fetching categories:', error);
+        return null;
+      }
 
-    if (error) {
-      console.error('Error fetching petty cash expenses:', error);
+      return data as ExpenseCategory[];
+    } catch (err) {
+      console.error('Unexpected error in getAllExpenseCategories:', err);
       return null;
     }
-
-    return data;
-  } catch (err) {
-    console.error('Unexpected error in getPettyCashExpenses:', err);
-    return null;
   }
-}
+
+  async createExpenseCategory(categoryName: string): Promise<ExpenseCategory | null> {
+    try {
+      const { data, error } = await supabase
+        .from('expense_category')
+        .insert([{ name: categoryName }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating category:', error);
+        if (error.code === '23505') {
+          throw new Error(`הקטגוריה "${categoryName}" כבר קיימת`);
+        }
+        return null;
+      }
+
+      return data as ExpenseCategory;
+    } catch (err) {
+      console.error('Unexpected error in createExpenseCategory:', err);
+      throw err;
+    }
+  }
+
+  async getPettyCashExpenses(): Promise<Expense[] | null> {
+    try {
+      // קודם שולפים את קטגוריית קופה קטנה
+      const { data: categories, error: catError } = await supabase
+        .from('expense_category')
+        .select('id')
+        .or('name.eq.קופה קטנה,name.eq.PETTY_CASH,name.eq.Petty Cash');
+
+      if (catError) {
+        console.error('Error fetching petty cash categories:', catError);
+        return null;
+      }
+
+      if (!categories || categories.length === 0) {
+        return [];
+      }
+
+      const categoryIds = categories.map(cat => cat.id);
+
+      const { data, error } = await supabase
+        .from('expense')
+        .select(`
+          *,
+          expense_category(id, name)
+        `)
+        .in('category_id', categoryIds);
+
+      if (error) {
+        console.error('Error fetching petty cash expenses:', error);
+        return null;
+      }
+
+      return data as Expense[];
+    } catch (err) {
+      console.error('Unexpected error in getPettyCashExpenses:', err);
+      return null;
+    }
+  }
+
+  async deleteExpenseCategory(categoryId: string): Promise<boolean> {
+    try {
+      console.log('Attempting to delete category with ID:', categoryId);
+      
+      // בדיקה אם יש הוצאות שמשתמשות בקטגוריה
+      const { data: expensesUsingCategory, error: checkError } = await supabase
+        .from('expense')
+        .select('id')
+        .eq('category_id', categoryId)
+        .limit(1);
+
+      if (checkError) {
+        console.error('Error checking category usage:', checkError);
+        return false;
+      }
+
+      if (expensesUsingCategory && expensesUsingCategory.length > 0) {
+        console.log('Category is in use, cannot delete');
+        throw new Error('לא ניתן למחוק קטגוריה שבשימוש');
+      }
+
+      const { data, error } = await supabase
+        .from('expense_category')
+        .delete()
+        .eq('id', categoryId)
+        .select();
+
+      console.log('Delete data:', data);
+      console.log('Delete error:', error);
+
+      if (error) {
+        console.error('Error deleting category:', error);
+        if (error.code === '23503') {
+          throw new Error('לא ניתן למחוק קטגוריה שבשימוש');
+        }
+        return false;
+      }
+
+      return true;
+    } catch (err) {
+      console.error('Unexpected error in deleteExpenseCategory:', err);
+      throw err;
+    }
+  }
 
 }

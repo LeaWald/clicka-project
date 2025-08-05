@@ -1,4 +1,4 @@
-import type{ ID, Invoice, Payment } from "shared-types";
+import type{ ID,Payment } from "shared-types";
 import { baseService } from "./baseService";
 import { PaymentModel } from "../models/payments.model";
 import { supabase } from "../db/supabaseClient";

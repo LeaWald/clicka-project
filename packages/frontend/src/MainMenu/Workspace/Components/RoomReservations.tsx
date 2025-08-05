@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import { useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { useForm, FormProvider, useWatch } from "react-hook-form";
 //יבוא מהעיצובים הכללים 
 import { InputField } from "../../../Common/Components/BaseComponents/Input";
@@ -336,9 +336,11 @@ export const RoomReservations = forwardRef<RoomReservationsRef, RoomReservations
             navigate('/bookings')
             methods.reset();
             onSubmit?.();
+            navigate (-1);
           }
 
       } catch (err) {
+
       }
     };
 //הטופס הזמנת חדרים

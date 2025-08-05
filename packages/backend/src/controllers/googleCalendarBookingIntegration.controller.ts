@@ -1,27 +1,32 @@
 import { Request, Response, NextFunction } from 'express';
 import * as CalendarService from '../services/googleCalendarBookingIntegration.service ';
 import * as calendarUpdate from '../services/calendar-service'
-import { CalendarSync } from 'shared-types/calendarSync';
-import type { CalendarEventInput, ID, StatusChangeRequest, UpdateGoogleCalendarEventRequest } from 'shared-types';
-import { CalendarSyncModel } from '../models/calendarSync.model';
-import { validateEventInput } from '../utils/validateEventInput';
+// import { CalendarSync } from 'shared-types/calendarSync';
+import type {  ID, UpdateGoogleCalendarEventRequest } from 'shared-types';
+// import { CalendarSyncModel } from '../models/calendarSync.model';
+// import { validateEventInput } from '../utils/validateEventInput';
 import { BookingModel } from '../models/booking.model';
 import { BookingService } from '../services/booking.service';
 import { UserTokenService } from '../services/userTokenService';
 
 const userTokenService = new UserTokenService();
 export const getGoogleCalendarEvents = async (req: Request, res: Response, next: NextFunction) => {
+console.log("I AT controlers!!")
   try {
     const token = await userTokenService.getSystemAccessToken();
+    // const token = process.env.SYSTEM_EMAIL 
+    console.log("this is us token:", token)
     if (!token) return next({ status: 401, message: 'Missing system token' });
 
     const calendarId: string = req.params.calendarId;
     const events = await CalendarService.getGoogleCalendarEvents(calendarId, token);
+    console.log("this is us events:", events)
     res.status(200).json(events);
   } catch (error) {
     console.error('Error fetching Google Calendar events:', error);
     res.status(500).json({ message: 'Failed to fetch Google Calendar events', error });
   }
+  
 };
 
 export const createCalendarEvent = async (req: Request, res: Response, next: NextFunction) => {

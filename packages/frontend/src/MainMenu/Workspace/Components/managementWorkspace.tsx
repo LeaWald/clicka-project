@@ -191,7 +191,7 @@ export const ManagementWorkspace = () => {
           הוספת חלל חדש
         </Button>
       </div>
-      <h2>רשימת החללים:</h2>
+      {/* <h2>רשימת החללים:</h2> */}
       {workSpaces.length === 0 ? (
         <p>אין חללים להצגה.</p>
       ) : (

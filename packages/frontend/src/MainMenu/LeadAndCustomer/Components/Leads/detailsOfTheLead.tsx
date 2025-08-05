@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from '../../../../Common/Components/BaseComponents/Button';
 import { Lead, LeadSource, LeadStatus, InteractionType , WorkspaceType } from "shared-types";
 

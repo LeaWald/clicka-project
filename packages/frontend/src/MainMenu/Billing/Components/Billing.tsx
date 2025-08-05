@@ -1,21 +1,24 @@
+import { useNavigate, Outlet } from 'react-router-dom';
+import { Button } from '../../../Common/Components/BaseComponents/Button';
 import { Route, Routes } from 'react-router-dom';
-// import '../Css/Billing.css';
 import { FinancialReportsDashboard } from './FinancialReports/FinancialReportsDashboard';
+
 
 export const Billing = () => {
 
-    // const navigate = useNavigate()
+    const navigate = useNavigate()
 
     return (
-        <Routes>
-            <Route path="*" element={<FinancialReportsDashboard />} />
+        <div className='billing' style={{ direction: 'rtl' }}>
+            <h1>billing</h1>
+            <Button variant="primary" size="md" onClick={() => navigate('createInvoice')}>יצירת חשבוניות</Button>
+            <Button variant="accent" size="sm" onClick={() => navigate('')}>Back</Button>
+            <Outlet />
+            <Routes>
+                <Route path="*" element={<FinancialReportsDashboard />} />
+            </Routes>
+        </div>
 
-        </Routes>
-    )
-    // <div className='billing'>
-        /* <h1>Billing</h1>
-        <Button variant="outlined" onClick={() => { navigate('/') }} sx={{ backgroundColor: 'black', color: 'white', borderColor: 'black', '&:hover': { borderColor: 'white' } }}>Back</Button>
-
-  <FinancialReportsDashboard/> */
-    // </div>
+    );
 }
+

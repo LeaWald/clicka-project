@@ -16,20 +16,20 @@ export const AssigmentTable = () => {
   const { customers,fetchCustomers } = useCustomerStore();
   const { workSpaces,getAllWorkspace } = useWorkSpaceStore();
    const [isLoading, setIsLoading] = useState(false);
-const allAssignmentFields: (keyof SpaceAssign)[] = [
-  'workspaceId', 'customerId', 'assignedDate', 'unassignedDate', 'status', 'assignedBy'
-];
+// const allAssignmentFields: (keyof SpaceAssign)[] = [
+//   'workspaceId', 'customerId', 'assignedDate', 'unassignedDate', 'status', 'assignedBy'
+// ];
 const navigate = useNavigate();
 // תרגום לתצוגה בלבד
-const fieldLabels: Partial<Record<keyof SpaceAssign, string>> = {
-  workspaceId: 'מרחב עבודה',
-  customerId: 'לקוח',
-  assignedDate: 'תאריך התחלה',
-  unassignedDate: 'תאריך סיום',
-  // notes: 'הערות',
-  assignedBy: 'שובץ ע"י',
-  status: 'סטטוס',
-};
+// const fieldLabels: Partial<Record<keyof SpaceAssign, string>> = {
+//   workspaceId: 'מרחב עבודה',
+//   customerId: 'לקוח',
+//   assignedDate: 'תאריך התחלה',
+//   unassignedDate: 'תאריך סיום',
+//   // notes: 'הערות',
+//   assignedBy: 'שובץ ע"י',
+//   status: 'סטטוס',
+// };
 // const getFieldLabel = (field: keyof SpaceAssign): string => {
 //   return fieldLabels[field] || field;
 // };
@@ -115,7 +115,6 @@ useEffect(() => {
    return <div>
     <h1  className="text-3xl font-bold text-center text-blue-600 my-4">הקצאות</h1>
     {isLoading && <h1>טוען...</h1>}
-   
    {!isLoading && Array.isArray(assignments) && (
   <>
     <Button onClick={() => navigate('/assignmentForm')}>להוספת הקצאה חדשה</Button>
@@ -128,14 +127,8 @@ useEffect(() => {
     />
   </>
 )}
-
 {!isLoading && !Array.isArray(assignments) && (
   <div style={{ color: 'red' }}>שגיאה: assignments אינו מערך תקין</div>
 )}
     </div>
 }
-
-
-
-
-

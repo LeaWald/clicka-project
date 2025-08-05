@@ -1,5 +1,5 @@
 import { ID } from "shared-types";
-import { Room,RoomFeature } from "shared-types";
+import { RoomFeature } from "shared-types";
 
 export class RoomFeatureModel implements RoomFeature {
   id?: ID;

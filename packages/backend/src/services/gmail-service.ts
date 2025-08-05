@@ -1,5 +1,5 @@
 import { google } from "googleapis";
-import { SendEmail, SendEmailRequest } from "shared-types/google";
+import { SendEmail } from "shared-types/google";
 import { UserTokenService } from "./userTokenService";
 import { EmailTemplateService } from "./emailTemplate.service";
 import { customerService } from "./customer.service";
@@ -222,7 +222,7 @@ export const sendEmailToConfrim = async (email: string | undefined, id: ID) => {
     {
       "name": customer.name,
       "link":
-        `${process.env.API_URL}/customers/confirm-email/${id}/${email}`,
+        `${process.env.REACT_APP_API_URL_FE}/customers/confirm-email/${id}/${email}`,
     },
   );
   await sendEmail(

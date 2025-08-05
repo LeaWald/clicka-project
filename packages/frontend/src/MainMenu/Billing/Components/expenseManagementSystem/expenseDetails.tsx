@@ -36,7 +36,7 @@ export const ExpenseDetails: React.FC<ExpenseDetailsProps> = ({ id, onClose }) =
           <div><b>מזהה הוצאה:</b> {expense.id}</div>
           <div><b>מזהה ספק:</b> {expense.vendor_id}</div>
           <div><b>שם ספק:</b> {expense.vendor_name}</div>
-          <div><b>קטגוריה:</b> {expense.category}</div>
+          <div><b>קטגוריה:</b> {expense.category?.name ?? expense.category_id ?? "-"}</div>
           <div><b>תיאור:</b> {expense.description}</div>
           <div><b>סכום:</b> {expense.amount} ₪</div>
           <div><b>מע״מ:</b> {expense.tax ?? "-"}</div>

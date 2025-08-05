@@ -1,5 +1,5 @@
 // import { FinancialReport, ReportType, ReportParameters } from "../../../../types/report";
-import { useDashboardStore } from "../../../../Stores/Billing/dashboardStore";
+// import { useDashboardStore } from "../../../../Stores/Billing/dashboardStore";
 
 export const DashboardOverview = () => {
 // const {fetchDashboardSummary,fetchMainReports,fetchFinancialSummary,fetchRecentExpenses,
@@ -9,12 +9,12 @@ export const DashboardOverview = () => {
 
 
   // פעולות מהירות (גישה מהירה למשימות חיוב נפוצות)
-  const quickActions = [
-    { label: "יצירת חשבונית", action: () => {} },
-    { label: "יצירת קבלה", action: () => {} },
-    { label: "יצירת דוח", action: () => {} },
-    { label: "רישום תשלום", action: () => {} }
-  ];
+  // const quickActions = [
+  //   { label: "יצירת חשבונית", action: () => {} },
+  //   { label: "יצירת קבלה", action: () => {} },
+  //   { label: "יצירת דוח", action: () => {} },
+  //   { label: "רישום תשלום", action: () => {} }
+  // ];
 
   return (
     <div>

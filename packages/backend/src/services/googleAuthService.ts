@@ -1,7 +1,6 @@
 import { google } from 'googleapis';
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { log } from 'console';
 dotenv.config();
 
 //parameters for Google OAuth2 from environment variables

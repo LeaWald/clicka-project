@@ -1,6 +1,4 @@
 import { ID, DateISO, FileReference } from './core';
-
-// סוגי מסמכים
 export enum DocumentType {
   INVOICE = 'INVOICE',
   RECEIPT = 'RECEIPT',
@@ -8,14 +6,13 @@ export enum DocumentType {
   STATEMENT = 'STATEMENT',
   TAX_INVOICE = 'TAX_INVOICE'
 }
-
 // תבנית מסמך
 export interface DocumentTemplate {
-  id: ID;
+  id?: ID;
   name: string;
   type: DocumentType;
   language: 'hebrew' | 'english';
-  template: string; // HTML template
+  template: string;
   variables: string[];
   isDefault: boolean;
   active: boolean;
@@ -25,6 +22,7 @@ export interface DocumentTemplate {
 
 // בקשה ליצירת מסמך
 export interface GenerateDocumentRequest {
+  name?: string;
   templateId: ID;
   entityId: ID; // Invoice ID, Payment ID, etc.
   variables: Record<string, any>;
@@ -32,18 +30,8 @@ export interface GenerateDocumentRequest {
   deliveryMethod?: 'email' | 'download' | 'store';
 }
 
-// מסמך שנוצר
-export interface GeneratedDocument {
-  id: ID;
-  type: DocumentType;
-  entityId: ID;
-  documentNumber: string;
-  templateId: ID;
-  file: FileReference;
-  generatedAt: DateISO;
-  deliveredAt?: DateISO;
-  deliveryMethod?: string;
-}
+
+
 
 // תבנית דוא"ל
 export interface EmailTemplate {
@@ -56,4 +44,49 @@ export interface EmailTemplate {
   variables: string[];
   createdAt: DateISO;
   updatedAt: DateISO;
+}
+export interface CreateDocumentTemplateRequest {
+  name: string;
+  type: DocumentType;
+  language: 'hebrew' | 'english';
+  template: string;
+  variables: string[];
+  isDefault: boolean;
+  active: boolean;
+}
+
+export interface UpdateDocumentTemplateRequest {
+  name?: string;
+  template?: string;
+  variables?: string[];
+  isDefault?: boolean;
+  active?: boolean;
+}
+
+// Interface
+export interface DocumentTemplate {
+  id?: ID;
+  name: string;
+  type: DocumentType;
+  language: 'hebrew' | 'english';
+  template: string;
+  variables: string[];
+  isDefault: boolean;
+  active: boolean;
+  createdAt: DateISO;
+  updatedAt: DateISO;
+}
+// Interface למסמכים שנוצרו
+export interface GeneratedDocument {
+  id?: ID;
+  name: string;
+  type: DocumentType;
+  entityId: ID;
+  documentNumber: string;
+  templateId: ID;
+  htmlContent: string;
+  generatedAt: DateISO;
+  deliveredAt?: DateISO;
+  deliveryMethod?: string;
+  file: FileReference;
 }

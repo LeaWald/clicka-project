@@ -1,7 +1,7 @@
 // google-types.d.ts
 
 import { BookingStatus } from 'booking';
-import { ApiResponse, ID, FileReference } from './core';
+import { FileReference } from './core';
 import { Buffer } from 'buffer';
 
 // Google OAuth token data

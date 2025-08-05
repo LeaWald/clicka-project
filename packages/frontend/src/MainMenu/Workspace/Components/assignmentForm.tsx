@@ -9,6 +9,8 @@ import { SelectField } from "../../../Common/Components/BaseComponents/Select";
 import { Button } from "../../../Common/Components/BaseComponents/Button";
 import { WorkspaceType } from "shared-types";
 import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { showAlert } from "../../../Common/Components/BaseComponents/ShowAlert";
 
 
 interface AssignmentFormProps {
@@ -56,7 +58,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
   const title = props.title ?? "הקצאת חלל עבודה";
 
 
-
+  const navigate = useNavigate();
   const { workSpaces, getAllWorkspace } = useWorkSpaceStore();
   const customers = useCustomerStore((s) => s.customers);
 
@@ -191,10 +193,26 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
         await createAssignment(data);
       }
       reset();
+
+      const result = await showAlert({
+        title: 'הקצאה הושלמה בהצלחה',
+        text: 'האם ברצונך לעבור לרשימת ההקצאות?',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonText: 'כן',
+        cancelButtonText: 'לא',
+        reverseButtons: true,
+      });
+
+      if (result.isConfirmed) {
+        navigate('/assignmentTable');
+      }
+
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
+
   console.log('Render - customers:', customers.length);
   console.log('Render - spaces:', workSpaces.length);
   console.log('Render - loading:', loading);
@@ -355,6 +373,9 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = (props) => {
         <div className="mt-6 flex justify-center">
           <Button type="submit" variant="primary" size="md" >
             בצע הקצאה
+          </Button>
+          <Button onClick={()=>{navigate(-1)}} variant="primary" size="md" >
+            בטל
           </Button>
         </div>
 

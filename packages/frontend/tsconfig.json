@@ -21,10 +21,11 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
+
     "paths": {
       "shared-types": ["../shared-types/src"]
     },
-    "types": []
+    "types": ["node"]
     // "types": ["cookie-parser"]
   },
   "include": ["src", "../shared-types/src"]

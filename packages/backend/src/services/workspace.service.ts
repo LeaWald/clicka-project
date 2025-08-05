@@ -1,9 +1,9 @@
 
 import { createClient } from '@supabase/supabase-js';
-import { RoomModel } from "../models/room.model";
-import type { ID } from "shared-types";
+import type { ID, PricingTier } from "shared-types";
 import { WorkspaceModel } from '../models/workspace.model'
 import dotenv from 'dotenv';
+import { PricingTierModel } from '../models/pricing.model';
 dotenv.config();
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
@@ -112,5 +112,34 @@ export class WorkspaceService {
     //להשתמש ב-try,catch
     //לשמור שגיאות במסד נתונים
     //לשלוח הודעות למנהל במקרה של כשל
+  }
+  async getPricingTiersByWorkspaceType(workspaceType: string): Promise<PricingTier[] | null> {
+    const { data, error } = await supabase
+      .from('pricing_tiers') // שם הטבלה שבה מאוחסנות מדרגות התמחור
+      .select('*')
+      .eq('workspace_type', workspaceType); // הנחתי שיש עמודה בשם workspace_type
+
+    if (error) {
+      console.error('Error fetching pricing tiers for workspace type:', error);
+      return null;
+    }
+
+    // המרת הנתונים למודל PricingTier
+    const pricingTiers = data.map(tier => PricingTierModel.fromDatabaseFormat(tier));
+    return pricingTiers;
+  }
+    async getWorkspacesByCustomerId(customerId: ID): Promise<WorkspaceModel[] | null> {
+    const { data, error } = await supabase
+      .from('workspace') // שם הטבלה ב-Supabase
+      .select('*')
+      .eq('current_customer_id', customerId); // הנחתי שיש עמודה בשם customer_id
+
+    if (error) {
+      console.error('Error fetching workspaces for customer:', error);
+      return null;
+    }
+
+    const workspaces = WorkspaceModel.fromDatabaseFormatArray(data); // המרת הנתונים למודל
+    return workspaces;
   }
 }

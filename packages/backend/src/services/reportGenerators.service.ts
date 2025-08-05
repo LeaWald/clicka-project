@@ -22,7 +22,7 @@ function getPeriodLabel(dateStr: string, groupBy: 'month' | 'quarter' | 'year' =
 
 export async function generateExpenseData(parameters: ReportParameters): Promise<ReportData | null> {
   const expenseService = new ExpenseService();
-  const expenseCategories = parameters.categories as ExpenseCategory[] | undefined;
+  const expenseCategories = parameters.categories as string[] | undefined;
 
   const expenses = await expenseService.getExpenses({
     dateFrom: parameters.dateRange?.startDate,
@@ -39,17 +39,17 @@ export async function generateExpenseData(parameters: ReportParameters): Promise
     const periodLabel = group.label;
     const expensesInPeriod = expenses.filter((e) => getPeriodLabel(e.date, parameters.groupBy) === periodLabel);
 
-    const sumsByCategory: Record<ExpenseCategory, number> = {} as Record<ExpenseCategory, number>;
+    const sumsByCategory: Record<string, number> = {};
     for (const expense of expensesInPeriod) {
-      const cat = (expense.category || 'OTHER') as ExpenseCategory;
+      const cat = expense.category || 'OTHER';
       sumsByCategory[cat] = (sumsByCategory[cat] || 0) + expense.amount;
     }
 
     const topCategories = Object.entries(sumsByCategory)
-      .sort((a, b) => b[1] - a[1])
+      .sort((a, b) => (b[1] as number) - (a[1] as number))
       .slice(0, 3)
       .map(([category, amount]) => ({
-        category: category as ExpenseCategory,
+        category: category as unknown as ExpenseCategory,
         amount: amount as number,
       }));
 
@@ -62,16 +62,16 @@ export async function generateExpenseData(parameters: ReportParameters): Promise
 
   const total = expenses.reduce((sum, e) => sum + e.amount, 0);
 
-  const categoryTotals: Record<ExpenseCategory, number> = {} as Record<ExpenseCategory, number>;
+  const categoryTotals: Record<string, number> = {};
   for (const expense of expenses) {
-    const cat = (expense.category || 'OTHER') as ExpenseCategory;
+    const cat = expense.category || 'OTHER';
     categoryTotals[cat] = (categoryTotals[cat] || 0) + expense.amount;
   }
 
   const expensesByCategory = Object.entries(categoryTotals).map(([category, amount]) => ({
-    category: category as ExpenseCategory,
-    amount,
-    percentage: Math.round((amount / total) * 1000) / 10,
+    category: category as unknown as ExpenseCategory,
+    amount: amount as number,
+    percentage: Math.round(((amount as number) / total) * 1000) / 10,
   }));
 
   return {
@@ -148,7 +148,7 @@ export async function generateRevenueDataFromPayments(parameters: ReportParamete
     let effectiveDate = payment.date;
 
     if (payment.invoice_id) {
-      const invoice: InvoiceModel | null = await serviceGetInvoiceById(payment.invoice_id);
+      const invoice: Invoice | null = await serviceGetInvoiceById(payment.invoice_id);
 
       // אם יש תאריך חשבונית – השתמש בו במקום בתאריך התשלום
       if (invoice?.issue_date) {
@@ -324,7 +324,6 @@ import { WorkspaceService } from '../services/workspace.service'; // ייבוא 
 
 import { WorkspaceType } from 'shared-types'; // תקן את הנתיב בהתאם
 import { serviceGetAllInvoices } from "../services/invoice.service";
-import { InvoiceModel } from '../models/invoice.model';
 
 export async function generateOccupancyRevenueData(parameters: ReportParameters): Promise<ReportData | null> {
   const bookingService = new BookingService();

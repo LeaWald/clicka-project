@@ -1,3 +1,7 @@
+"use strict";
+// expense-types.d.ts
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ExpensePaymentMethod = exports.ExpenseStatus = exports.ExpenseCategory = void 0;
 // Expense category enum
 export var ExpenseCategory;
 (function (ExpenseCategory) {
@@ -18,7 +22,7 @@ export var ExpenseCategory;
     ExpenseCategory["EQUIPMENT"] = "EQUIPMENT";
     ExpenseCategory["PETTY_CASH"] = "PETTY_CASH";
     ExpenseCategory["OTHER"] = "OTHER";
-})(ExpenseCategory || (ExpenseCategory = {}));
+})(ExpenseCategory || (exports.ExpenseCategory = ExpenseCategory = {}));
 // Expense status enum
 export var ExpenseStatus;
 (function (ExpenseStatus) {
@@ -26,7 +30,7 @@ export var ExpenseStatus;
     ExpenseStatus["APPROVED"] = "APPROVED";
     ExpenseStatus["PAID"] = "PAID";
     ExpenseStatus["REJECTED"] = "REJECTED";
-})(ExpenseStatus || (ExpenseStatus = {}));
+})(ExpenseStatus || (exports.ExpenseStatus = ExpenseStatus = {}));
 // Payment method (for expenses)
 export var ExpensePaymentMethod;
 (function (ExpensePaymentMethod) {
@@ -38,10 +42,10 @@ export var ExpensePaymentMethod;
     ExpensePaymentMethod["OTHER"] = "OTHER";
 })(ExpensePaymentMethod || (ExpensePaymentMethod = {}));
 // export enum PaymentMethod {
-//   BankTransfer = 'BankTransfer',   
-//   CreditCard = 'CreditCard',      
-//   Cash = 'Cash',                  
-//   Other = 'Other'                 
+//   BankTransfer = 'BankTransfer',
+//   CreditCard = 'CreditCard',
+//   Cash = 'Cash',
+//   Other = 'Other'
 // }
 // export enum VendorStatus {
 //   Active = 'Active',

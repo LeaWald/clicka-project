@@ -1,5 +1,4 @@
 import { createClient } from '@supabase/supabase-js';
-import { Translation } from 'shared-types';
 import { translateText } from '../utils/translate';
 import { supportedLanguages } from 'shared-types';
 import { TranslationModel } from '../models/TranslationRecord';

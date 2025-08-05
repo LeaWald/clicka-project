@@ -13,7 +13,28 @@ import { ChartDisplay } from '../../../../Common/Components/BaseComponents/Graph
 import { ExportButtons } from '../../../../Common/Components/BaseComponents/ExportButtons';
 import { SelectField } from '../../../../Common/Components/BaseComponents/Select';
 import { useFinancialReportsStore } from '../../../../Stores/Billing/financialReports1';
-import { ReportType, ReportParameters, ExpenseCategory } from 'shared-types';
+import { ReportType, ReportParameters } from 'shared-types';
+
+// Define ExpenseCategory as a runtime enum for zod validation
+export enum ExpenseCategory {
+  RENT = 'RENT',
+  UTILITIES = 'UTILITIES',
+  CLEANING = 'CLEANING',
+  MAINTENANCE = 'MAINTENANCE',
+  OFFICE_SUPPLIES = 'OFFICE_SUPPLIES',
+  REFRESHMENTS = 'REFRESHMENTS',
+  MARKETING = 'MARKETING',
+  SALARIES = 'SALARIES',
+  INSURANCE = 'INSURANCE',
+  SOFTWARE = 'SOFTWARE',
+  PROFESSIONAL_SERVICES = 'PROFESSIONAL_SERVICES',
+  TAXES = 'TAXES',
+  EVENTS = 'EVENTS',
+  FURNITURE = 'FURNITURE',
+  EQUIPMENT = 'EQUIPMENT',
+  PETTY_CASH = 'PETTY_CASH',
+  OTHER = 'OTHER',
+}
 
 // טיפוס כולל vendorId רק בצד הקליינט
 type ExtendedReportParameters = ReportParameters & {

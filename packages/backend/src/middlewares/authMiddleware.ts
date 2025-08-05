@@ -1,7 +1,6 @@
 
 // middlewares/authMiddleware.ts
 import { Request, Response, NextFunction } from 'express';
-import jwt from 'jsonwebtoken';
 import { UserService } from '../services/user.service';
 import { User } from "shared-types";
 import { UserTokenService } from '../services/userTokenService';

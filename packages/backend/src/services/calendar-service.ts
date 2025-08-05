@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 //ספריה לסינכרון איזורי זמן
-import { toZonedTime, format } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 import { CalendarEventInput } from 'shared-types';
 import { DateISO } from 'shared-types/core';
 

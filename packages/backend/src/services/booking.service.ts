@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 import { BookingModel } from "../models/booking.model";
-// import type { ID, Room } from "shared-types";
 import dotenv from 'dotenv';
 import { customerService } from './customer.service';
 import { getCurrentMeetingRoomPricing, getMeetingRoomPricingHistory } from './pricing.service';

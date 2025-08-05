@@ -3,8 +3,7 @@ import { ChartDisplay, ChartData } from '../Components/BaseComponents/Graph';
 import { Button } from '../Components/BaseComponents/Button';
 
 export const ReportPage = () => {
-  const chartRef = useRef<HTMLDivElement>(null);
-//עושים רפרנס לדיו שאחרי זה יעזור לי לייצא לPDF 
+const chartRef = useRef<HTMLDivElement>(null);//עושים רפרנס לדיו שאחרי זה יעזור לי לייצא לPDF 
   
   const initialData: ChartData[] = [
     { label: 'Group A', value: 100 },

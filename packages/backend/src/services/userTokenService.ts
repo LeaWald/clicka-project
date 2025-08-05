@@ -1,9 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { decrypt, encrypt } from "./cryptoService";
 import { supabase } from "../db/supabaseClient";
 import { UserTokens } from "../models/userTokens.models";
 import { randomUUID } from "crypto";
-import { User } from "shared-types";
 import { refreshAccessToken } from "./googleAuthService";
 import { UserService } from "./user.service";
 

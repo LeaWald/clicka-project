@@ -1,4 +1,4 @@
-import { useReceiptAndDocumentsStore } from "../../../../Stores/Billing/receiptAndDocumentsStore";
+// import { useReceiptAndDocumentsStore } from "../../../../Stores/Billing/receiptAndDocumentsStore";
 export const ReceiptAndDocumentGeneration = () => {
     // const { fetchGeneratedDocuments, fetchDocumentTemplates, generateDocument
     //     , downloadDocument, sendDocumentByEmail

@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { FileReference, ID } from 'shared-types';
+import { ID } from 'shared-types';
 import { Readable } from 'stream';
 import { UserTokenService } from './userTokenService';
 import { DocumentModel } from '../models/document.model';
@@ -130,12 +130,32 @@ export async function deleteFileFromDrive(fileId: string, token: string): Promis
   await drive.files.delete({ fileId });
 }
 
-export async function shareDriveFile(fileId: string, permissions: any, token: string): Promise<void> {
+// export async function shareDriveFile(fileId: string, permissions: any, token: string): Promise<void> {
+//   const drive = google.drive({ version: 'v3', auth: getAuth(token) });
+//   await drive.permissions.create({
+//     fileId,
+//     requestBody: permissions,
+//   });
+// }
+
+export async function shareDriveFile(
+  fileId: string,
+  clientEmail: string,
+  token: string
+): Promise<void> {
   const drive = google.drive({ version: 'v3', auth: getAuth(token) });
+  // הגדרת ההרשאות כצופה בלבד
+  const permissions = {
+    type: 'user',
+    role: 'reader', // רק קריאה, ללא אפשרות עריכה
+    emailAddress: clientEmail, // המייל של הלקוח
+  };
+  // יצירת הרשאה עבור הקובץ
   await drive.permissions.create({
     fileId,
     requestBody: permissions,
   });
+  console.log(`File ${fileId} shared with ${clientEmail} as a viewer.`);
 }
 
 //פונקציות שהוספתי
@@ -285,10 +305,10 @@ export async function uploadFileAndReturnReference(
     console.log('File uploaded to Drive:', uploaded);
     
     console.log('Sharing file...');
-    await shareDriveFile(uploaded.id!, {
-      role: 'reader',
-      type: 'anyone'
-    }, token);
+    // await shareDriveFile(uploaded.id!, {
+    //   role: 'reader',
+    //   type: 'anyone'
+    // }, token);
     console.log('File shared successfully');
     
     console.log('Getting file metadata...');

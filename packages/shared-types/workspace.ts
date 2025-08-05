@@ -1,5 +1,5 @@
 // workspace-types.d.ts
-import { ID, DateISO, ApiResponse, PaginatedResponse } from './core';
+import { ID, DateISO } from './core';
 import { WorkspaceType } from './customer';
 
 // Space status enum

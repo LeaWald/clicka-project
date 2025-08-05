@@ -1,11 +1,11 @@
 
-import { useSupplierStore } from "../../../../Stores/Billing/supplierStore";
+// import { useSupplierStore } from "../../../../Stores/Billing/supplierStore";
 
 
 export const ContractForm = () => {
-    const { fetchContractDetails, handleFieldChange, validateContractForm,
-        handleCreateContract, handleUpdateContract
-    } = useSupplierStore();
+    // const { fetchContractDetails, handleFieldChange, validateContractForm,
+    //     handleCreateContract, handleUpdateContract
+    // } = useSupplierStore();
 
 
 
@@ -14,11 +14,11 @@ export const ContractForm = () => {
     //in the store
 
 
-    // איפוס הטופס
-    const resetForm = (): void => { };
+    // // איפוס הטופס
+    // const resetForm = (): void => { };
 
-    // סגירת הטופס (ביטול/סיום)
-    const handleCloseForm = (): void => { };
+    // // סגירת הטופס (ביטול/סיום)
+    // const handleCloseForm = (): void => { };
 
 
     return (

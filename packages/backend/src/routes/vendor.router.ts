@@ -8,9 +8,7 @@ import {
   getVendorController,
   uploadVendorDocument
 } from '../controllers/vendor.controller';
-import multer from 'multer';
 const vendorRouter = Router();
-const upload = multer();
 
 vendorRouter.get("/", getVendorController);
 // vendorRouter.post('/vendors/upload-document', upload.single('file'), handleUploadDocument);

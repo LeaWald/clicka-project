@@ -223,3 +223,40 @@ export const sendStatusChangeEmails = async (
   );
   await Promise.all(emailPromises);
 };
+
+//פונקציה ליצירת פריט חשבונית
+export async function serviceCreateInvoiceItem(data: Partial<InvoiceItemModel>): Promise<InvoiceItemModel> {
+    console.log('🔍 מתחילים ליצור פריט חשבונית עם הנתונים:', data);
+
+    // הכנת הנתונים להוספה
+    const itemData = {
+        invoice_id: data.invoice_id || '',
+        type: data.type || '', // ברירת מחדל
+        description: data.description || '',
+        quantity: data.quantity || 0,
+        unit_price: data.unit_price || 0,
+        total_price: data.total_price || 0,
+        tax_rate: data.tax_rate || 0,
+        tax_amount: data.tax_amount || 0,
+        workspace_type: data.workspace_type,
+        booking_id: data.booking_id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+    };
+
+    console.log('📦 נתוני הפריט המוכנים להוספה:', itemData);
+
+    const { data: invoiceItemData, error } = await supabase
+        .from('invoice_item')
+        .insert([itemData])
+        .select()
+        .single();
+
+    if (error) {
+        console.error('❌ שגיאה בהוספת פריט חשבונית:', error);
+        throw new Error(error.message);
+    }
+
+    console.log('✅ פריט החשבונית נוצר בהצלחה:', invoiceItemData);
+    return invoiceItemData as InvoiceItemModel;
+}

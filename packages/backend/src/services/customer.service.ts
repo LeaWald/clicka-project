@@ -4,11 +4,9 @@ import { serviceCustomerPeriod } from "./customerPeriod.service";
 import {
   ContractStatus,
   CreateCustomerRequest,
-  CustomerPeriod,
   CustomerStatus,
   GetCustomersRequest,
   ID,
-  PaginatedResponse,
   PaymentMethodType,
   RecordExitNoticeRequest,
   StatusChangeRequest,
@@ -21,16 +19,10 @@ import { contractService } from "../services/contract.service";
 import { customerPaymentMethodModel } from "../models/customerPaymentMethod.model";
 import { serviceCustomerPaymentMethod } from "./customerPaymentMethod.service";
 import { EmailTemplateService } from "./emailTemplate.service";
-import { EmailTemplateModel } from "../models/emailTemplate.model";
 import { encodeSubject, sendEmail } from "./gmail-service";
-import { error, log } from "node:console";
-import { changeCustomerStatus } from "../controllers/customer.controller";
-import { token } from "morgan";
 import { UserTokenService } from "./userTokenService";
-import { promises } from "node:dns";
 import { getDocumentById } from "./document.service";
 import { deleteFileFromDrive } from "./drive-service";
-import { ca } from "date-fns/locale";
 import * as XLSX from "xlsx"; //חדש
 
 export class customerService extends baseService<CustomerModel> {
@@ -655,7 +647,7 @@ export class customerService extends baseService<CustomerModel> {
           {}
         );
 
-        const response = await sendEmail(
+        await sendEmail(
           "me",
           {
             to: [customer.email ?? ""],

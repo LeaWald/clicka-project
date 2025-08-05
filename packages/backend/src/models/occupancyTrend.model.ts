@@ -1,6 +1,6 @@
 
 import { ID, DateISO } from 'shared-types/core';
-import { OccupancyTrend, OccupancyAlert, TimePeriod, StatusOccupancy, WorkSpaceType }from 'shared-types/occupancy'
+import { OccupancyTrend, TimePeriod, StatusOccupancy, WorkSpaceType }from 'shared-types/occupancy'
 
 export class OccupancyTrendModel implements OccupancyTrend {
  id?:ID;

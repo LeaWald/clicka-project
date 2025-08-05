@@ -91,7 +91,7 @@ export const ExpenseList = () => {
             (expense) =>
                 expense.vendor_name?.toLowerCase().includes(term.toLowerCase()) ||
                 expense.description?.toLowerCase().includes(term.toLowerCase()) ||
-                expense.category?.toLowerCase().includes(term.toLowerCase())
+                String(expense.category)?.toLowerCase().includes(term.toLowerCase())
         );
 
         if (filtered.length > 0) {
@@ -99,7 +99,7 @@ export const ExpenseList = () => {
         } else {
             try {
                 const response = await axiosInstance.get("/expenses/filter", {
-                    params: { q: term, page: 1, limit: 50 },
+                    params: { q: term, page: 1, limit: 50, excludePettyCash: true },
                 });
                 setExpenses(response.data);
             } catch (error) {
@@ -126,7 +126,7 @@ export const ExpenseList = () => {
     const valuesToTable: ValuesToTable[] = expenses.map((expense) => ({
         id: expense.id!,
         vendor_name: expense.vendor_name,
-        category: expense.category,
+        category: expense.category ? String(expense.category) : "",
         amount: expense.amount,
         status: expense.status,
         date: new Date(expense.date).toLocaleDateString("he-IL"),

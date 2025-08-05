@@ -1,6 +1,5 @@
 import { customerPaymentMethodModel } from "../models/customerPaymentMethod.model";
 import { baseService } from "./baseService";
-import { CustomerPeriod } from "shared-types";
 import { supabase } from "../db/supabaseClient";
 
 export class customerPaymentMethodService extends baseService<customerPaymentMethodModel> {

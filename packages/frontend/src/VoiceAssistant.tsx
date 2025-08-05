@@ -145,24 +145,61 @@ const handleCommand = (text: string) => {
     "היסטוריה",
   ];
 
+  const newVendorKeywords = [
+    "ספק חדש",
+    "הוספת ספק",
+    "פתיחת ספק חדש",
+    "תוסיפי ספק",
+    "תפתחי ספק",
+    "לפתוח ספק",
+    "הוסף ספק",
+    "הכנסת ספק",
+    "צור ספק",
+    "קליטה של ספק",
+    "אני רוצה להוסיף ספק",
+    "אני צריכה ספק חדש",
+    "פתחי כרטיס ספק",
+    "חדש ספק",
+  ];
+
+  const vendorsListKeywords = [
+    "ספקים",
+    "כל הספקים",
+    "רשימת ספקים",
+    "תראי לי ספקים",
+    "אני רוצה לראות את הספקים",
+    "תפתחי את דף הספקים",
+    "דף ספקים",
+    "תציגי את הספקים",
+    "כל כרטיסי הספקים",
+    "הכרטיסים של הספקים",
+    "כרטיסי ספק",
+    "ספקים קיימים",
+    "עיון בספקים",
+  ];
+
   const matches = (input: string, keywords: string[]) =>
     keywords.some((kw) => input.includes(kw));
 
   if (matches(lower, newCustomerKeywords)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/customers/new`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/customers/new`;
   } else if (matches(lower, customersListKeywords)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/customers`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/customers`;
   } else if (matches(lower, newLead)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads/interestedCustomerRegistration`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/leads/interestedCustomerRegistration`;
   } else if (matches(lower, leadsList)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/leads`;
   } else if (matches(lower, contractList)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/contracts`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/contracts`;
   } else if (matches(lower, sourcesGraph)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/leadAndCustomer/leads/LeadSourcesPieChart`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}leadAndCustomer/leads/LeadSourcesPieChart`;
   } else if (matches(lower, history)) {
-    window.location.href = `${process.env.REACT_APP_BASE_URL}/customerHistory`;
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}customerHistory`;
+  } else if (matches(lower, newVendorKeywords)) {
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}vendors/new`;
+  } else if (matches(lower, vendorsListKeywords)) {
+    window.location.href = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}vendor`;
   } else {
-    showAlert("","לא הבנתי את הפקודה... 😕 נסי שוב בבקשה","warning");
+    showAlert("", "לא הבנתי את הפקודה... 😕 נסי שוב בבקשה", "warning");
   }
 };

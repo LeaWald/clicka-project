@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { Form } from "../../../../Common/Components/BaseComponents/Form";
 import { InputField } from "../../../../Common/Components/BaseComponents/Input";
@@ -47,6 +47,7 @@ const workspaceTypeLabels: Record<WorkspaceType, string> = {
   [WorkspaceType.COMPUTER_STAND]: "עמדת מחשב",
   [WorkspaceType.RECEPTION_DESK]: "דלפק קבלה",
   [WorkspaceType.BASE]: "בסיס",
+  [WorkspaceType.KLIKAH_CARD_UPGRADED]: "כרטיס קליקה משודרג"
 };
 
 // סכימת אימות (Zod)

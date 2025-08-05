@@ -1,8 +1,17 @@
-import type{ DateISO, Expense, ExpenseCategory, ExpensePaymentMethod, ExpenseStatus, FileReference, ID } from "shared-types";
+import type {
+  DateISO,
+  Expense,
+  ExpenseCategory,
+  ExpensePaymentMethod,
+  ExpenseStatus,
+  FileReference,
+  ID
+} from "shared-types";
 export class ExpenseModel implements Expense {
   id: ID;
   vendor_id: ID;
   vendor_name: string;
+  category_id: string;
   category: ExpenseCategory;
   description: string;
   amount: number;
@@ -21,11 +30,15 @@ export class ExpenseModel implements Expense {
   approvedAt?: DateISO;
   createdAt: DateISO;
   updatedAt: DateISO;
+  is_income: boolean;
+  source_type: "vendor" | "store";
+  purchaser_name: string;
   constructor(
     id: ID,
     vendor_id: ID,
     vendor_name: string,
-    category: ExpenseCategory,
+    category_id: string,
+    category: ExpenseCategory | undefined,
     description: string,
     amount: number,
     tax: number | undefined,
@@ -42,12 +55,16 @@ export class ExpenseModel implements Expense {
     approved_by: ID | undefined,
     approvedAt: DateISO | undefined,
     createdAt: DateISO,
-    updatedAt: DateISO
+    updatedAt: DateISO,
+    is_income: boolean,
+    source_type: "vendor" | "store",
+    purchaser_name: string
   ) {
     this.id = id;
     this.vendor_id = vendor_id;
     this.vendor_name = vendor_name;
-    this.category = category;
+    this.category_id = category_id;
+this.category = category!;
     this.description = description;
     this.amount = amount;
     this.tax = tax;
@@ -65,48 +82,44 @@ export class ExpenseModel implements Expense {
     this.approvedAt = approvedAt;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.vendorId = vendor_id;
-    this.vendorName = vendor_name;
+    this.is_income = is_income;
+    this.source_type = source_type;
+    this.purchaser_name = purchaser_name;
   }
-  vendorId: string;
-  vendorName: string;
-  dueDate?: string | undefined;
-  paidDate?: string | undefined;
-  paymentMethod?: ExpensePaymentMethod | undefined;
-  invoiceNumber?: string | undefined;
-  invoiceFile?: FileReference | undefined;
-  receiptFile?: FileReference | undefined;
-  success: any;
   toDatabaseFormat() {
-return {
-id: this.id,
-vendor_id: this.vendor_id,
-vendor_name: this.vendor_name,
-category: this.category,
-description: this.description,
-amount: this.amount,
-tax: this.tax,
-date: this.date,
-due_date: this.due_date,
-paid_date: this.paid_date,
-status: this.status,
-payment_method: this.payment_method,
-reference: this.reference,
-invoice_number: this.invoice_number,
-invoice_file: this.invoice_file,
-receipt_file: this.receipt_file,
-notes: this.notes,
-approved_by: this.approved_by,
-approved_at: this.approvedAt,
-created_at: this.createdAt,
-updated_at: this.updatedAt,
-};
-}
-static fromDatabaseFormat(dbData: any): ExpenseModel {
+    return {
+      id: this.id,
+      vendor_id: this.vendor_id,
+      vendor_name: this.vendor_name,
+      category_id: this.category_id,
+      description: this.description,
+      amount: this.amount,
+      tax: this.tax,
+      date: this.date,
+      due_date: this.due_date,
+      paid_date: this.paid_date,
+      status: this.status,
+      payment_method: this.payment_method,
+      reference: this.reference,
+      invoice_number: this.invoice_number,
+      invoice_file: this.invoice_file,
+      receipt_file: this.receipt_file,
+      notes: this.notes,
+      approved_by: this.approved_by,
+      approved_at: this.approvedAt,
+      created_at: this.createdAt,
+      updated_at: this.updatedAt,
+      is_income: this.is_income,
+      source_type: this.source_type,
+      purchaser_name: this.purchaser_name,
+    };
+  }
+  static fromDatabaseFormat(dbData: any): ExpenseModel {
     return new ExpenseModel(
       dbData.id,
       dbData.vendor_id,
       dbData.vendor_name,
+      dbData.category_id,
       dbData.category,
       dbData.description,
       dbData.amount,
@@ -125,11 +138,12 @@ static fromDatabaseFormat(dbData: any): ExpenseModel {
       dbData.approved_at,
       dbData.created_at,
       dbData.updated_at,
+      dbData.is_income,
+      dbData.source_type,
+      dbData.purchaser_name
     );
   }
-
   static fromDatabaseFormatArray(dbDataArray: any[]): ExpenseModel[] {
-    return dbDataArray.map(dbData => ExpenseModel.fromDatabaseFormat(dbData));
+    return dbDataArray.map(ExpenseModel.fromDatabaseFormat);
   }
-
 }

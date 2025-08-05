@@ -12,7 +12,6 @@ import { useWorkSpaceStore } from "../../../Stores/Workspace/workspaceStore";
 import { useForm } from "react-hook-form";
 
 type SpaceAssignUpdateData = z.infer<typeof spaceAssignUpdateSchema>;
-
 const spaceAssignUpdateSchema = z.object({
   workspaceId: z.string().min(1, "נדרש מזהה חלל עבודה"),
   customerId: z.string().min(1, "נדרש מזהה לקוח"),
@@ -22,7 +21,6 @@ const spaceAssignUpdateSchema = z.object({
   assignedBy: z.string().min(1, "נדרש מזהה משבץ"),
   status: z.enum(["ACTIVE", "INACTIVE"]),
 });
-
 export const UpdateAssigenment = () => {
   const location = useLocation();
   const assignment = location.state?.assignment;
@@ -61,7 +59,7 @@ export const UpdateAssigenment = () => {
   useEffect(() => {
     console.log(assignment);
     fetchCustomers();
-     getAllWorkspace(); 
+     getAllWorkspace();
       setWorkspaceOptions(
         workSpaces.map((w) => ({ label:w.name, value:w.id?w.id : ''}))
       );
@@ -119,6 +117,7 @@ export const UpdateAssigenment = () => {
     return () => clearTimeout(timeoutId);
   }, [watchedWorkspaceId, watchedAssignedDate, watchedUnassignedDate, watchedDaysOfWeek, checkConflicts,onchange]);
   const handleSubmit = async (data: SpaceAssignUpdateData) => {
+    console.log(data)
     try {
       const payload: SpaceAssign = {
         ...assignment,
@@ -133,20 +132,19 @@ export const UpdateAssigenment = () => {
       };
       const result = await updateAssignment(assignment.id!, payload);
       if (result) {
-        navigate("/space-assignments");
+        navigate("/assignmentTable");
       } else {
-        alert("שגיאה בעדכון ההשמה");
+        alert("שגיאה בעדכון");
       }
     } catch (err) {
-      console.error("שגיאה בעדכון ההשמה:", err);
+      console.error("שגיאה בעדכון :", err);
     }
   };
-
   if (!assignment) {
-    return <div>לא נמצאה השמה לעריכה</div>;
+    return <div>לא נמצאה הקצאה לעריכה</div>;
   }
-
   const handleCancel = () => {
+    navigate("/assignmentTable");
     navigate("/assignmentTable");
   };
 console.log(assignment);
@@ -205,7 +203,6 @@ console.log(assignment);
             defaultValue={assignment.workspaceId}
             className="w-full border rounded px-3 py-2"
           />
-
           <SelectField
             label="לקוח"
             name="customerId"
@@ -213,15 +210,14 @@ console.log(assignment);
             defaultValue={assignment.customerId}
             className="w-full border rounded px-3 py-2"
           />
-
           <InputField
+            label="תאריך הקצאה"
             label="תאריך הקצאה"
             name="assignedDate"
             type="date"
             defaultValue={assignment.assignedDate}
             className="w-full border rounded px-3 py-2"
           />
-
           <InputField
             label="תאריך סיום"
             name="unassignedDate"
@@ -254,14 +250,12 @@ console.log(assignment);
             defaultValue={assignment.notes || ""}
             className="w-full border rounded px-3 py-2"
           />
-
           <InputField
             label="הוקצה עי"
             name="assignedBy"
             defaultValue={assignment.assignedBy}
             className="w-full border rounded px-3 py-2"
           />
-
           <SelectField
             label="סטטוס"
             name="status"
@@ -272,14 +266,12 @@ console.log(assignment);
             defaultValue={assignment.status}
             className="w-full border rounded px-3 py-2"
           />
-
           <div className="flex gap-4 mt-4">
             <Button
               type="button"
               className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
               onClick={handleCancel}
             >בטל</Button>
-
             <Button
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"

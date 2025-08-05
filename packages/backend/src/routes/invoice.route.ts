@@ -8,7 +8,9 @@ import {
   updateInvoice,
   deleteInvoice,
   getCustomersCollection,
-  sendEmail
+  sendEmail,
+  createInvoiceItem
+
 } from '../controllers/invoice.controller';
 import { sendInvoiceUpdateMail } from '../controllers/InvoiceUpdateMail';
 
@@ -25,6 +27,7 @@ invoiceRouter.get('/health', (req: Request, res: Response) => {
       'GET    /api/invoices/:invoice_id/items     - Get invoice by invoiceId',
       'GET    /api/invoices/:id     - Get invoice by ID',
       'POST   /api/invoices/create  - Create manual invoice',
+      'POST   /api/invoices/:invoice_id  - Create invoice item',
       'POST   /api/invoices/generate - Generate automatic invoices',
       'PUT    /api/invoices/:id     - Update invoice',
       'DELETE /api/invoices/:id     - Delete invoice'
@@ -33,6 +36,8 @@ invoiceRouter.get('/health', (req: Request, res: Response) => {
 });
 // CREATE - יצירת חשבוניות
 invoiceRouter.post('/create', createInvoice);
+// יצירת פריט חשבונית
+invoiceRouter.post('/:invoice_id', createInvoiceItem); 
 // יצירת חשבונית ידנית            // יצירת חשבוניות אוטומטיות
 // READ - קריאת חשבוניות
 invoiceRouter.get('/', getAllInvoices);  // כל החשבוניות  

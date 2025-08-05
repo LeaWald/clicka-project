@@ -3,8 +3,7 @@ import {
   postEvent,
   getListEvents,
   deleteEvent,
-  putEvent,
-  getFreeBusy
+  putEvent
 } from '../controllers/calendar-controller';
 
 const router = Router();

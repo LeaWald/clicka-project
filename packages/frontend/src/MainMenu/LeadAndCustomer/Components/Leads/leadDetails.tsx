@@ -1,7 +1,6 @@
-import React, { useState } from "react";
 import { Button } from "../../../../Common/Components/BaseComponents/Button";
 import { useNavigate } from "react-router-dom";
-import { LeadStatus, LeadSource, Lead } from "shared-types";
+import { Lead } from "shared-types";
 
 // קומפוננטת בן – נפתחת בלחיצה
 export const LeadDetails = ({ lead, onDelete }: { lead: Lead, onDelete: () => void }) => {

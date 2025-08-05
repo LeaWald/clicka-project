@@ -2,7 +2,6 @@ import { UserModel } from '../models/user.model'; // נניח שהמודל User 
 import { logUserActivity } from '../utils/logger';
 import dotenv from 'dotenv';
 import { supabase } from '../db/supabaseClient';
-import { decrypt } from './cryptoService';
 // import bcrypt from 'bcrypt';
 //טוען את משתני הסביבה מהקובץ .env
 dotenv.config();

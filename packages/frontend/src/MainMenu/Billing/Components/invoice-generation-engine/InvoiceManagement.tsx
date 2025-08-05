@@ -11,19 +11,12 @@ import { UUID } from 'crypto';
 export const InvoiceManagement: React.FC = () => {
   const {
     invoices,
-    // loading,
     error,
     getAllInvoices,
     getAllInvoiceItems,
     createInvoice,
     updateInvoice,
-    // updateInvoiceStatus,
     deleteInvoice,
-    // generateMonthlyInvoices,
-    // sendInvoiceByEmail,
-    // getOverdueInvoices,
-    // getInvoicesByStatus,
-    // calculateOpenInvoicesTotal,
     clearError
   } = useInvoiceStore();
 
@@ -87,6 +80,7 @@ export const InvoiceManagement: React.FC = () => {
       Swal.fire('שגיאה', 'אירעה שגיאה בטעינת פריטי החשבונית', 'error');
     }
   };
+  
 
   const columns: TableColumn<any>[] = [
     { header: 'מספר חשבונית', accessor: 'invoice_number' },

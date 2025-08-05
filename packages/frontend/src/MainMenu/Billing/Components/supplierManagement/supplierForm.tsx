@@ -1,5 +1,5 @@
 
-import { useSupplierStore } from "../../../../Stores/Billing/supplierStore";
+// import { useSupplierStore } from "../../../../Stores/Billing/supplierStore";
 export const SupplierForm = () => {
     // const { fetchVendorDetails, handleFieldChange, validateVendorForm,
     //     handleCreateVendor, handleUpdateVendor
@@ -9,10 +9,10 @@ export const SupplierForm = () => {
 
 
     // איפוס הטופס
-    const resetForm = (): void => { };
+    // const resetForm = (): void => { };
 
-    // סגירת הטופס (ביטול/סיום)
-    const handleCloseForm = (): void => { };
+    // // סגירת הטופס (ביטול/סיום)
+    // const handleCloseForm = (): void => { };
 
 
     return <div>

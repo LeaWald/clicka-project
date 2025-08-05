@@ -32,6 +32,7 @@ const workspaceTypeLabels = {
   DESK_IN_ROOM: "שולחן בחדר",
   OPEN_SPACE: "אופן ספייס",
   KLIKAH_CARD: "כרטיס קליקה",
+  KLIKAH_CARD_UPGRADED: "כרטיס קליקה משודרג",
   DOOR_PASS: "כרטיס כניסה",
   WALL: "קיר",
   COMPUTER_STAND: "עמדת מחשב",

@@ -28,7 +28,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   getAllUsers: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.get<User[]>('/users/getAllUsers');
+      const response = await axiosInstance.get<User[]>('/api/users/getAllUsers');
       set({ users: response.data, loading: false });
     } catch (error) {
       console.error('Error getting all users:', error);
@@ -49,7 +49,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.get<User>(`/users/getUser/${id}`);
+      const response = await axiosInstance.get<User>(`/api/users/getUser/${id}`);
       set({ currentUser: response.data, loading: false });
       return response.data;
     } catch (error) {
@@ -66,7 +66,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   createUser: async (user: User): Promise<User | null> => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.post('/users/createUser', user);
+      const response = await axiosInstance.post('/api/users/createUser', user);
       const newUser = response.data;
       
       // עדכון רשימת המשתמשים
@@ -90,7 +90,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   removeUser: async (id: string): Promise<User | null> => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.delete(`/users/deleteUser/${id}`);
+      const response = await axiosInstance.delete(`/api/users/deleteUser/${id}`);
       const deletedUser = response.data;
       
       // הסרת המשתמש מהרשימה
@@ -115,7 +115,7 @@ export const useUserStore = create<UserState>((set, get) => ({
   updateUser: async (id: string, newUser: User): Promise<User | null> => {
     set({ loading: true, error: null });
     try {
-      const response = await axiosInstance.put(`/users/updateUser/${id}`, newUser);
+      const response = await axiosInstance.put(`/api/users/updateUser/${id}`, newUser);
       const updatedUser = response.data;
       
       // עדכון המשתמש ברשימה

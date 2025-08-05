@@ -376,7 +376,7 @@ export function RoomManager() {
             <TextField
               label="ציוד (מופרד בפסיקים)"
               fullWidth margin="normal"
-              // {...methods.register("equipment", { required: "שדה חובה" })}
+              {...methods.register("equipment", { required: "שדה חובה" })}
               error={!!errors.equipment}
               helperText={errors.equipment?.message}
             />

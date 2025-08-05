@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import App from './App';
 import { AuthenticationScreen } from './MainMenu/CoreAndIntegration/Components/Login/AuthenticationScreen';
@@ -9,8 +9,8 @@ import VendorsList from './MainMenu/Billing/Components/Vendor-management/Vendors
 import { Vendor } from 'shared-types';
 import { ExcelUpload } from './MainMenu/LeadAndCustomer/Components/Leads/ UploadLeadsFile';
 import { ExcelCUpload } from './MainMenu/LeadAndCustomer/Components/Customers/UploadCustomersFile';
-import { BillingRouting } from './MainMenu/Billing/Components/BillingRouting';
-import { ExpenseList } from './MainMenu/Billing/Components/expenseManagementSystem/expenseList';
+import { BillingRouting } from './MainMenu/Billing/Components/billingRouting';
+// import { ExpenseList } from './MainMenu/Billing/Components/expenseManagementSystem/expenseList';
 import PaymentForm from './MainMenu/Billing/Components/invoice-generation-engine/PaymentForm';
 import { PaymentList } from './MainMenu/Billing/Components/paymentList';
 import { BookingCalendar } from './MainMenu/Workspace/Components/bookingCalendar';
@@ -26,7 +26,7 @@ import { InvoiceManagement } from './MainMenu/Billing/Components/invoice-generat
 import { Collection } from './MainMenu/Billing/Components/invoice-generation-engine/collection';
 import { RegisterUser } from './MainMenu/CoreAndIntegration/Components/Login/registerUser';
 import { VendorForm } from './MainMenu/Billing/Components/Vendor-management/VendorForm';
-
+import { ExpensesPage } from './MainMenu/Billing/Components/expenseManagementSystem/ExpensesPage';
 import { BookingTable } from './MainMenu/Workspace/Components/bookingTable';
 import { UpdateBooking } from './MainMenu/Workspace/Components/updateBooking';
 import { Report } from './MainMenu/Workspace/Components/report';
@@ -34,11 +34,17 @@ import { AssigmentTable } from './MainMenu/Workspace/Components/assigenmentTable
 import { UpdateAssigenment } from './MainMenu/Workspace/Components/updateAssigenment';
 import { AssignmentForm } from './MainMenu/Workspace/Components/assignmentForm';
 import DocumentUpload from './MainMenu/CoreAndIntegration/Components/DocumentUpload';
-import PettyCashPage from './MainMenu/Billing/Components/expenseManagementSystem/PettyCashPage';
 import { RoomManager } from './MainMenu/Workspace/Components/RoomManager';
-import { CreateExpenseForm } from './MainMenu/Billing/Components/expenseManagementSystem/expenseForm';
+// import { CreateExpenseModal } from './MainMenu/Billing/Components/expenseManagementSystem/expenseForm';
 import { WorkspaceMap } from './MainMenu/Workspace/Components/workspaceMap';
 import { CustomerChange } from './MainMenu/Workspace/Components/customerChange';
+import DocumentTemplate from './MainMenu/DocumentManagement/Components/DocumentTemplate';
+import { UpdateDocumentTemplate } from './MainMenu/DocumentManagement/Components/UpdateDocumentTemplate';
+import {ShowDocumentTemplate} from './MainMenu/DocumentManagement/Components/ShowDocumentTemplate';
+import { PreviewDocumentTemplate } from './MainMenu/DocumentManagement/Components/PreviewDocumentTemplate';
+import AddDocumentTemplate from './MainMenu/DocumentManagement/Components/AddDocumentTemplate';
+import { ExpenseList } from './MainMenu/Billing/Components/expenseManagementSystem/expenseList';
+import { DocumentTemplatePreviewPage } from './MainMenu/DocumentManagement/Components/DocumentTempExport';
 
 export const Routing = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -59,11 +65,12 @@ export const Routing = () => {
         <Route path="leadAndCustomer" element={<LeadAndCustomer />} />
         <Route path="leadAndCustomer/*" element={<LeadAndCustomerRouting />} />
         <Route path="billing/*" element={<BillingRouting />} />
-        <Route path="expenses" element={<ExpenseList />} />
+        {/* <Route path="expenses" element={<ExpenseList />} /> */}
+        <Route path="expenses" element={<ExpensesPage/>} />
         <Route path="/leadAndCustomer/leads/UploadLeadsFile" element={<ExcelUpload />} />
         <Route path="/leadAndCustomer/Customers/UploadCustomersFile" element={<ExcelCUpload />} />
-        <Route path="expenses/expense-form" element={<CreateExpenseForm />} />
-        <Route path="expenses/expense-form/:id" element={<CreateExpenseForm />} />
+        {/* <Route path="expenses/expense-form" element={<CreateExpenseForm />} /> */}
+        {/* <Route path="expenses/expense-form/:id" element={<CreateExpenseForm />} /> */}
         <Route path="/workspaceMap" element={<WorkspaceMap />} />
         <Route path="assignmentForm" element={<AssignmentForm/>} />
         <Route path="assignmentTable" element={<AssigmentTable/>} />
@@ -74,10 +81,27 @@ export const Routing = () => {
         <Route path="payments" element={<PaymentList />} />
         <Route path="payment-form" element={<PaymentForm />} />
         <Route path="vendor" element={<VendorsList vendors={vendors} setVendors={setVendors} />} />
+        <Route path="billing/*" element={<BillingRouting />} />
+        <Route path="expenses" element={<ExpenseList />} />
+        {/* <Route path="expenses/expense-form" element={<CreateExpenseForm />} /> */}
+        {/* <Route path="expenses/expense-form/:id" element={<CreateExpenseForm />} /> */}
+        <Route path="/workspaceMap" element={<WorkspaceMap />} />
+        <Route path="leadAndCustomer/*" element={<LeadAndCustomerRouting />} />
+        <Route path="assignmentForm" element={<AssignmentForm />} />
+        <Route path="bookingCalendar" element={<BookingCalendar roomId={""} roomName={""} />} />
+        <Route path="payments" element={<DocumentTemplate />} />
+        <Route path="/document-templates" element={<DocumentTemplate />} />
+        <Route path="document-templates/edit/:id" element={<UpdateDocumentTemplate />} />
+        <Route path="document-templates/view/:id" element={<ShowDocumentTemplate />} />
+        <Route path="document-templates/preview/:id" element={<DocumentTemplatePreviewPage />} />
+        <Route path="document-templates/add" element={<AddDocumentTemplate />} />
+        {/* <Route path="document-templates/preview/:id" element={<DocumentTemplate />} /> */}
+        <Route path="payment" element={<PaymentForm />} />
+        <Route path="vendors" element={<VendorsList vendors={vendors} setVendors={setVendors} />} />
         <Route path="vendors/new" element={<VendorForm vendors={vendors} setVendors={setVendors} />} />
         <Route path="vendors/:id/edit" element={<VendorForm vendors={vendors} setVendors={setVendors} />} />
         {/* <Route path="vendors/:id" element={<VendorSummary vendors={vendors} setVendors={setVendors} />} /> */}
-        <Route path="expense-form" element={<CreateExpenseForm />} />
+        {/* <Route path="expense-form" element={<CreateExpenseForm />} /> */}
         {/* <Route path="billing/*" element={<Billing />} /> */}
         <Route path="users" element={< UserTable />} />
         <Route path="meetingRooms" element={<RoomReservations />} />
@@ -92,12 +116,10 @@ export const Routing = () => {
         <Route path="/billing/invoiceManagement" element={< InvoiceManagement />} />
         <Route path="/occupancyReports" element={<Report />} />
         <Route path="/billing/collection" element={< Collection />} />
-                <Route path="/rooms" element={<RoomManager />} />
-        <Route path="/petty-cash" element={<PettyCashPage />} />
+        <Route path="/rooms" element={<RoomManager />} />
         <Route path="/documentUpload" element={< DocumentUpload />} />
         <Route path="/registerUser" element={<RegisterUser />} />
-
-        <Route path="/customerChange" element={<CustomerChange />} />
+        <Route path="/customerChange" element={<CustomerChange/>} />
       </Route>
 
 

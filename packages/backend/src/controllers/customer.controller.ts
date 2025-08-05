@@ -1,23 +1,14 @@
 import { Request, Response } from "express";
 import { customerService } from "../services/customer.service";
 import {
-  CreateCustomerRequest,
-  CustomerStatus,
-  ID,
   StatusChangeRequest,
 } from "shared-types";
-import { contractService } from "../services/contract.service";
 import { serviceCustomerPaymentMethod } from "../services/customerPaymentMethod.service";
 import { UserTokenService } from "../services/userTokenService";
-import { sendEmail } from "../services/gmail-service";
-import { EmailTemplateService } from "../services/emailTemplate.service";
-import { th } from "date-fns/locale";
 import { CustomerModel } from "../models/customer.model";
 
 const serviceCustomer = new customerService();
-const serviceContract = new contractService();
-const userTokenService = new UserTokenService();
-const emailService = new EmailTemplateService();
+
 
 export const postCustomersFromExcel = async (req: Request, res: Response) => {
   try {

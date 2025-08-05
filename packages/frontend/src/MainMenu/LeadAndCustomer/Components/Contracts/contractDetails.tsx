@@ -24,6 +24,7 @@ const workspaceTypeLabels: Record<WorkspaceType, string> = {
     DESK_IN_ROOM: "שולחן בחדר",
     OPEN_SPACE: "עמדה במרחב פתוח",
     KLIKAH_CARD: "כרטיס קליקה",
+    KLIKAH_CARD_UPGRADED: "כרטיס קליקה משודרג",
     DOOR_PASS: "כרטיס כניסה",
     WALL: "קיר",
     RECEPTION_DESK: "דלפק קבלה",

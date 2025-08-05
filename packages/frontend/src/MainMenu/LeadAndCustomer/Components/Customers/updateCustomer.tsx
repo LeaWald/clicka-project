@@ -57,4 +57,3 @@ export const UpdateCustomer: React.FC = () => {
     );
 };
 
-
