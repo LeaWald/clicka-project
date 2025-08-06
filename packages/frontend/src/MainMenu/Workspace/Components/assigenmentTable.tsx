@@ -81,7 +81,8 @@ useEffect(() => {
     getAssignments()
     setIsLoading(false);
   }
-}, [assignments, fetchCustomers, getAllWorkspace, getAssignments]);
+// eslint-disable-next-line react-hooks/exhaustive-deps
+}, []);
 //מחיקת הקצאה
   const handleDelete = async (ass: SpaceAssign) => {
     const result = await Swal.fire({

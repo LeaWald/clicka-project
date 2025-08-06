@@ -124,7 +124,7 @@ function App() {
                   <div className="text-gray-600">ניהול דיגיטלי</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-bold text-gray-800 mb-2">24/7</div>
+                  <div className="text-3xl font-bold text-gray-800 mb-2">24/6</div>
                   <div className="text-gray-600">זמינות המערכת</div>
                 </div>
                 <div>

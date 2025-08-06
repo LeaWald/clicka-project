@@ -16,49 +16,49 @@ const supabaseUrl = process.env.SUPABASE_URL || ''; // החלף עם ה-URL של
 const supabaseAnonKey = process.env.SUPABASE_KEY || ''; // החלף עם ה-Anon Key שלך
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 //נחמי קוזיץ getAll עבור event שליפת כל האירועים והמרת לאובייקט  
-export const getGoogleCalendarEvents = async (calendarId: string, token: string): Promise<Event[] | null> => {
-    //שליפת כל האירועים לפי לוח
-     const events = await getEvents(calendarId, token);
-  
-
-    // המרת האירועים לאובייקטים מסוג GoogleCalendarEvent
-const newEvents: Event[] = await Promise.all(events.map(async event => {
-    console.log("event in the getGoogleCalendarEvents\n",event);
-    console.log(event.id, "event.id in the getGoogleCalendarEvents\n",event.id);
-
-    const booking = await BookingService.getBookingByEventId(event.id!);
-    console.log(booking, "booking in the getGoogleCalendarEvents\n");
+export const getGoogleCalendarEvents = async (calendarId: string, token: string): Promise<Event[]> => {
+    const events = await getEvents(calendarId, token);
     
-    console.log(booking?.status, "booking?.status in the getGoogleCalendarEvents\n",booking?.status);
-    
-    return {
-        id: event.id || '',  // או זרוק שגיאה אם id לא קיים
-        calendarId: calendarId,
-        summary: event.summary || '',
-        description: event.description || '',
-        location: event.location || '',
-        start: {
-            dateTime: event.start?.dateTime || '',
-            timeZone: event.start?.timeZone || '',
-        },
-        end: {
-            dateTime: event.end?.dateTime || '',
-            timeZone: event.end?.timeZone || '',
-        },
-        attendees: event.attendees ? event.attendees.map(attendee => ({
-            email: attendee.email || '',
-            displayName: attendee.displayName || '',
-            
-        })) : [],
-        status: booking!.status ,
-        created: event.created || '',
-        updated: event.updated || '',
-        htmlLink: event.htmlLink || '',
-    };
-}));
+    const newEvents: Event[] = await Promise.all(events.map(async event => {
+        console.log("event in the getGoogleCalendarEvents\n", event);
+        console.log("event.id in the getGoogleCalendarEvents\n", event.id);
 
-    return newEvents;
+        const bookings = await BookingService.getBookingByEventId(event.id!);
+        console.log(bookings, "bookings in the getGoogleCalendarEvents\n");
+        
+        // בחר את הסטטוס של ההזמנה הראשונה אם קיים
+        const status = bookings && bookings.status ? bookings.status : null;
+
+        console.log(status, "status in the getGoogleCalendarEvents\n");
+
+        return {
+            id: event.id || '',
+            calendarId: calendarId,
+            summary: event.summary || '',
+            description: event.description || '',
+            location: event.location || '',
+            start: {
+                dateTime: event.start?.dateTime || '',
+                timeZone: event.start?.timeZone || '',
+            },
+            end: {
+                dateTime: event.end?.dateTime || '',
+                timeZone: event.end?.timeZone || '',
+            },
+            attendees: event.attendees ? event.attendees.map(attendee => ({
+                email: attendee.email || '',
+                displayName: attendee.displayName || '',
+            })) : [],
+            status: status, // השתמש בסטטוס שנבחר
+            created: event.created || '',
+            updated: event.updated || '',
+            htmlLink: event.htmlLink || '',
+        };
+    }));
+
+    return newEvents; // החזר את המערך של האירועים
 }
+
 //יצירת אובייקט סינכרון כרגע לא רלוונטי
 export const createCalendarSync = async (sync: CalendarSyncModel): Promise<CalendarSyncModel | null> => {
     const { data, error } = await supabase

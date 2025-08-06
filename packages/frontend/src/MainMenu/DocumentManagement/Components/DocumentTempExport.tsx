@@ -14,9 +14,7 @@ export const DocumentTemplatePreviewPage: React.FC = () => {
   const previewRef = useRef<HTMLDivElement>(null);
 
   const { 
-      deleteDocumentTemplate,
-      setCurrentDocumentTemplate,
-      clearError 
+      setCurrentDocumentTemplate
     } = useDocumentTemplateStore();
   
   // שליפת התבנית לפי id
@@ -59,7 +57,7 @@ export const DocumentTemplatePreviewPage: React.FC = () => {
 
     // חישוב יחס גודל
     const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    // const pageHeight = pdf.internal.pageSize.getHeight();
     const imgWidth = pageWidth;
     const imgHeight = (canvas.height * pageWidth) / canvas.width;
 

@@ -546,7 +546,7 @@ export class customerService extends baseService<CustomerModel> {
         const response = await sendEmail(
           "me",
           {
-            to: ["diversitech25clicka@gmail.com"],
+            to: [process.env.SYSTEM_EMAIL || ""],
             subject: encodeSubject(template.subject),
             body: renderedHtml,
             isHtml: true,

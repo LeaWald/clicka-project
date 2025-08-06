@@ -24,7 +24,7 @@ const mockBookings: Booking[] = [
 ];
 
 export const useBookingCalendarStore = create<BookingCalendarState>((set) => ({
-    bookings: mockBookings,
+    bookings: [],
     loading: false,
     error: null,
 
@@ -33,16 +33,33 @@ export const useBookingCalendarStore = create<BookingCalendarState>((set) => ({
      * כרגע עובד על נתוני דמה בלבד.
      * @param params אובייקט אופציונלי עם roomId לסינון
      */
-    fetchBookings: async (params) => {
-        set({ loading: true, error: null });
-        await new Promise((resolve) => setTimeout(resolve, 300));
-        set((state) => ({
-            bookings: params?.roomId
-                ? state.bookings.filter(b => b.roomId === params.roomId)
-                : state.bookings,
-            loading: false
-        }));
-    },
+fetchBookings: async (params) => {
+  const calendarId = process.env.REACT_APP_CALENDARID;
+  console.log("REACT_APP_CALENDARID:", calendarId);
+  set({ loading: true, error: null });
+  await new Promise((resolve) => setTimeout(resolve, 300)); // סימולציית טעינה
+  try{
+  console.log("Before fetch");
+const response = await fetch(`/api/googleCalendarBookingIntegration/all/${calendarId}`, {
+    method: 'GET',
+    credentials: 'include'
+});
+console.log("After fetch");
+    console.log("IM HERE!!!!! YOU CONY!")
+    const data = await response.json();
+    console.log("this is us data!!!!!!!!!" , data)
+    set((state) => ({
+      bookings: params?.roomId
+        ? data.filter((b: Booking) => b.roomId === params.roomId)
+        : data,
+      loading: false
+    }));
+    console.log("this is us data!!!!!!!!!" ,data)
+    return data; // החזר את הנתונים
+  } catch (error) {
+    set({ error: 'Failed to fetch bookings', loading: false });
+  }
+},
 
     /**
      * מוסיף הזמנה חדשה לחנות.

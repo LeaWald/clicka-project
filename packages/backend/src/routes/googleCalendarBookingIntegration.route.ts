@@ -2,6 +2,7 @@ import express from 'express'
 import * as calendarSyncController from '../controllers/googleCalendarBookingIntegration.controller'
 
 const routerSync = express.Router()
+routerSync.get('/all/:calendarId', calendarSyncController.getGoogleCalendarEvents.bind(calendarSyncController))
 routerSync.get('/all/:calendarId', calendarSyncController.getAllCalendarSync.bind(calendarSyncController))
 routerSync.get('/get/:id', calendarSyncController.getCalendarSyncById.bind(calendarSyncController))
 // routerSync.post('/post-sync', calendarSyncController.createCalendarSync.bind(calendarSyncController))
