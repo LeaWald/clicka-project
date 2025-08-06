@@ -15,10 +15,10 @@ export const postCustomersFromExcel = async (req: Request, res: Response) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     console.log('Received file:', req.file);
     await serviceCustomer.importCustomersFromExcelBuffer(req.file.buffer);
-    res.status(200).json({ message: 'הלידים נוספו בהצלחה!!' });
+    res.status(200).json({ message: 'הלקוחות נוספו בהצלחה!!' });
   } catch (error: any) {
     console.error('Error uploading leads:', error);
-    res.status(500).json({ message: 'שגיאה, אנא העלה קובץ אקסל של לידים בלבד!!!', error: error.message });
+    res.status(500).json({ message: 'שגיאה, אנא העלה קובץ אקסל של לקוחות בלבד!!!', error: error.message });
   }
 };
 
