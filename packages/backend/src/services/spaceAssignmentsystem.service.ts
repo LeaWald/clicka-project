@@ -10,6 +10,8 @@ function logUserActivity(userId: string, action: string) {
 }
 //הקצאת מרחב
 export class SpaceAssignmentService {
+
+
   async createSpace(space: SpaceAssignmentModel): Promise<SpaceAssignmentModel | null> {
   console.log(':package: Inserting space:', space.toDatabaseFormat());
 
@@ -231,27 +233,68 @@ export class SpaceAssignmentService {
   }
 }
 
-async getHistory(date: Date): Promise<SpaceAssignmentModel[]> {
+// async getHistory(date: Date): Promise<SpaceAssignmentModel[]> {
+//   try {
+//     const { data, error } = await supabase
+//       .from('space_assignment')
+//       .select('*')
+//       .lte('assigned_date', date.toISOString()) 
+//       .or(`unassigned_date.is.null,unassigned_date.gte.${date.toISOString()}`); // שעדיין בתוקף
+
+//     if (error) {
+//       console.error('Supabase error in getHistory:', error.message);
+//       throw new Error('Failed to fetch history');
+//     }
+
+//     const allAssignments = data.map((item: any) => SpaceAssignmentModel.fromDatabaseFormat(item));
+
+   
+//     const weekday = date.getDay(); 
+
+//     const filtered = allAssignments.filter(assign => {
+//       if (!assign.daysOfWeek || assign.daysOfWeek.length === 0) {
+//         return true; 
+//       }
+//       return assign.daysOfWeek.includes(weekday);
+//     });
+
+//     return filtered;
+
+//   } catch (err) {
+//     console.error('Error in getHistory:', err);
+//     throw err;
+//   }
+// }
+
+
+async getHistory(date: Date): Promise<any[]> { // שים לב: מחזיר מערך של אובייקטים, לא של SpaceAssignmentModel
   try {
+    const formatted = date.toISOString().split('T')[0];
+
     const { data, error } = await supabase
       .from('space_assignment')
-      .select('*')
-      .lte('assigned_date', date.toISOString()) 
-      .or(`unassigned_date.is.null,unassigned_date.gte.${date.toISOString()}`); // שעדיין בתוקף
+      .select('*, customer:customer_id(name)')
+      .lte('assigned_date', formatted)
+      .or(`unassigned_date.is.null,unassigned_date.gte.${formatted}`);
 
     if (error) {
       console.error('Supabase error in getHistory:', error.message);
       throw new Error('Failed to fetch history');
     }
 
-    const allAssignments = data.map((item: any) => SpaceAssignmentModel.fromDatabaseFormat(item));
+    const allAssignments = data.map((item: any) => {
+      const model = SpaceAssignmentModel.fromDatabaseFormat(item);
+      return {
+        ...model,
+        customerName: item.customer?.name || '',
+      };
+    });
 
-   
-    const weekday = date.getDay(); 
+    const weekday = date.getDay();
 
     const filtered = allAssignments.filter(assign => {
       if (!assign.daysOfWeek || assign.daysOfWeek.length === 0) {
-        return true; 
+        return true;
       }
       return assign.daysOfWeek.includes(weekday);
     });
@@ -263,5 +306,6 @@ async getHistory(date: Date): Promise<SpaceAssignmentModel[]> {
     throw err;
   }
 }
+
 
 }

@@ -9,7 +9,7 @@ import VendorsList from './MainMenu/Billing/Components/Vendor-management/Vendors
 import { Vendor } from 'shared-types';
 import { ExcelUpload } from './MainMenu/LeadAndCustomer/Components/Leads/ UploadLeadsFile';
 import { ExcelCUpload } from './MainMenu/LeadAndCustomer/Components/Customers/UploadCustomersFile';
-import { BillingRouting } from './MainMenu/Billing/Components/billingRouting';
+// import { BillingRouting } from './MainMenu/Billing/Components/billingRouting';
 // import { ExpenseList } from './MainMenu/Billing/Components/expenseManagementSystem/expenseList';
 import PaymentForm from './MainMenu/Billing/Components/invoice-generation-engine/PaymentForm';
 import { PaymentList } from './MainMenu/Billing/Components/paymentList';
@@ -44,6 +44,7 @@ import {ShowDocumentTemplate} from './MainMenu/DocumentManagement/Components/Sho
 import AddDocumentTemplate from './MainMenu/DocumentManagement/Components/AddDocumentTemplate';
 import { ExpenseList } from './MainMenu/Billing/Components/expenseManagementSystem/expenseList';
 import { DocumentTemplatePreviewPage } from './MainMenu/DocumentManagement/Components/DocumentTempExport';
+import { BillingRouting } from './MainMenu/Billing/Components/BillingRouting';
 
 export const Routing = () => {
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -63,6 +64,7 @@ export const Routing = () => {
         {/* Rutas hijas que se renderizan dentro de <Outlet /> en App */}
         <Route path="leadAndCustomer" element={<LeadAndCustomer />} />
         <Route path="leadAndCustomer/*" element={<LeadAndCustomerRouting />} />
+        {/* <Route path="billing/*" element={<BillingRouting/>} /> */}
         <Route path="billing/*" element={<BillingRouting />} />
         {/* <Route path="expenses" element={<ExpenseList />} /> */}
         <Route path="expenses" element={<ExpensesPage/>} />
@@ -80,7 +82,7 @@ export const Routing = () => {
         <Route path="payments" element={<PaymentList />} />
         <Route path="payment-form" element={<PaymentForm />} />
         <Route path="vendor" element={<VendorsList vendors={vendors} setVendors={setVendors} />} />
-        <Route path="billing/*" element={<BillingRouting />} />
+        {/* <Route path="billing/*" element={<BillingRouting />} /> */}
         <Route path="expenses" element={<ExpenseList />} />
         {/* <Route path="expenses/expense-form" element={<CreateExpenseForm />} /> */}
         {/* <Route path="expenses/expense-form/:id" element={<CreateExpenseForm />} /> */}

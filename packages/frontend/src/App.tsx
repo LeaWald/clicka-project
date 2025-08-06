@@ -6,8 +6,6 @@ import { Accesibility } from './Common/Components/BaseComponents/Accesibility';
 import MainLayout from './layout/MainLayout';
 import { useAuthStore } from './Stores/CoreAndIntegration/useAuthStore';
 import { VoiceCommand } from './VoiceAssistant';
-import PricingHomePage from './MainMenu/Billing/Components/Pricing/PricingHomePage';
-import PricingSectionPage from './MainMenu/Billing/Components/Pricing/PricingSectionPage';
 
 function App() {
   const [, setHealthStatus] = useState(null);
@@ -140,14 +138,6 @@ function App() {
       )}
       <VoiceCommand />
       <Accesibility />
-      <Routes>
-        <Route path="/pricing" element={<PricingHomePage />} />
-        <Route path="/pricing/workspace" element={<PricingSectionPage type="workspace" />} />
-        <Route path="/pricing/meeting-room" element={<PricingSectionPage type="meeting-room" />} />
-        <Route path="/pricing/lounge" element={<PricingSectionPage type="lounge" />} />
-        {/* אפשר להוסיף כאן ראוטים נוספים */}
-      </Routes>        
-
       </div>
   );
 }

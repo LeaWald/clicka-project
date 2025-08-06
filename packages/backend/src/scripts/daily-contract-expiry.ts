@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import dayjs from 'dayjs';
 import cron from 'node-cron';
 import dotenv from 'dotenv';
+import { updateWorkspaceMap } from '../services/workspaceMap.service';
+import {useWorkSpaceStore} from '../../../frontend/src/Stores/Workspace/workspaceStore';
 
 
 dotenv.config(); // טוען את משתני הסביבה
@@ -81,11 +83,71 @@ if (fetchLeavingError) {
 }
 };
 
+const updateWorkspacesByAssignment = async () => {
+  const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+  const { setWorkSpaces } = useWorkSpaceStore.getState();
+
+  const { data: assignments, error: assignmentError } = await supabase
+    .from('space_assignment')
+    .select('workspaceId, customerId')
+    .lte('assigned_date', today)
+    .or(`unassigned_date.is.null,unassigned_date.gte.${today}`);
+
+  if (assignmentError) {
+    console.error('Error fetching assignments:', assignmentError);
+    return;
+  }
+
+  const { data: workspaces, error: workspaceError } = await supabase
+    .from('workspace')
+    .select('*');
+
+  if (workspaceError) {
+    console.error('Error fetching workspaces:', workspaceError);
+    return;
+  }
+
+  if (!workspaces || !assignments) return;
+
+  const uniqueCustomerIds = [...new Set(assignments.map(a => a.customerId).filter(Boolean))];
+
+  const { data: customers, error: customerError } = await supabase
+    .from('customers')
+    .select('id, name')
+    .in('id', uniqueCustomerIds);
+
+  if (customerError) {
+    console.error('Error fetching customers:', customerError);
+    return;
+  }
+
+  const customerMap = new Map(customers?.map(c => [c.id, c.name]));
+
+  const updatedWorkspaces = workspaces.map(ws => {
+    const assignment = assignments.find(a => a.workspaceId === ws.id);
+    const customerName = assignment?.customerId ? customerMap.get(assignment.customerId) : '';
+
+    return {
+      ...ws,
+      currentCustomerId: assignment?.customerId || '',
+      currentCustomerName: customerName || '',
+    };
+  });
+
+  setWorkSpaces(updatedWorkspaces);
+};
+
+
 
 // // ✅ ירוץ כל יום בשעה 22:00
 cron.schedule("0 22 * * *", () => {
   console.log("🔥 cron רץ לבדיקת חוזים בשעה 22:00...");
   updateContractsAndCustomers();
+});
+
+cron.schedule("0 6 * * *", () => {
+  console.log("🔥 cron רץ לבדיקת חוזים בשעה 6:00...");
+  updateWorkspacesByAssignment();
 });
 // ✅ ירוץ כל דקה
 // cron.schedule("* * * * *", () => {

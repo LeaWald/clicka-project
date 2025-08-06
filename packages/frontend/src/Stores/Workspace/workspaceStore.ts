@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import {axiosInstance} from "../../Service/Axios";
+import { axiosInstance } from "../../Service/Axios";
 import { ID, Space, SpaceStatus } from "shared-types";
 
 interface WorkSpaceState {
@@ -12,11 +12,14 @@ interface WorkSpaceState {
     deleteWorkspace: (id: ID) => Promise<void>;
     getWorkspaceHistory: (date: Date) => Promise<void>;
     getAllWorkspaceMap: () => Promise<any[]>;
+    setWorkSpaces: (spaces: Space[]) => void;
+
 }
 //מימוש הפונקציות
 export const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
     workSpaces: [],
     maps: [],
+    setWorkSpaces: (spaces) => set({ workSpaces: spaces }),
     //get all spaces
     getAllWorkspace: async () => {
         try {
@@ -71,36 +74,66 @@ export const useWorkSpaceStore = create<WorkSpaceState>((set, get) => ({
             console.error('Error deleting workspace:', error);
         }
     },
+
     getWorkspaceHistory: async (date: Date) => {
-        try {
-            const formattedDate = date.toISOString().split('T')[0];
-            console.log('Sending date to API:', formattedDate);
+    try {
+        const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD
+        console.log('Sending date to API:', formattedDate);
 
-            const response = await axiosInstance.get<Space[]>(`/space/getHistory/${formattedDate}`);
-            const serverData = response.data;
+        const response = await axiosInstance.get(`/space/getHistory/${formattedDate}`);
+        const assignments: any[] = response.data;
 
-            const { workSpaces: localData } = get();
+        const { workSpaces: localSpaces } = get();
 
-            const mergedData: Space[] = [...serverData];
+        // סוגי חללים שתמיד יקבלו סטטוס NONE
+        const alwaysNoneTypes = [
+            'BASE', 'DOOR', 'PASSAGE', 'KITCHEN', 'TOILET', 'LOUNGE', 'MEETING_ROOM'
+        ];
 
-            localData.forEach(localItem => {
-                const exists = serverData.some(serverItem => serverItem.id === localItem.id);
-                if (!exists) {
-                    const { currentCustomerId, currentCustomerName, ...rest } = localItem;
-                    mergedData.push({
-                        ...rest,
-                        currentCustomerId: '',
-                        currentCustomerName: '',
-                        status: rest.type === 'BASE' ? SpaceStatus.NONE : SpaceStatus.AVAILABLE,
-                    });
-                }
-            });
-            set({ workSpaces: mergedData });
-        } catch (error) {
-            console.error('Error fetching work spaces:', error);
-            set({ workSpaces: [] });
+        const mergedSpaces: Space[] = localSpaces.map(space => {
+            // אם זה חלל בסיס או אחד מהסוגים המיוחדים - תמיד סטטוס NONE
+            if (alwaysNoneTypes.includes(space.type)) {
+                return {
+                    ...space,
+                    currentCustomerId: '',
+                    currentCustomerName: '',
+                    status: SpaceStatus.NONE,
+                    assignedDate: '',
+                    unassignedDate: '',
+                };
+            }
+
+            const assignment = assignments.find((a: any) => a.workspaceId === space.id);
+            if (assignment) {
+                return {
+                    ...space,
+                    currentCustomerId: assignment.customerId,
+                    currentCustomerName: assignment.customerName || '',
+                    status: SpaceStatus.OCCUPIED,
+                    assignedDate: assignment.assignedDate,
+                    unassignedDate: assignment.unassignedDate,
+                };
+            } else {
+                return {
+                    ...space,
+                    currentCustomerId: '',
+                    currentCustomerName: '',
+                    status: SpaceStatus.AVAILABLE,
+                    assignedDate: '',
+                    unassignedDate: '',
+                };
+            }
+        });
+
+        console.log('mergedSpaces', mergedSpaces);
+
+        set({ workSpaces: mergedSpaces });
+
+    } catch (error) {
+        console.error('Error fetching work spaces:', error);
+        set({ workSpaces: [] });    }
         }
-    },
+    ,
 
     // get all workspace maps
     getAllWorkspaceMap: async () => {
